@@ -28,65 +28,61 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-# Auto contrast function from Aditya
-def auto_contrast_fn(im_array):
-    print("in array is " + str(im_array.shape))
 
-    # convert to range 0,255 if not already (it is already) and convert to 8-bit
+def auto_contrast_fn(
+    im_array,
+    upper_limit_frac=1 / 10,
+    low_thresh_frac=1 / 5000,
+    zero_high_count_pix=True,
+    verbose=True,
+):
+    """
+    im_array: 2d np.array, usually dtype=uint16
+    upper_limit_frac: the highest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the lower threshold for clipping the image, default=1/10
+    low_thresh_frac: the lowest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the upper threshold for clipping the image, default=1/5000
+    zero_high_count_pix: set all pixel values below (inclusive) the upper_limit_frac are set to zero, default=True
+    verbose: print image info, default=True
+    """
+
+    # TODO don't convert to 8-bit and then stretch, stretch original image to get better sampling
+
+    # TODO use better conversion function
+    # convert to range 0,255 8-bit image if not already
     im_array_n = (im_array / im_array.max() * 255).astype("uint8")
 
     # count number of nonzero pixels
-    im_flat = im_array_n.flatten()
-    t = im_flat > 0
-    im_flat[t] = 1
-    pixel_count = im_flat.sum()
+    pixel_count = (im_array_n > 0).sum()
 
     # not sure what these are
-    limit = pixel_count / 10
-    threshold = pixel_count / 5000
+    limit = pixel_count * upper_limit_frac
+    threshold = pixel_count * low_thresh_frac
 
     # histogram of pixel values with bin boundaries = 0,1,2,...256
-    hist = np.histogram(im_array_n, np.array([i for i in range(257)]))
+    hist, _ = np.histogram(im_array_n, bins=np.arange(256 + 1))
 
-    low_thresh = None
-    high_thresh = None
+    # high and low thresholds at which to constrast stretch the image
+    low_thresh = np.where(hist < limit)[0].min()
+    high_thresh = np.where(hist > threshold)[0].max()
 
-    for i in range(hist[0].size):  # iterate through all pixel values 0,1,2,...255
-        if (
-            hist[0][i] >= limit
-        ):  # if more pixels have this value than limit, set to zero
-            pos = im_array_n == i
-            im_array_n[
-                pos
-            ] = (
-                0
-            )  # assumes??? pix values with high counts are low value pixels eg 0,1,2,3
-        elif limit > hist[0][i] > threshold:
-            if (
-                low_thresh is None
-            ):  # lowest pixel value with counts between limit & threshold
-                low_thresh = i
-            else:
-                pass
-        else:
-            pass
+    # zero out pixels values with high counts -- presumes all high counts are low values?
+    if zero_high_count_pix:
+        high_count_pix = np.where(hist >= limit)[0]
+        high_count_mask = np.isin(im_array_n, high_count_pix)
+        im_array_n[high_count_mask] = 0
 
-    for i in range(hist[0].size):
-        if limit < hist[0][hist[0].size - i - 1] < threshold:
-            pos = im_array_n == i
-            im_array_n[pos] = 0
-        elif hist[0][hist[0].size - i - 1] >= threshold:
-            high_thresh = (
-                hist[0].size - i - 1
-            )  # highest pixel value between limit & threshold
-            break
-        else:
-            pass
-    print(low_thresh, high_thresh, np.min(im_array_n))
     out_array = exposure.rescale_intensity(
         im_array_n, in_range=(low_thresh, high_thresh)
-    )  # scale to 0,255
-    print("out array is " + str(out_array.shape))
+    )
+
+    if verbose:
+        print("inpput array shape is {}".format(im_array.shape))
+        print(
+            "low_thresh = {}, high_thresh = {}, im_array_n.min()={}".format(
+                low_thresh, high_thresh, np.min(im_array_n)
+            )
+        )
+        print("out array shape is {}".format(out_array.shape))
+
     return out_array
 
 
@@ -96,8 +92,8 @@ def read_and_contrast_image(filebase):
     print(filebase)
     C_im = AICSImage(filebase)
     C_data = C_im.data
-    for k in range(5):
 
+    for k in range(5):
         C = C_data[0, k, :, :, :]
         print(C.shape)
         Cmax = np.amax(C, axis=0)
@@ -107,9 +103,11 @@ def read_and_contrast_image(filebase):
         Cmax_n_auto = auto_contrast_fn(Cmax_n)
         Cmaxs.append(Cmax)
         Cautos.append(Cmax_n_auto)
+
     for add in range(5, 10):
         Cmaxs.append(C_data[0, add, 0, :, :])
         Cautos.append((C_data[0, add, 0, :, :]))
+
     return Cmaxs, Cautos
 
 
