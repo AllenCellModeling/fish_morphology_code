@@ -44,11 +44,13 @@ def auto_contrast_fn(
     verbose: print image info, default=True
     """
 
+    @assert upper_limit_frac > low_thresh_frac
+
     # TODO don't convert to 8-bit and then stretch, stretch original image to get better sampling
 
     # TODO use better conversion function
     # convert to range 0,255 8-bit image if not already
-    im_array_n = (im_array / im_array.max() * 255).astype("uint8")
+    im_array_n = (im_array / im_array.max() * np.iinfo(np.uint8).max).astype(np.uint8)
 
     # count number of nonzero pixels
     pixel_count = (im_array_n > 0).sum()
@@ -58,12 +60,12 @@ def auto_contrast_fn(
     threshold = pixel_count * low_thresh_frac
 
     # histogram of pixel values with bin boundaries = 0,1,2,...256
-    hist, _ = np.histogram(im_array_n, bins=np.arange(256 + 1))
+    hist, bins = np.histogram(im_array_n, bins=np.arange(1 + np.iinfo(np.uint8).max + 1))
 
     # high and low thresholds at which to constrast stretch the image
-    low_thresh = np.where(hist < limit)[0].min()
-    high_thresh = np.where(hist > threshold)[0].max()
-
+    low_thresh = bins[0] if hist.min() >= limit else np.where(hist < limit)[0].min()
+    high_thresh = bins[-1] if hist.max() <= threshold else np.where(hist > threshold)[0].max()
+    
     # zero out pixels values with high counts -- presumes all high counts are low values?
     if zero_high_count_pix:
         high_count_pix = np.where(hist >= limit)[0]
