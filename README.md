@@ -5,9 +5,9 @@ basic code and automated workflows to produce analysis friendly data from annota
 ## Bare minimum contents contains:
 
 - [ ] manifest of the locations of original image data + segmentations
+- [ ] script for taking original images and generating 2D normalized images
 - [x] structure annotations for each segmented cell
-- [ ] text-ish version of cellprofilers workflow to generate features from image data + segmentations
-- [ ] script for generating single cell images for each channel
+- [ ] text-ish version of cellprofiler workflow to generate single cell segmentations and features from image data + segmentations
 
 
 ## Stretch goals
