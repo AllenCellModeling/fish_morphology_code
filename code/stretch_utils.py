@@ -2,8 +2,10 @@
 extract hand segmented images of individual cells for scoring actn2 structure
 """
 
+import os
 import numpy as np
 from aicsimageio import AICSImage
+import imageio
 from skimage import exposure
 
 
@@ -154,3 +156,81 @@ def read_and_contrast_image(
     ]
 
     return Cmaxs, Cautos
+
+
+def cell_worker(
+    Cautos,
+    label_image,
+    cell_ind,
+    basename="unnamed_image_field",
+    out_dir=None,
+    channels={
+        "bf": 0,
+        "488": 1,
+        "561": 2,
+        "638": 3,
+        "nuc": 4,
+        "seg488": 5,
+        "seg561": 6,
+        "seg638": 7,
+        "backmask": 8,
+        "cell": 9,
+    },
+    verbose=True,
+):
+
+    if out_dir is None:
+        out_dir = os.getcwd()
+
+    y, x = np.where(label_image == cell_ind)
+    label_crop = label_image[min(y) : max(y) + 1, min(x) : max(x) + 1]
+    mask = (label_crop == cell_ind).astype(np.float64)
+
+    for c, channel in channels.items():
+        cell_object_crop = Cautos[channel][min(y) : max(y) + 1, min(x) : max(x) + 1]
+        cell_object_crop = cell_object_crop * mask
+
+        out_filename = "{0}_cell{1}_C{2}.png".format(basename, cell_ind, channel)
+        out_path = os.path.join(out_dir, out_filename)
+        imageio.imwrite(out_path, cell_object_crop)
+
+
+def stretch_worker(
+    filename,
+    out_dir=None,
+    channels={
+        "bf": 0,
+        "488": 1,
+        "561": 2,
+        "638": 3,
+        "nuc": 4,
+        "seg488": 5,
+        "seg561": 6,
+        "seg638": 7,
+        "backmask": 8,
+        "cell": 9,
+    },
+    verbose=True,
+):
+
+    if out_dir is None:
+        out_dir = os.getcwd()
+
+    basename, ext = os.path.splitext(os.path.basename(filename))
+
+    Cmaxs, Cautos = read_and_contrast_image(filename)
+    label_image = Cautos[channels["cell"]]  # extract napari annotation channel
+    num_labels = np.max(label_image)
+    if verbose:
+        print("found {} segmented cells".format(num_labels))
+
+    for cell_ind in range(1, num_labels + 1):
+        cell_worker(
+            Cautos,
+            label_image,
+            cell_ind,
+            basename=basename,
+            out_dir=out_dir,
+            channels=channels,
+            verbose=verbose,
+        )
