@@ -7,6 +7,7 @@ import numpy as np
 from aicsimageio import AICSImage
 import imageio
 from skimage import exposure
+from skimage import img_as_ubyte
 
 
 def auto_contrast_fn(
@@ -26,9 +27,8 @@ def auto_contrast_fn(
 
     # TODO don't convert to 8-bit and then stretch, stretch original image to get better sampling
 
-    # TODO use better conversion function
     # convert to range 0,255 8-bit image if not already
-    im_array_n = (im_array / im_array.max() * np.iinfo(np.uint8).max).astype(np.uint8)
+    im_array_n = img_as_ubyte(im_array)
 
     # count number of nonzero pixels
     pixel_count = (im_array_n > 0).sum()
@@ -68,36 +68,6 @@ def auto_contrast_fn(
         print("out array shape is {}".format(out_array.shape))
 
     return out_array
-
-
-def normalize_image_zero_one(im):
-    r"""
-    Normalize a Numpy array to have min zero and max one.
-    Args:
-        im (numpy.ndarray): data matrix
-    Returns:
-        (numpy.ndarray): normalized data matrix
-    """
-    im = im - np.min(im)
-    if np.max(im) > 0:
-        im = im / np.max(im)
-    return im
-
-
-def float_to_uint(im, uint_dtype=np.uint8):
-    r"""
-    Convert an array of floats to unsigned ints, contrast stretrching so to the dynamic range of the output data type.
-    Args:
-        im (numpy.ndarray): data matrix
-        uint_dtype (numpy.dtype): numpy data type e.g. np.uint8
-    Returns:
-        (numpy.ndarray): integer data matrix
-    """
-    imax = np.iinfo(uint_dtype).max + 1  # eg imax = 256 for uint8
-    im = im * imax
-    im[im == imax] = imax - 1
-    im = np.asarray(im, uint_dtype)
-    return im
 
 
 def read_and_contrast_image(
@@ -142,10 +112,7 @@ def read_and_contrast_image(
 
     # list of max projects for each channels
     Cmaxs = [
-        float_to_uint(
-            normalize_image_zero_one(im.get_image_data("ZYX", T=0, C=c).max(axis=0)),
-            uint_dtype=np.uint8,
-        )
+        img_as_ubyte(img_as_ubyte(im.get_image_data("ZYX", T=0, C=c).max(axis=0)))
         for c in sorted(channels.values())
     ]
 
