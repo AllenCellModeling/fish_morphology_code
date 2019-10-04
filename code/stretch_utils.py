@@ -1,69 +1,30 @@
-"""
-extract hand segmented images of individual cells for scoring actn2 structure
+r"""
+Extract hand segmented images of individual cells for scoring actn2 structure
 """
 
 import os
 import numpy as np
 from aicsimageio import AICSImage
 import imageio
-from skimage.exposure import rescale_intensity, histogram
-from skimage import img_as_ubyte
+from skimage.exposure import rescale_intensity
+from skimage import img_as_ubyte, img_as_float64
 
 
 def auto_contrast_fn(
-    im_array,
-    upper_limit_frac=1 / 10,
-    low_thresh_frac=1 / 5000,
-    zero_high_count_pix=True,
-    verbose=True,
+    im_array, clip_quantiles=[0.0, 0.999], zero_below_median=False, verbose=True
 ):
-    """
+    r"""
     im_array: 2d np.array, usually dtype=uint16
-    upper_limit_frac: the highest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the lower threshold for clipping the image, default=1/10
-    low_thresh_frac: the lowest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the upper threshold for clipping the image, default=1/5000
-    zero_high_count_pix: set all pixel values below (inclusive) the upper_limit_frac are set to zero, default=True
+    clip_quantiles: where to set image intensity rescaling thresholds, default = clip_quantiles=[0.0,0.999]
+    zero_below_median: set pixels below the median pixel value equal to zero before rescaling intensity, default=False
     verbose: print image info, default=True
     """
-
-    # TODO don't convert to 8-bit and then stretch, stretch original image to get better sampling
-
-    # convert to range 0,255 8-bit image if not already
-    im_array_n = img_as_ubyte(rescale_intensity(im_array))
-
-    # count number of nonzero pixels
-    pixel_count = (im_array_n > 0).sum()
-
-    # not sure what these are
-    limit = pixel_count * upper_limit_frac
-    threshold = pixel_count * low_thresh_frac
-
-    # histogram of pixel values with bins = 0,1,2,...,255
-    hist, bins = histogram(im_array_n)
-
-    # high and low thresholds at which to constrast stretch the image
-    low_thresh = bins[0] if hist.min() >= limit else np.where(hist < limit)[0].min()
-    high_thresh = (
-        bins[-1] if hist.max() <= threshold else np.where(hist > threshold)[0].max()
-    )
-
-    # zero out pixels values with high counts -- presumes all high counts are low values?
-    if zero_high_count_pix:
-        high_count_pix = np.where(hist >= limit)[0]
-        high_count_mask = np.isin(im_array_n, high_count_pix)
-        im_array_n[high_count_mask] = 0
-
-    out_array = rescale_intensity(im_array_n, in_range=(low_thresh, high_thresh))
-
-    if verbose:
-        print("inpput array shape is {}".format(im_array.shape))
-        print(
-            "low_thresh = {}, high_thresh = {}, im_array_n.min()={}".format(
-                low_thresh, high_thresh, np.min(im_array_n)
-            )
-        )
-        print("out array shape is {}".format(out_array.shape))
-
-    return out_array
+    im = img_as_float64(im_array)
+    q_low, q_high = np.quantile(im, clip_quantiles)
+    im_clipped = np.clip(im, a_min=q_low, a_max=q_high)
+    if zero_below_median:
+        im_clipped[im_clipped < np.median(im_clipped)] = 0
+    return img_as_ubyte(rescale_intensity(im_clipped))
 
 
 def read_and_contrast_image(
@@ -80,7 +41,10 @@ def read_and_contrast_image(
         "backmask": 8,
         "cell": 9,
     },
-    stretch_channels=["bf", "488", "561", "638", "nuc"],
+    fluor_channels=["488", "561", "638", "nuc"],
+    bf_channels=["bf"],
+    fluor_kwargs={"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
+    bf_kwargs={"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
     verbose=True,
 ):
     r"""
@@ -89,7 +53,10 @@ def read_and_contrast_image(
     Args:
         image_path (str): location of input tiff image
         channels (dict): {"channel_name":channel_index} map for input tiff
-        stretch_channels (list): list of channel names that to be contrast stretched
+        fluor_channels (list): list of channel names to be contrast stretched with fluor_kwargs
+        bf_channels (list): list of channel names to be contrast stretched bf_kwargs
+        fluor_kwargs, default = {clip_quantiles:[0.0,0.999], zero_below_median:False}
+        bf_kwargs, default = {clip_quantiles:[0.00001, 0.99999], zero_below_median:False}
         verbose (bool): print info while processing or not
     Returns:
         (Cmaxs, Cautos): tuple of two lists
@@ -101,7 +68,8 @@ def read_and_contrast_image(
         print(image_path)
 
     # channel indices on which to apply auto_contrast_fn
-    raw_inds = [ind for channel, ind in channels.items() if channel in stretch_channels]
+    fluor_inds = [ind for channel, ind in channels.items() if channel in fluor_channels]
+    bf_inds = [ind for channel, ind in channels.items() if channel in bf_channels]
 
     # read in all data for image
     im = AICSImage(image_path)
@@ -114,7 +82,11 @@ def read_and_contrast_image(
 
     # auto contrast if image channel, original max proj if not
     Cautos = [
-        auto_contrast_fn(Cdata, verbose=verbose) if c in raw_inds else Cdata
+        auto_contrast_fn(Cdata, verbose=verbose, **fluor_kwargs)
+        if c in fluor_inds
+        else auto_contrast_fn(Cdata, verbose=verbose, **bf_kwargs)
+        if c in bf_inds
+        else Cdata
         for c, Cdata in enumerate(Cmaxs)
     ]
 
@@ -149,8 +121,8 @@ def cell_worker(
     label_crop = label_image[min(y) : max(y) + 1, min(x) : max(x) + 1]
     mask = (label_crop == cell_ind).astype(np.float64)
 
-    for c, channel in channels.items():
-        cell_object_crop = Cautos[channel][min(y) : max(y) + 1, min(x) : max(x) + 1]
+    for channel, c in channels.items():
+        cell_object_crop = Cautos[c][min(y) : max(y) + 1, min(x) : max(x) + 1]
         cell_object_crop = cell_object_crop * mask
 
         out_filename = "{0}_cell{1}_C{2}.png".format(basename, cell_ind, channel)
@@ -173,6 +145,12 @@ def stretch_worker(
         "backmask": 8,
         "cell": 9,
     },
+    auto_contrast_kwargs={
+        "fluor_channels": ["488", "561", "638", "nuc"],
+        "bf_channels": ["bf"],
+        "fluor_kwargs": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
+        "bf_kwargs": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
+    },
     verbose=True,
 ):
 
@@ -181,7 +159,9 @@ def stretch_worker(
 
     basename, ext = os.path.splitext(os.path.basename(filename))
 
-    Cmaxs, Cautos = read_and_contrast_image(filename)
+    Cmaxs, Cautos = read_and_contrast_image(
+        filename, verbose=verbose, **auto_contrast_kwargs
+    )
     label_image = Cautos[channels["cell"]]  # extract napari annotation channel
     num_labels = np.max(label_image)
     if verbose:
