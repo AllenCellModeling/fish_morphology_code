@@ -28,7 +28,7 @@ def auto_contrast_fn(
     # TODO don't convert to 8-bit and then stretch, stretch original image to get better sampling
 
     # convert to range 0,255 8-bit image if not already
-    im_array_n = img_as_ubyte(im_array)
+    im_array_n = img_as_ubyte(rescale_intensity(im_array))
 
     # count number of nonzero pixels
     pixel_count = (im_array_n > 0).sum()
@@ -108,7 +108,7 @@ def read_and_contrast_image(
 
     # list of max projects for each channels
     Cmaxs = [
-        img_as_ubyte(img_as_ubyte(im.get_image_data("ZYX", T=0, C=c).max(axis=0)))
+        img_as_ubyte(rescale_intensity(im.get_image_data("ZYX", T=0, C=c).max(axis=0)))
         for c in sorted(channels.values())
     ]
 
