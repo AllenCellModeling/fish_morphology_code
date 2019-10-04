@@ -6,7 +6,7 @@ import os
 import numpy as np
 from aicsimageio import AICSImage
 import imageio
-from skimage import exposure
+from skimage.exposure import rescale_intensity, histogram
 from skimage import img_as_ubyte
 
 
@@ -37,10 +37,8 @@ def auto_contrast_fn(
     limit = pixel_count * upper_limit_frac
     threshold = pixel_count * low_thresh_frac
 
-    # histogram of pixel values with bin boundaries = 0,1,2,...256
-    hist, bins = np.histogram(
-        im_array_n, bins=np.arange(1 + np.iinfo(np.uint8).max + 1)
-    )
+    # histogram of pixel values with bins = 0,1,2,...,255
+    hist, bins = histogram(im_array_n)
 
     # high and low thresholds at which to constrast stretch the image
     low_thresh = bins[0] if hist.min() >= limit else np.where(hist < limit)[0].min()
@@ -54,9 +52,7 @@ def auto_contrast_fn(
         high_count_mask = np.isin(im_array_n, high_count_pix)
         im_array_n[high_count_mask] = 0
 
-    out_array = exposure.rescale_intensity(
-        im_array_n, in_range=(low_thresh, high_thresh)
-    )
+    out_array = rescale_intensity(im_array_n, in_range=(low_thresh, high_thresh))
 
     if verbose:
         print("inpput array shape is {}".format(im_array.shape))
