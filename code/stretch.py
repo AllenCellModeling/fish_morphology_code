@@ -7,6 +7,7 @@ import os
 import json
 import fire
 import pandas as pd
+from tqdm import tqdm
 
 from stretch_utils import stretch_worker
 
@@ -21,7 +22,7 @@ def run(
         "fluor_kwargs": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
         "bf_kwargs": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
     },
-    verbose=True,
+    verbose=False,
 ):
     """
     Extract segmented objects from field of view and save channels into separate images
@@ -56,9 +57,13 @@ def run(
     input_files = pd.read_csv(image_file_csv)
     file_names = input_files["image_location"]
 
+    # print task info
+    if verbose:
+        print("found {} image fields -- beginging processing".format(len(file_names)))
+
     # for each field, auto-contrast the channels if appropriate, and save single cell segmentations
     field_info_dfs = []
-    for filename in file_names:
+    for filename in tqdm(file_names, desc="Field"):
         field_info_df = stretch_worker(
             filename,
             out_dir=out_dir,

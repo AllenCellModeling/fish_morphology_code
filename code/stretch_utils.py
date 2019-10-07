@@ -9,6 +9,22 @@ from aicsimageio import AICSImage
 import imageio
 from skimage.exposure import rescale_intensity
 from skimage import img_as_ubyte, img_as_float64
+import warnings
+from tqdm import tqdm
+
+
+def img_as_ubyte_nowarn(img):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        img_out = img_as_ubyte(img)
+    return img_out
+
+
+def rescale_intensity_nowarn(img):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        img_out = rescale_intensity(img)
+    return img_out
 
 
 def auto_contrast_fn(
@@ -20,12 +36,13 @@ def auto_contrast_fn(
     zero_below_median: set pixels below the median pixel value equal to zero before rescaling intensity, default=False
     verbose: print image info, default=True
     """
+
     im = img_as_float64(im_array)
     q_low, q_high = np.quantile(im, clip_quantiles)
     im_clipped = np.clip(im, a_min=q_low, a_max=q_high)
     if zero_below_median:
         im_clipped[im_clipped < np.median(im_clipped)] = 0
-    return img_as_ubyte(rescale_intensity(im_clipped))
+    return img_as_ubyte_nowarn(rescale_intensity_nowarn(im_clipped))
 
 
 def read_and_contrast_image(
@@ -74,7 +91,9 @@ def read_and_contrast_image(
 
     # list of max projects for each channels
     Cmaxs = [
-        img_as_ubyte(rescale_intensity(im.get_image_data("ZYX", T=0, C=c).max(axis=0)))
+        img_as_ubyte_nowarn(
+            rescale_intensity_nowarn(im.get_image_data("ZYX", T=0, C=c).max(axis=0))
+        )
         for c in sorted(channels.values())
     ]
 
@@ -136,7 +155,9 @@ def cell_worker(
         channel, c = row["channel_name"], row["channel_index"]
         cell_object_crop = Cautos[c][crop_slice]
         cell_object_crop = cell_object_crop * mask
-        cell_object_crop = img_as_ubyte(rescale_intensity(cell_object_crop))
+        cell_object_crop = img_as_ubyte_nowarn(
+            rescale_intensity_nowarn(cell_object_crop)
+        )
 
         out_filename = "{0}_cell{1}_C{2}.png".format(basename, cell_ind, channel)
         out_path = os.path.join(img_out_dir, out_filename)
@@ -193,7 +214,7 @@ def stretch_worker(
 
     cell_info_dfs = []
 
-    for cell_ind, cell_label_value in enumerate(sorted(cell_labels)):
+    for cell_ind, cell_label_value in enumerate(tqdm(sorted(cell_labels), desc="Cell")):
         cell_info_df = cell_worker(
             Cautos,
             label_image,
