@@ -38,13 +38,15 @@ def run(
 
     # save run parameters
     run_parameters = locals()
-    with open(os.path.join(out_dir, "parametrs.json"), "w") as fp:
-        json.dump(run_parameters, fp, indent=2, sort_keys=True)
 
     # make output dir if doesn't exist yet
     if out_dir is None:
         out_dir = os.getcwd()
     os.makedirs(out_dir, exist_ok=True)
+
+    # write run parameters
+    with open(os.path.join(out_dir, "parameters.json"), "w") as fp:
+        json.dump(run_parameters, fp, indent=2, sort_keys=True)
 
     # read channel defs
     with open(channels_json, "r") as f:
