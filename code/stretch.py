@@ -16,6 +16,7 @@ def run(
     image_file_csv,
     channels_json,
     out_dir=None,
+    contrast_method="simple_quantile",
     auto_contrast_kwargs={
         "fluor_channels": ["488", "561", "638", "nuc"],
         "bf_channels": ["bf"],
@@ -68,6 +69,7 @@ def run(
             filename,
             out_dir=out_dir,
             channels=channels,
+            contrast_method=contrast_method,
             verbose=verbose,
             auto_contrast_kwargs=auto_contrast_kwargs,
         )

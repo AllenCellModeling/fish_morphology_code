@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from aicsimageio import AICSImage
 import imageio
-from skimage.exposure import rescale_intensity
+from skimage.exposure import rescale_intensity, histogram
 from skimage import img_as_ubyte, img_as_float64
 import warnings
 from tqdm import tqdm
@@ -27,8 +27,12 @@ def rescale_intensity_nowarn(img):
     return img_out
 
 
-def auto_contrast_fn(
-    im_array, clip_quantiles=[0.0, 0.999], zero_below_median=False, verbose=True
+def _simple_quantile_constrast(
+    im_array,
+    clip_quantiles=[0.0, 0.999],
+    zero_below_median=False,
+    verbose=True,
+    **kwargs
 ):
     r"""
     im_array: 2d np.array, usually dtype=uint16
@@ -45,6 +49,80 @@ def auto_contrast_fn(
     return img_as_ubyte_nowarn(rescale_intensity_nowarn(im_clipped))
 
 
+def _imagej_rewrite_autocontrast(
+    im_array,
+    upper_limit_frac=1 / 10,
+    low_thresh_frac=1 / 5000,
+    zero_high_count_pix=True,
+    verbose=True,
+    **kwargs
+):
+    r"""
+    im_array: 2d np.array, usually dtype=uint16
+    upper_limit_frac: the highest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the lower threshold for clipping the image, default=1/10
+    low_thresh_frac: the lowest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the upper threshold for clipping the image, default=1/5000
+    zero_high_count_pix: set all pixel values below (inclusive) the upper_limit_frac are set to zero, default=True
+    verbose: print image info, default=True
+    """
+
+    # TODO don't convert to 8-bit and then stretch, stretch original image to get better sampling
+
+    # convert to range 0,255 8-bit image if not already
+    im_array_n = img_as_ubyte(rescale_intensity(im_array))
+
+    # count number of nonzero pixels
+    pixel_count = (im_array_n > 0).sum()
+
+    # not sure what these are
+    limit = pixel_count * upper_limit_frac
+    threshold = pixel_count * low_thresh_frac
+
+    # histogram of pixel values with bins = 0,1,2,...,255
+    hist, bins = histogram(im_array_n)
+
+    # high and low thresholds at which to constrast stretch the image
+    low_thresh = bins[0] if hist.min() >= limit else np.where(hist < limit)[0].min()
+    high_thresh = (
+        bins[-1] if hist.max() <= threshold else np.where(hist > threshold)[0].max()
+    )
+
+    # zero out pixels values with high counts -- presumes all high counts are low values?
+    if zero_high_count_pix:
+        high_count_pix = np.where(hist >= limit)[0]
+        high_count_mask = np.isin(im_array_n, high_count_pix)
+        im_array_n[high_count_mask] = 0
+
+    out_array = rescale_intensity(im_array_n, in_range=(low_thresh, high_thresh))
+
+    if verbose:
+        print("inpput array shape is {}".format(im_array.shape))
+        print(
+            "low_thresh = {}, high_thresh = {}, im_array_n.min()={}".format(
+                low_thresh, high_thresh, np.min(im_array_n)
+            )
+        )
+        print("out array shape is {}".format(out_array.shape))
+
+    return out_array
+
+
+def auto_contrast_fn(*args, **kwargs):
+    r"""
+    calls _imagej_rewrite_autocontrast if contrast_method="imagej_rewrite",
+    calls _simple_quantile_constrast if contrast_method="simple_quantile",
+    else throws an error
+    """
+    if kwargs["contrast_method"] == "imagej_rewrite":
+        out = _imagej_rewrite_autocontrast(*args, **kwargs)
+    elif kwargs["contrast_method"] == "simple_quantile":
+        out = _simple_quantile_constrast(*args, **kwargs)
+    else:
+        raise ValueError(
+            "%s is not a valid contrast method" % kwargs["contrast_method"]
+        )
+    return out
+
+
 def read_and_contrast_image(
     image_path,
     channels={
@@ -59,6 +137,7 @@ def read_and_contrast_image(
         "backmask": 8,
         "cell": 9,
     },
+    contrast_method="simple_quantile",
     fluor_channels=["488", "561", "638", "nuc"],
     bf_channels=["bf"],
     fluor_kwargs={"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
@@ -99,9 +178,13 @@ def read_and_contrast_image(
 
     # auto contrast if image channel, original max proj if not
     Cautos = [
-        auto_contrast_fn(Cdata, verbose=verbose, **fluor_kwargs)
+        auto_contrast_fn(
+            Cdata, verbose=verbose, contrast_method=contrast_method, **fluor_kwargs
+        )
         if c in fluor_inds
-        else auto_contrast_fn(Cdata, verbose=verbose, **bf_kwargs)
+        else auto_contrast_fn(
+            Cdata, verbose=verbose, contrast_method=contrast_method, **bf_kwargs
+        )
         if c in bf_inds
         else Cdata
         for c, Cdata in enumerate(Cmaxs)
@@ -185,6 +268,7 @@ def stretch_worker(
         "backmask": 8,
         "cell": 9,
     },
+    contrast_method="simple_quantile",
     auto_contrast_kwargs={
         "fluor_channels": ["488", "561", "638", "nuc"],
         "bf_channels": ["bf"],
@@ -196,13 +280,36 @@ def stretch_worker(
 
     if out_dir is None:
         out_dir = os.getcwd()
-    os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(os.path.join(out_dir, "output_field_images"), exist_ok=True)
 
     basename, ext = os.path.splitext(os.path.basename(filename))
 
     Cmaxs, Cautos = read_and_contrast_image(
-        filename, verbose=verbose, **auto_contrast_kwargs
+        filename,
+        verbose=verbose,
+        contrast_method=contrast_method,
+        **auto_contrast_kwargs
     )
+
+    # save original and rescaled field data
+    field_info_df = pd.DataFrame.from_records(
+        list(channels.items()), columns=["channel_name", "channel_index"]
+    )
+
+    field_info_df["field_image_path"] = ""
+    field_info_df["rescaled_field_image_path"] = ""
+    for i, row in field_info_df.iterrows():
+        field_info_df.at[i, "field_image_path"] = filename
+        rescaled_field_channel_out_path = os.path.join(
+            out_dir,
+            "output_field_images",
+            "{0}_C{1}.png".format(basename, row["channel_name"]),
+        )
+        field_info_df.at[
+            i, "rescaled_field_image_path"
+        ] = rescaled_field_channel_out_path
+        Cautos
+        imageio.imwrite(rescaled_field_channel_out_path, Cautos[row["channel_index"]])
 
     label_image = Cautos[channels["cell"]]  # extract napari annotation channel
     labels = np.unique(label_image)
@@ -228,7 +335,9 @@ def stretch_worker(
 
         cell_info_dfs += [cell_info_df]
 
-    field_info_df = pd.concat(cell_info_dfs, axis="rows", ignore_index=True)
-    field_info_df["field_image_path"] = filename
+    all_cell_info_df = pd.concat(cell_info_dfs, axis="rows", ignore_index=True)
+    all_cell_info_df["field_image_path"] = filename
+
+    field_info_df = field_info_df.merge(all_cell_info_df, how="inner")
 
     return field_info_df
