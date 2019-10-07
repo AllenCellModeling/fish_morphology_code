@@ -6,6 +6,7 @@ Extract hand segmented images of individual cells for scoring actn2 structure
 import os
 import json
 import fire
+import pandas as pd
 
 from stretch_utils import stretch_worker
 
@@ -20,13 +21,14 @@ def run(
         "fluor_kwargs": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
         "bf_kwargs": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
     },
+    verbose=True,
 ):
     """
     Extract segmented objects from field of view and save channels into separate images
 
-    image_file_csv: csv file with list of mips with seg files
-    channels_json: json file with channel identifiers
-    out_dir: output directory where to save images, default=current working directory
+    image_file_csv: csv file with list *absolute_paths* of max projects + seg file tiffs
+    channels_json: json file with channel identifiers {"name": index}
+    out_dir: output directory where to save images and log, default=current working directory
     auto_contrast_kwargs: which channels to treat as fluroescent vs brightfield vs leave alone, and how to stretch those you wan to adjust
         default = {"fluor_channels":["488", "561", "638", "nuc"],
                    "bf_channels":["bf"],
@@ -34,21 +36,39 @@ def run(
                    "bf_kwargs":{"clip_quantiles":[0.00001, 0.99999], "zero_below_median":False}}
     """
 
-    with open(image_file_csv, "r") as images:
-        file_names = [f.strip() for f in images]
-    with open(channels_json, "r") as f:
-        channels = json.load(f)
+    # save run parameters
+    run_parameters = locals()
+    with open(os.path.join(out_dir, "parametrs.json"), "w") as fp:
+        json.dump(run_parameters, fp, indent=2, sort_keys=True)
+
+    # make output dir if doesn't exist yet
     if out_dir is None:
         out_dir = os.getcwd()
+    os.makedirs(out_dir, exist_ok=True)
 
+    # read channel defs
+    with open(channels_json, "r") as f:
+        channels = json.load(f)
+
+    # read input file manifest
+    input_files = pd.read_csv(image_file_csv)
+    file_names = input_files["image_location"]
+
+    # for each field, auto-contrast the channels if appropriate, and save single cell segmentations
+    field_info_dfs = []
     for filename in file_names:
-        stretch_worker(
+        field_info_df = stretch_worker(
             filename,
             out_dir=out_dir,
             channels=channels,
-            verbose=True,
+            verbose=verbose,
             auto_contrast_kwargs=auto_contrast_kwargs,
         )
+        field_info_dfs += [field_info_df]
+
+    # aggregate all the metadata for each single cell+channel image and save
+    main_log_df = pd.concat(field_info_dfs, axis="rows", ignore_index=True)
+    main_log_df.to_csv(os.path.join(out_dir, "output_image_manifest.csv"), index=False)
 
 
 if __name__ == "__main__":
