@@ -2,4 +2,7 @@ aicsimageio
 fire
 imageio
 numpy
+pandas
 skimage
+tqdm
+
