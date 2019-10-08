@@ -77,6 +77,19 @@ def run(
 
     # aggregate all the metadata for each single cell+channel image and save
     main_log_df = pd.concat(field_info_dfs, axis="rows", ignore_index=True)
+    ordered_cols = [
+        "field_image_name",
+        "field_image_path",
+        "rescaled_field_image_path",
+        "channel_name",
+        "channel_index",
+        "cell_index",
+        "cell_label_value",
+        "single_cell_channel_output_path",
+    ]
+    unordered_cols = [c for c in main_log_df.columns if c not in ordered_cols]
+    cols = ordered_cols + unordered_cols
+    main_log_df = main_log_df[cols]
     main_log_df.to_csv(os.path.join(out_dir, "output_image_manifest.csv"), index=False)
 
 
