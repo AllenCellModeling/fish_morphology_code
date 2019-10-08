@@ -31,14 +31,14 @@ def _simple_quantile_constrast(
     im_array,
     clip_quantiles=[0.0, 0.999],
     zero_below_median=False,
-    verbose=True,
+    verbose=False,
     **kwargs
 ):
     r"""
     im_array: 2d np.array, usually dtype=uint16
     clip_quantiles: where to set image intensity rescaling thresholds, default = clip_quantiles=[0.0,0.999]
     zero_below_median: set pixels below the median pixel value equal to zero before rescaling intensity, default=False
-    verbose: print image info, default=True
+    verbose: print image info, default=False
     """
 
     im = img_as_float64(im_array)
@@ -54,7 +54,7 @@ def _imagej_rewrite_autocontrast(
     upper_limit_frac=1 / 10,
     low_thresh_frac=1 / 5000,
     zero_high_count_pix=True,
-    verbose=True,
+    verbose=False,
     **kwargs
 ):
     r"""
@@ -62,7 +62,7 @@ def _imagej_rewrite_autocontrast(
     upper_limit_frac: the highest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the lower threshold for clipping the image, default=1/10
     low_thresh_frac: the lowest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the upper threshold for clipping the image, default=1/5000
     zero_high_count_pix: set all pixel values below (inclusive) the upper_limit_frac are set to zero, default=True
-    verbose: print image info, default=True
+    verbose: print image info, default=False
     """
 
     # TODO don't convert to 8-bit and then stretch, stretch original image to get better sampling
@@ -142,7 +142,7 @@ def read_and_contrast_image(
     bf_channels=["bf"],
     fluor_kwargs={"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
     bf_kwargs={"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
-    verbose=True,
+    verbose=False,
 ):
     r"""
     Load an image from a file path, return two lists: max projects per channel,
@@ -154,7 +154,7 @@ def read_and_contrast_image(
         bf_channels (list): list of channel names to be contrast stretched
         fluor_kwargs, default = {clip_quantiles:[0.0,0.999], zero_below_median:False}
         bf_kwargs, default = {clip_quantiles:[0.00001, 0.99999], zero_below_median:False}
-        verbose (bool): print info while processing or not
+        verbose (bool): print info while processing or not, default = False
     Returns:
         (Cmaxs, Cautos): tuple of two lists
             - unadjusted maxprojects per channel
@@ -212,7 +212,7 @@ def cell_worker(
         "backmask": 8,
         "cell": 9,
     },
-    verbose=True,
+    verbose=False,
 ):
 
     if out_dir is None:
@@ -275,7 +275,7 @@ def stretch_worker(
         "fluor_kwargs": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
         "bf_kwargs": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
     },
-    verbose=True,
+    verbose=False,
 ):
 
     if out_dir is None:
