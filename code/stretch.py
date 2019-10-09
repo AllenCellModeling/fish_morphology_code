@@ -5,6 +5,8 @@ Extract hand segmented images of individual cells for scoring actn2 structure
 
 import os
 import json
+from functools import partial
+from concurrent.futures import ThreadPoolExecutor
 
 import fire
 import pandas as pd
@@ -24,6 +26,7 @@ def run(
         "fluor_kwargs": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
         "bf_kwargs": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
     },
+    max_workers=None,
     verbose=False,
 ):
     """
@@ -37,6 +40,8 @@ def run(
                    "bf_channels":["bf"],
                    "fluor_kwargs":{"clip_quantiles":[0.0,0.998], "zero_below_median":False},
                    "bf_kwargs":{"clip_quantiles":[0.00001, 0.99999], "zero_below_median":False}}
+    max_workers: how many jobs to run in parallel / cores to use. default=None, which uses all available cores.
+    verbose: print out info as you go. Probably  messes with the progess bar. default=False
     """
 
     # save run parameters
@@ -63,21 +68,29 @@ def run(
     if verbose:
         print("found {} image fields -- beginging processing".format(len(file_names)))
 
-    # for each field, auto-contrast the channels if appropriate, and save single cell segmentations
-    field_info_dfs = []
-    for filename in tqdm(file_names, desc="Field"):
-        field_info_df = stretch_worker(
-            filename,
-            out_dir=out_dir,
-            channels=channels,
-            contrast_method=contrast_method,
-            verbose=verbose,
-            auto_contrast_kwargs=auto_contrast_kwargs,
-        )
-        field_info_dfs += [field_info_df]
+    # partial function for iterating through files with map
+    _stretch_worker_partial = partial(
+        stretch_worker,
+        out_dir=out_dir,
+        channels=channels,
+        contrast_method=contrast_method,
+        verbose=verbose,
+        auto_contrast_kwargs=auto_contrast_kwargs,
+    )
 
-    # aggregate all the metadata for each single cell+channel image and save
-    main_log_df = pd.concat(field_info_dfs, axis="rows", ignore_index=True)
+    # iterate in parallel
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        main_log_df = pd.concat(
+            tqdm(
+                executor.map(_stretch_worker_partial, file_names),
+                total=len(file_names),
+                desc="Fields",
+            ),
+            axis="rows",
+            ignore_index=True,
+        )
+
+    # reorder dataframe columns
     ordered_cols = [
         "field_image_name",
         "field_image_path",
