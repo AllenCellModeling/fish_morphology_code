@@ -4,13 +4,13 @@ Extract hand segmented images of individual cells for scoring actn2 structure
 
 import os
 import warnings
+from functools import partial
 
 import numpy as np
 import pandas as pd
 import imageio
 from skimage.exposure import rescale_intensity, histogram
 from skimage import img_as_ubyte, img_as_float64
-from tqdm import tqdm
 
 from aicsimageio import AICSImage
 
@@ -196,10 +196,9 @@ def read_and_contrast_image(
 
 
 def cell_worker(
-    Cautos,
-    label_image,
-    cell_ind,
     cell_label_value,
+    Cautos=[],
+    label_channel="cell",
     basename="unnamed_image_field",
     out_dir=None,
     channels={
@@ -222,6 +221,11 @@ def cell_worker(
 
     img_out_dir = os.path.join(out_dir, "output_single_cell_images")
     os.makedirs(img_out_dir, exist_ok=True)
+
+    label_image = Cautos[channels[label_channel]]
+    labels = np.unique(label_image)
+    cell_labels = labels[labels > 0]
+    cell_ind = np.where(cell_labels == cell_label_value)[0][0] + 1
 
     y, x = np.where(label_image == cell_label_value)
     crop_slice = np.s_[min(y) : max(y) + 1, min(x) : max(x) + 1]
@@ -315,31 +319,29 @@ def stretch_worker(
 
     label_image = Cautos[channels["cell"]]  # extract napari annotation channel
     labels = np.unique(label_image)
-    cell_labels = labels[labels > 0]
+    cell_labels = np.sort(labels[labels > 0])
 
     if verbose:
         print("processing {}".format(filename))
         print("found {} segmented cells".format(len(cell_labels)))
 
-    cell_info_dfs = []
+    # partial function for iterating over all cells in an image with map
+    _cell_worker_partial = partial(
+        cell_worker,
+        Cautos=Cautos,
+        label_channel="cell",
+        basename=basename,
+        out_dir=out_dir,
+        channels=channels,
+        verbose=verbose,
+    )
 
-    for cell_ind, cell_label_value in enumerate(tqdm(sorted(cell_labels), desc="Cell")):
-        cell_info_df = cell_worker(
-            Cautos,
-            label_image,
-            cell_ind + 1,
-            cell_label_value,
-            basename=basename,
-            out_dir=out_dir,
-            channels=channels,
-            verbose=verbose,
-        )
+    # iterate through all cells in an image
+    all_cell_info_df = pd.concat(
+        map(_cell_worker_partial, cell_labels), axis="rows", ignore_index=True
+    )
 
-        cell_info_dfs += [cell_info_df]
-
-    all_cell_info_df = pd.concat(cell_info_dfs, axis="rows", ignore_index=True)
     all_cell_info_df["field_image_path"] = filename
-
     field_info_df = field_info_df.merge(all_cell_info_df, how="inner")
 
     return field_info_df
