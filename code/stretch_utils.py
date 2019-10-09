@@ -3,14 +3,16 @@ Extract hand segmented images of individual cells for scoring actn2 structure
 """
 
 import os
+import warnings
+
 import numpy as np
 import pandas as pd
-from aicsimageio import AICSImage
 import imageio
 from skimage.exposure import rescale_intensity, histogram
 from skimage import img_as_ubyte, img_as_float64
-import warnings
 from tqdm import tqdm
+
+from aicsimageio import AICSImage
 
 
 def img_as_ubyte_nowarn(img):
