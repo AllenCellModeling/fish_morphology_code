@@ -26,6 +26,8 @@ pip install pre-commit
 pre-commit install
 ```
 
+This will install the black formatter and flake8 linter, and configure them to run as pre-commit hooks.
+
 ## Contributions
 
 Internal contributions are welcome and encouraged.
