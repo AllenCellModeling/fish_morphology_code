@@ -4,10 +4,36 @@ basic code and automated workflows to produce analysis friendly data from annota
 
 ## Installation
 
-In this directory:
+Recommended installation procedure is to create a conda environment and then pip install into that environment.
+
+### Normal users
+
+Clone this repository, then
+
 ```
+cd fish_morphology_code
+conda create --name cardio_fish_data python=3.7
+conda activate cardio_fish_data
 pip install -r requirements.txt
 ```
+
+### Developers
+
+After following the "Normal users" installation instructions,
+
+```
+pip install pre-commit
+pre-commit install
+```
+
+This will install the black formatter and flake8 linter, and configure them to run as pre-commit hooks.
+
+## Contributions
+
+Internal contributions are welcome and encouraged.
+Please create an issue describing your contributions, and work an a branch with a descriptive name, such as `FEATURE/your_contribution` or `BUGFIX/the_bug` etc.
+When things look good on your branch, create a pull request to master.
+Direct commits to master should be disabled, but if not please don't push commits directly to the master branch.
 
 ## Running the code
 
