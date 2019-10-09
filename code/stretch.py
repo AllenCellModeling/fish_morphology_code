@@ -57,7 +57,7 @@ def run(
 
     # read input file manifest
     input_files = pd.read_csv(image_file_csv)
-    file_names = input_files["image_location"]
+    file_names = input_files["seg_file_name"]
 
     # print task info
     if verbose:
