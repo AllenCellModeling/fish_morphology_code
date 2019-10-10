@@ -2,8 +2,8 @@ r"""
 Extract hand segmented images of individual cells for scoring actn2 structure
 """
 
-import os
 import warnings
+from pathlib import Path
 from functools import partial
 
 import numpy as np
@@ -217,10 +217,12 @@ def cell_worker(
 ):
 
     if out_dir is None:
-        out_dir = os.getcwd()
+        out_dir = Path.cwd()
+    else:
+        out_dir = Path(out_dir)
 
-    img_out_dir = os.path.join(out_dir, "output_single_cell_images")
-    os.makedirs(img_out_dir, exist_ok=True)
+    img_out_dir = out_dir.joinpath("output_single_cell_images")
+    img_out_dir.mkdir(exist_ok=True)
 
     label_image = Cautos[channels[label_channel]]
     labels = np.unique(label_image)
@@ -249,7 +251,7 @@ def cell_worker(
         )
 
         out_filename = "{0}_cell{1}_C{2}.png".format(basename, cell_ind, channel)
-        out_path = os.path.join(img_out_dir, out_filename)
+        out_path = img_out_dir.joinpath(out_filename)
         imageio.imwrite(out_path, cell_object_crop)
         cell_info_df.at[i, "single_cell_channel_output_path"] = out_path
 
@@ -284,12 +286,22 @@ def stretch_worker(
     verbose=False,
 ):
 
+    # early exit if file does not exist -- return df of just
+    filepath = Path(filename)
+    if not filepath.is_file():
+        return pd.DataFrame({"field_image_path": [filepath]})
+
+    # set out dir if needed
     if out_dir is None:
-        out_dir = os.getcwd()
-    os.makedirs(os.path.join(out_dir, "output_field_images"), exist_ok=True)
+        out_dir = Path.cwd()
+    else:
+        out_dir = Path(out_dir)
 
-    basename, ext = os.path.splitext(os.path.basename(filename))
+    # set out dir for rescaled images and create if needed
+    output_field_image_dir = out_dir.joinpath("output_field_images")
+    output_field_image_dir.mkdir(exist_ok=True)
 
+    # contrast stretch the field channels
     Cmaxs, Cautos = read_and_contrast_image(
         filename,
         verbose=verbose,
@@ -302,22 +314,21 @@ def stretch_worker(
         list(channels.items()), columns=["channel_name", "channel_index"]
     )
 
+    # save field level metadate to df
     field_info_df["field_image_path"] = ""
     field_info_df["rescaled_field_image_path"] = ""
     for i, row in field_info_df.iterrows():
         field_info_df.at[i, "field_image_path"] = filename
-        rescaled_field_channel_out_path = os.path.join(
-            out_dir,
-            "output_field_images",
-            "{0}_C{1}.png".format(basename, row["channel_name"]),
+        rescaled_field_channel_out_path = output_field_image_dir.joinpath(
+            "{0}_C{1}.png".format(filepath.stem, row["channel_name"])
         )
         field_info_df.at[
             i, "rescaled_field_image_path"
         ] = rescaled_field_channel_out_path
-        Cautos
         imageio.imwrite(rescaled_field_channel_out_path, Cautos[row["channel_index"]])
 
-    label_image = Cautos[channels["cell"]]  # extract napari annotation channel
+    # extract napari annotation channel and grab unique labels for cells
+    label_image = Cautos[channels["cell"]]
     labels = np.unique(label_image)
     cell_labels = np.sort(labels[labels > 0])
 
@@ -330,7 +341,7 @@ def stretch_worker(
         cell_worker,
         Cautos=Cautos,
         label_channel="cell",
-        basename=basename,
+        basename=filepath.stem,
         out_dir=out_dir,
         channels=channels,
         verbose=verbose,
@@ -341,6 +352,7 @@ def stretch_worker(
         map(_cell_worker_partial, cell_labels), axis="rows", ignore_index=True
     )
 
+    # merge cell-wise data into field-wise data
     all_cell_info_df["field_image_path"] = filename
     field_info_df = field_info_df.merge(all_cell_info_df, how="inner")
 

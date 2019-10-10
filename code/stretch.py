@@ -3,8 +3,8 @@
 Extract hand segmented images of individual cells for scoring actn2 structure
 """
 
-import os
 import json
+from pathlib import Path
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
 
@@ -48,12 +48,15 @@ def run(
     run_parameters = locals()
 
     # make output dir if doesn't exist yet
+    # set out dir if needed
     if out_dir is None:
-        out_dir = os.getcwd()
-    os.makedirs(out_dir, exist_ok=True)
+        out_dir = Path.cwd()
+    else:
+        out_dir = Path(out_dir)
+    out_dir.mkdir(exist_ok=True)
 
     # write run parameters
-    with open(os.path.join(out_dir, "parameters.json"), "w") as fp:
+    with open(out_dir.joinpath("parameters.json"), "w") as fp:
         json.dump(run_parameters, fp, indent=2, sort_keys=True)
 
     # read channel defs
@@ -88,6 +91,7 @@ def run(
             ),
             axis="rows",
             ignore_index=True,
+            sort=False,
         )
 
     # reorder dataframe columns
@@ -104,7 +108,7 @@ def run(
     unordered_cols = [c for c in main_log_df.columns if c not in ordered_cols]
     cols = ordered_cols + unordered_cols
     main_log_df = main_log_df[cols]
-    main_log_df.to_csv(os.path.join(out_dir, "output_image_manifest.csv"), index=False)
+    main_log_df.to_csv(out_dir.joinpath("output_image_manifest.csv"), index=False)
 
 
 if __name__ == "__main__":
