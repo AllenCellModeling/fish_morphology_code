@@ -213,10 +213,6 @@ def cell_worker(
     img_out_dir.mkdir(exist_ok=True)
 
     label_image = Cautos[channels[label_channel]]
-    labels = np.unique(label_image)
-    cell_labels = labels[labels > 0]
-    cell_ind = np.where(cell_labels == cell_label_value)[0][0] + 1
-
     y, x = np.where(label_image == cell_label_value)
     crop_slice = np.s_[min(y) : max(y) + 1, min(x) : max(x) + 1]
     label_crop = label_image[crop_slice]
@@ -226,7 +222,6 @@ def cell_worker(
         list(channels.items()), columns=["channel_name", "channel_index"]
     )
     cell_info_df["field_image_name"] = basename
-    cell_info_df["cell_index"] = cell_ind
     cell_info_df["cell_label_value"] = cell_label_value
     cell_info_df["single_cell_channel_output_path"] = ""
 
@@ -238,13 +233,15 @@ def cell_worker(
             rescale_intensity_nowarn(cell_object_crop)
         )
 
-        out_filename = "{0}_cell{1}_C{2}.png".format(basename, cell_ind, channel)
+        out_filename = "{0}_cell{1}_C{2}.png".format(
+            basename, cell_label_value, channel
+        )
         out_path = img_out_dir.joinpath(out_filename)
         imageio.imwrite(out_path, cell_object_crop)
         cell_info_df.at[i, "single_cell_channel_output_path"] = out_path
 
     if verbose:
-        print("cell_ind = {}, cell_label_value = {}".format(cell_ind, cell_label_value))
+        print("cell_label_value = {}".format(cell_label_value))
 
     return cell_info_df
 
@@ -310,6 +307,7 @@ def field_worker(
     label_image = Cautos[channels["cell"]]
     labels = np.unique(label_image)
     cell_labels = np.sort(labels[labels > 0])
+    assert (cell_labels[0], cell_labels[-1]) == (1, len(cell_labels))
 
     if verbose:
         print("processing {}".format(filename))
@@ -326,7 +324,6 @@ def field_worker(
         verbose=verbose,
     )
 
-    print(cell_labels)
     # iterate through all cells in an image
     all_cell_info_df = pd.concat(
         map(_cell_worker_partial, cell_labels), axis="rows", ignore_index=True
