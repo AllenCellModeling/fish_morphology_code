@@ -28,6 +28,20 @@ CHANNELS = {
 }
 
 
+CHANNEL_GROUPS = {
+    "fluor": ["488", "561", "638", "nuc"],
+    "bf": ["bf"],
+    "seg": ["seg488", "seg561", "seg638", "backmask", "cell"],
+}
+
+
+CONTRAST_KWARGS = {
+    "fluor": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
+    "bf": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
+    "seg": {},
+}
+
+
 def img_as_ubyte_nowarn(img):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -121,21 +135,10 @@ def _imagej_rewrite_autocontrast(
     return out_array
 
 
-def auto_contrast_fn(*args, **kwargs):
-    r"""
-    calls _imagej_rewrite_autocontrast if contrast_method="imagej_rewrite",
-    calls _simple_quantile_constrast if contrast_method="simple_quantile",
-    else throws an error
-    """
-    if kwargs["contrast_method"] == "imagej_rewrite":
-        out = _imagej_rewrite_autocontrast(*args, **kwargs)
-    elif kwargs["contrast_method"] == "simple_quantile":
-        out = _simple_quantile_constrast(*args, **kwargs)
-    else:
-        raise ValueError(
-            "%s is not a valid contrast method" % kwargs["contrast_method"]
-        )
-    return out
+CONTRAST_METHOD = {
+    "imagej_rewrite": _imagej_rewrite_autocontrast,
+    "simple_quantile": _simple_quantile_constrast,
+}
 
 
 def read_and_contrast_image(
@@ -143,10 +146,8 @@ def read_and_contrast_image(
     channels=CHANNELS,
     contrast_method="simple_quantile",
     image_dims="CYX",
-    fluor_channels=["488", "561", "638", "nuc"],
-    bf_channels=["bf"],
-    fluor_kwargs={"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
-    bf_kwargs={"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
+    channel_groups=CHANNEL_GROUPS,
+    contrast_kwargs=CONTRAST_KWARGS,
     verbose=False,
 ):
     r"""
@@ -166,9 +167,16 @@ def read_and_contrast_image(
             - stretched versions of same (for channels to be stretched, else unadjusted)
     """
 
-    # channel indices on which to apply auto_contrast_fn
-    fluor_inds = [ind for channel, ind in channels.items() if channel in fluor_channels]
-    bf_inds = [ind for channel, ind in channels.items() if channel in bf_channels]
+    channel_types = dict((v, k) for k in channel_groups for v in channel_groups[k])
+
+    # set which contrast function we're using
+    contrast_fn = CONTRAST_METHOD[contrast_method]
+
+    # set which contrast method gets applied to images vs segmentations
+    contrast_fns = {
+        grp: contrast_fn if grp != "seg" else img_as_ubyte
+        for grp, kwds in contrast_kwargs.items()
+    }
 
     # read in all data for image and check that channel dim is correct length and all labeled
     im = AICSImage(image_path, known_dims=image_dims)
@@ -177,18 +185,12 @@ def read_and_contrast_image(
     # list of input max projects for each channels
     Cmaxs = [im.get_image_data("YX", C=c) for c in sorted(channels.values())]
 
-    # auto contrast if image channel, original max proj if not, all out as ubyte
+    # auto contrast each channel according to what type of image it is
     Cautos = [
-        auto_contrast_fn(
-            Cdata, verbose=verbose, contrast_method=contrast_method, **fluor_kwargs
+        contrast_fns[channel_types[c_name]](
+            Cmaxs[c_ind], **contrast_kwargs[channel_types[c_name]]
         )
-        if c in fluor_inds
-        else auto_contrast_fn(
-            Cdata, verbose=verbose, contrast_method=contrast_method, **bf_kwargs
-        )
-        if c in bf_inds
-        else img_as_ubyte_nowarn(Cdata)
-        for c, Cdata in enumerate(Cmaxs)
+        for (c_name, c_ind) in CHANNELS.items()
     ]
 
     return Cmaxs, Cautos
