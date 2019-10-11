@@ -26,7 +26,7 @@ def run(
         "fluor_kwargs": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
         "bf_kwargs": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
     },
-    image_dims="STZCYX",
+    image_dims="CYX",
     max_workers=None,
     verbose=False,
 ):

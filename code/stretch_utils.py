@@ -142,7 +142,7 @@ def read_and_contrast_image(
     image_path,
     channels=CHANNELS,
     contrast_method="simple_quantile",
-    image_dims="STZCYX",
+    image_dims="CYX",
     fluor_channels=["488", "561", "638", "nuc"],
     bf_channels=["bf"],
     fluor_kwargs={"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
@@ -170,18 +170,14 @@ def read_and_contrast_image(
     fluor_inds = [ind for channel, ind in channels.items() if channel in fluor_channels]
     bf_inds = [ind for channel, ind in channels.items() if channel in bf_channels]
 
-    # read in all data for image
-    im = AICSImage(image_path)
-    _ = im.data.shape
-    im.dims = image_dims
+    # read in all data for image and check that channel dim is correct length and all labeled
+    im = AICSImage(image_path, known_dims=image_dims)
+    assert dict(zip(im.dims, im.data.shape))["C"] == len(channels)
 
-    # list of max projects for each channels
-    Cmaxs = [
-        img_as_ubyte_nowarn(rescale_intensity_nowarn(im.get_image_data("YX", C=c)))
-        for c in sorted(channels.values())
-    ]
+    # list of input max projects for each channels
+    Cmaxs = [im.get_image_data("YX", C=c) for c in sorted(channels.values())]
 
-    # auto contrast if image channel, original max proj if not
+    # auto contrast if image channel, original max proj if not, all out as ubyte
     Cautos = [
         auto_contrast_fn(
             Cdata, verbose=verbose, contrast_method=contrast_method, **fluor_kwargs
@@ -191,7 +187,7 @@ def read_and_contrast_image(
             Cdata, verbose=verbose, contrast_method=contrast_method, **bf_kwargs
         )
         if c in bf_inds
-        else Cdata
+        else img_as_ubyte_nowarn(Cdata)
         for c, Cdata in enumerate(Cmaxs)
     ]
 
@@ -264,7 +260,7 @@ def field_worker(
         "fluor_kwargs": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
         "bf_kwargs": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
     },
-    image_dims="STZCYX",
+    image_dims="CYX",
     verbose=False,
 ):
 
