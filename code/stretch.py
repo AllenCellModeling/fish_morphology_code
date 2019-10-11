@@ -12,7 +12,7 @@ import fire
 import pandas as pd
 from tqdm import tqdm
 
-from stretch_utils import stretch_worker
+from stretch_utils import field_worker
 
 
 def run(
@@ -26,6 +26,7 @@ def run(
         "fluor_kwargs": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
         "bf_kwargs": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
     },
+    image_dims="STZCYX",
     max_workers=None,
     verbose=False,
 ):
@@ -72,20 +73,21 @@ def run(
         print("found {} image fields -- beginging processing".format(len(file_names)))
 
     # partial function for iterating through files with map
-    _stretch_worker_partial = partial(
-        stretch_worker,
+    _field_worker_partial = partial(
+        field_worker,
         out_dir=out_dir,
         channels=channels,
         contrast_method=contrast_method,
         verbose=verbose,
         auto_contrast_kwargs=auto_contrast_kwargs,
+        image_dims=image_dims,
     )
 
     # iterate in parallel
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         main_log_df = pd.concat(
             tqdm(
-                executor.map(_stretch_worker_partial, file_names),
+                executor.map(_field_worker_partial, file_names),
                 total=len(file_names),
                 desc="Fields",
             ),

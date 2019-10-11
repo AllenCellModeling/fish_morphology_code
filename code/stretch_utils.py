@@ -14,6 +14,19 @@ from skimage import img_as_ubyte, img_as_float64
 
 from aicsimageio import AICSImage
 
+CHANNELS = {
+    "bf": 0,
+    "488": 1,
+    "561": 2,
+    "638": 3,
+    "nuc": 4,
+    "seg488": 5,
+    "seg561": 6,
+    "seg638": 7,
+    "backmask": 8,
+    "cell": 9,
+}
+
 
 def img_as_ubyte_nowarn(img):
     with warnings.catch_warnings():
@@ -127,19 +140,9 @@ def auto_contrast_fn(*args, **kwargs):
 
 def read_and_contrast_image(
     image_path,
-    channels={
-        "bf": 0,
-        "488": 1,
-        "561": 2,
-        "638": 3,
-        "nuc": 4,
-        "seg488": 5,
-        "seg561": 6,
-        "seg638": 7,
-        "backmask": 8,
-        "cell": 9,
-    },
+    channels=CHANNELS,
     contrast_method="simple_quantile",
+    image_dims="STZCYX",
     fluor_channels=["488", "561", "638", "nuc"],
     bf_channels=["bf"],
     fluor_kwargs={"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
@@ -169,12 +172,12 @@ def read_and_contrast_image(
 
     # read in all data for image
     im = AICSImage(image_path)
+    _ = im.data.shape
+    im.dims = image_dims
 
     # list of max projects for each channels
     Cmaxs = [
-        img_as_ubyte_nowarn(
-            rescale_intensity_nowarn(im.get_image_data("ZYX", T=0, C=c).max(axis=0))
-        )
+        img_as_ubyte_nowarn(rescale_intensity_nowarn(im.get_image_data("YX", C=c)))
         for c in sorted(channels.values())
     ]
 
@@ -201,18 +204,7 @@ def cell_worker(
     label_channel="cell",
     basename="unnamed_image_field",
     out_dir=None,
-    channels={
-        "bf": 0,
-        "488": 1,
-        "561": 2,
-        "638": 3,
-        "nuc": 4,
-        "seg488": 5,
-        "seg561": 6,
-        "seg638": 7,
-        "backmask": 8,
-        "cell": 9,
-    },
+    channels=CHANNELS,
     verbose=False,
 ):
 
@@ -261,21 +253,10 @@ def cell_worker(
     return cell_info_df
 
 
-def stretch_worker(
+def field_worker(
     filename,
     out_dir=None,
-    channels={
-        "bf": 0,
-        "488": 1,
-        "561": 2,
-        "638": 3,
-        "nuc": 4,
-        "seg488": 5,
-        "seg561": 6,
-        "seg638": 7,
-        "backmask": 8,
-        "cell": 9,
-    },
+    channels=CHANNELS,
     contrast_method="simple_quantile",
     auto_contrast_kwargs={
         "fluor_channels": ["488", "561", "638", "nuc"],
@@ -283,6 +264,7 @@ def stretch_worker(
         "fluor_kwargs": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
         "bf_kwargs": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
     },
+    image_dims="STZCYX",
     verbose=False,
 ):
 
@@ -305,6 +287,7 @@ def stretch_worker(
     Cmaxs, Cautos = read_and_contrast_image(
         filename,
         verbose=verbose,
+        image_dims=image_dims,
         contrast_method=contrast_method,
         **auto_contrast_kwargs
     )
@@ -347,6 +330,7 @@ def stretch_worker(
         verbose=verbose,
     )
 
+    print(cell_labels)
     # iterate through all cells in an image
     all_cell_info_df = pd.concat(
         map(_cell_worker_partial, cell_labels), axis="rows", ignore_index=True
