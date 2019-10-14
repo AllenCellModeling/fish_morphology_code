@@ -3,6 +3,6 @@ fire>=0.2.1
 imageio>=2.6.1
 numpy>=1.17.2
 pandas>=0.25.1
-scikit-image>=0.15
+scikit-image>=0.16.1
 tqdm>=4.36.1
 
