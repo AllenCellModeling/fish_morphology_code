@@ -12,37 +12,38 @@ import fire
 import pandas as pd
 from tqdm import tqdm
 
-from stretch_utils import field_worker
+from stretch_utils import field_worker, DEFAULT_CONTRAST_KWARGS, DEFAULT_CHANNEL_GROUPS
 
 
 def run(
     image_file_csv,
     channels_json,
     out_dir=None,
-    contrast_method="simple_quantile",
-    auto_contrast_kwargs={
-        "fluor_channels": ["488", "561", "638", "nuc"],
-        "bf_channels": ["bf"],
-        "fluor_kwargs": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
-        "bf_kwargs": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
-    },
     image_dims="CYX",
+    contrast_method="simple_quantile",
+    contrast_kwargs=DEFAULT_CONTRAST_KWARGS,
+    channel_groups=DEFAULT_CHANNEL_GROUPS,
     max_workers=None,
     verbose=False,
 ):
     """
-    Extract segmented objects from field of view and save channels into separate images
-
-    image_file_csv: csv file with list *absolute_paths* of max projects + seg file tiffs
-    channels_json: json file with channel identifiers {"name": index}
-    out_dir: output directory where to save images and log, default=current working directory
-    auto_contrast_kwargs: which channels to treat as fluroescent vs brightfield vs leave alone, and how to stretch those you wan to adjust
-        default = {"fluor_channels":["488", "561", "638", "nuc"],
-                   "bf_channels":["bf"],
-                   "fluor_kwargs":{"clip_quantiles":[0.0,0.998], "zero_below_median":False},
-                   "bf_kwargs":{"clip_quantiles":[0.00001, 0.99999], "zero_below_median":False}}
-    max_workers: how many jobs to run in parallel / cores to use. default=None, which uses all available cores.
-    verbose: print out info as you go. Probably  messes with the progess bar. default=False
+    Autocontrast by field/channel, extract segmented objects from field, save output and log what happened
+    Args:
+        image_file_csv (str): csv file with list *absolute_paths* of max projects + seg file tiffs
+        channels_json (str): json file with channel identifiers {"name": index}
+        out_dir (str): where to save output images, default=None
+        image_dims (str): input image dimension ordering, default="CYX"
+        contrast_method (str): method for autocontrasting, default=="simple_quantile"
+        contrast_kwargs (dict): keyword args for autocontrast settings,
+            default={"fluor": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
+                     "bf": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
+                     "seg": {}}
+        channel_groups (dict): fluor/bf/seg grouping,
+            default={"fluor": ["488", "561", "638", "nuc"],
+                     "bf": ["bf"],
+                     "seg": ["seg488", "seg561", "seg638", "backmask", "cell"]}
+        max_workers (int): how many jobs to run in parallel / cores to use. default=None, which uses all available cores.
+        verbose (bool): print info while processing or not, default=False (True probably messes with the progess bar)
     """
 
     # save run parameters
@@ -75,12 +76,13 @@ def run(
     # partial function for iterating through files with map
     _field_worker_partial = partial(
         field_worker,
-        out_dir=out_dir,
-        channels=channels,
-        contrast_method=contrast_method,
-        verbose=verbose,
-        auto_contrast_kwargs=auto_contrast_kwargs,
         image_dims=image_dims,
+        out_dir=out_dir,
+        contrast_method=contrast_method,
+        contrast_kwargs=contrast_kwargs,
+        channels=channels,
+        channel_groups=channel_groups,
+        verbose=verbose,
     )
 
     # iterate in parallel

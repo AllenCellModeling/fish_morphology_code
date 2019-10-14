@@ -14,7 +14,8 @@ from skimage import img_as_ubyte, img_as_float64
 
 from aicsimageio import AICSImage
 
-CHANNELS = {
+
+DEFAULT_CHANNELS = {
     "bf": 0,
     "488": 1,
     "561": 2,
@@ -28,14 +29,14 @@ CHANNELS = {
 }
 
 
-CHANNEL_GROUPS = {
+DEFAULT_CHANNEL_GROUPS = {
     "fluor": ["488", "561", "638", "nuc"],
     "bf": ["bf"],
     "seg": ["seg488", "seg561", "seg638", "backmask", "cell"],
 }
 
 
-CONTRAST_KWARGS = {
+DEFAULT_CONTRAST_KWARGS = {
     "fluor": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
     "bf": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
     "seg": {},
@@ -49,13 +50,6 @@ def img_as_ubyte_nowarn(img):
     return img_out
 
 
-def rescale_intensity_nowarn(img):
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        img_out = rescale_intensity(img)
-    return img_out
-
-
 def _simple_quantile_constrast(
     im_array,
     clip_quantiles=[0.0, 0.999],
@@ -64,10 +58,13 @@ def _simple_quantile_constrast(
     **kwargs
 ):
     r"""
-    im_array: 2d np.array, usually dtype=uint16
-    clip_quantiles: where to set image intensity rescaling thresholds, default = clip_quantiles=[0.0,0.999]
-    zero_below_median: set pixels below the median pixel value equal to zero before rescaling intensity, default=False
-    verbose: print image info, default=False
+    Nonparametrically stretch the contrast of single channel image
+        im_array (np.array): 2D array, usually dtype=uint16
+        clip_quantiles (list): where to set image intensity rescaling thresholds, default=clip_quantiles=[0.0,0.999]
+        zero_below_median (bool): set pixels below the median pixel value equal to zero before rescaling intensity, default=False
+        verbose (bool): print info while processing or not, default=False
+    Returns:
+        out_array (np.array): 2D array, dtype=uint8
     """
 
     im = img_as_float64(im_array)
@@ -75,7 +72,7 @@ def _simple_quantile_constrast(
     im_clipped = np.clip(im, a_min=q_low, a_max=q_high)
     if zero_below_median:
         im_clipped[im_clipped < np.median(im_clipped)] = 0
-    return img_as_ubyte_nowarn(rescale_intensity_nowarn(im_clipped))
+    return img_as_ubyte_nowarn(rescale_intensity(im_clipped))
 
 
 def _imagej_rewrite_autocontrast(
@@ -87,17 +84,21 @@ def _imagej_rewrite_autocontrast(
     **kwargs
 ):
     r"""
-    im_array: 2d np.array, usually dtype=uint16
-    upper_limit_frac: the highest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the lower threshold for clipping the image, default=1/10
-    low_thresh_frac: the lowest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the upper threshold for clipping the image, default=1/5000
-    zero_high_count_pix: set all pixel values below (inclusive) the upper_limit_frac are set to zero, default=True
-    verbose: print image info, default=False
+    Imitation of imagej's autocontrast function
+    Args:
+        im_array (np.array): 2D array, usually dtype=uint16
+        upper_limit_frac (float): the highest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the lower threshold for clipping the image, default=1/10
+        low_thresh_frac (float): the lowest pixel value (in 8-bits) exceeding this fraction of all image pixels is used as the upper threshold for clipping the image, default=1/5000
+        zero_high_count_pix (bool): set all pixel values below (inclusive) the upper_limit_frac are set to zero, default=True
+        verbose (bool): print info while processing or not, default=False
+    Returns:
+        out_array (np.array): 2D array, dtype=uint8
     """
 
     # TODO don't convert to 8-bit and then stretch, stretch original image to get better sampling
 
     # convert to range 0,255 8-bit image if not already
-    im_array_n = img_as_ubyte(rescale_intensity(im_array))
+    im_array_n = img_as_ubyte_nowarn(rescale_intensity(im_array))
 
     # count number of nonzero pixels
     pixel_count = (im_array_n > 0).sum()
@@ -141,71 +142,28 @@ CONTRAST_METHOD = {
 }
 
 
-def read_and_contrast_image(
-    image_path,
-    channels=CHANNELS,
-    contrast_method="simple_quantile",
-    image_dims="CYX",
-    channel_groups=CHANNEL_GROUPS,
-    contrast_kwargs=CONTRAST_KWARGS,
-    verbose=False,
-):
-    r"""
-    Load an image from a file path, return two lists: max projects per channel,
-    and autocontrast versions of same.
-    Args:
-        image_path (str): location of input tiff image
-        channels (dict): {"channel_name":channel_index} map for input tiff
-        fluor_channels (list): list of channel names to be contrast stretched with
-        bf_channels (list): list of channel names to be contrast stretched
-        fluor_kwargs, default = {clip_quantiles:[0.0,0.999], zero_below_median:False}
-        bf_kwargs, default = {clip_quantiles:[0.00001, 0.99999], zero_below_median:False}
-        verbose (bool): print info while processing or not, default = False
-    Returns:
-        (Cmaxs, Cautos): tuple of two lists
-            - unadjusted maxprojects per channel
-            - stretched versions of same (for channels to be stretched, else unadjusted)
-    """
-
-    channel_types = dict((v, k) for k in channel_groups for v in channel_groups[k])
-
-    # set which contrast function we're using
-    contrast_fn = CONTRAST_METHOD[contrast_method]
-
-    # set which contrast method gets applied to images vs segmentations
-    contrast_fns = {
-        grp: contrast_fn if grp != "seg" else img_as_ubyte
-        for grp, kwds in contrast_kwargs.items()
-    }
-
-    # read in all data for image and check that channel dim is correct length and all labeled
-    im = AICSImage(image_path, known_dims=image_dims)
-    assert dict(zip(im.dims, im.data.shape))["C"] == len(channels)
-
-    # list of input max projects for each channels
-    Cmaxs = [im.get_image_data("YX", C=c) for c in sorted(channels.values())]
-
-    # auto contrast each channel according to what type of image it is
-    Cautos = [
-        contrast_fns[channel_types[c_name]](
-            Cmaxs[c_ind], **contrast_kwargs[channel_types[c_name]]
-        )
-        for (c_name, c_ind) in CHANNELS.items()
-    ]
-
-    return Cmaxs, Cautos
-
-
 def cell_worker(
     cell_label_value,
     Cautos=[],
     label_channel="cell",
     basename="unnamed_image_field",
     out_dir=None,
-    channels=CHANNELS,
+    channels=DEFAULT_CHANNELS,
     verbose=False,
 ):
-
+    r"""
+    segemtn single cells + save, log info to df
+    Args:
+        cell_label_value (int): integer mask value in segmentation for this cell,
+        Cautos (list): auto-contrasted images from single iimage field, default=[],
+        label_channel (str): name of channel to use as the image mask, default=="cell",
+        basename (str): naem of the input image field, default=="unnamed_image_field",
+        out_dir (str): where to save output images, default==None,
+        channels (dict): {"name":index} map for input tiff, default=DEFAULT_CHANNELS
+        verbose (bool): print info while processing or not, default=False
+    Returns:
+        cell_info_df (pd.DataFrame): info for each cell
+    """
     if out_dir is None:
         out_dir = Path.cwd()
     else:
@@ -231,9 +189,7 @@ def cell_worker(
         channel, c = row["channel_name"], row["channel_index"]
         cell_object_crop = Cautos[c][crop_slice]
         cell_object_crop = cell_object_crop * mask
-        cell_object_crop = img_as_ubyte_nowarn(
-            rescale_intensity_nowarn(cell_object_crop)
-        )
+        cell_object_crop = img_as_ubyte_nowarn(rescale_intensity(cell_object_crop))
 
         out_filename = "{0}_cell{1}_C{2}.png".format(
             basename, cell_label_value, channel
@@ -248,25 +204,90 @@ def cell_worker(
     return cell_info_df
 
 
-def field_worker(
-    filename,
-    out_dir=None,
-    channels=CHANNELS,
-    contrast_method="simple_quantile",
-    auto_contrast_kwargs={
-        "fluor_channels": ["488", "561", "638", "nuc"],
-        "bf_channels": ["bf"],
-        "fluor_kwargs": {"clip_quantiles": [0.0, 0.998], "zero_below_median": False},
-        "bf_kwargs": {"clip_quantiles": [0.00001, 0.99999], "zero_below_median": False},
-    },
+def read_and_contrast_image(
+    image_path,
     image_dims="CYX",
+    contrast_method="simple_quantile",
+    contrast_kwargs=DEFAULT_CONTRAST_KWARGS,
+    channels=DEFAULT_CHANNELS,
+    channel_groups=DEFAULT_CHANNEL_GROUPS,
     verbose=False,
 ):
+    r"""
+    Load an image from a file path, return two lists: max projects per channel,
+    and autocontrast versions of same.
+    Args:
+        image_path (str): location of input tiff image
+        image_dims (str): input image dimension ordering, default="CYX"
+        contrast_method (str): method for autocontrasting, default=="simple_quantile"
+        contrast_kwargs (dict):, default=DEFAULT_CONTRAST_KWARGS
+        channels (dict): {"name":index} map for input tiff, default=DEFAULT_CHANNELS
+        channel_groups (dict): fluor/bf/seg grouping, default=DEFAULT_CHANNEL_GROUPS
+        verbose (bool): print info while processing or not, default=False
+    Returns:
+        (Cmaxs, Cautos): tuple of two lists
+            - unadjusted maxprojects per channel
+            - stretched versions of same (for channels to be stretched, else unadjusted)
+    """
+
+    channel_types = dict((v, k) for k in channel_groups for v in channel_groups[k])
+
+    # set which contrast function we're using
+    contrast_fn = CONTRAST_METHOD[contrast_method]
+
+    # set which contrast method gets applied to images vs segmentations
+    contrast_fns = {
+        grp: contrast_fn if grp != "seg" else img_as_ubyte_nowarn
+        for grp, kwds in contrast_kwargs.items()
+    }
+
+    # read in all data for image and check that channel dim is correct length and all labeled
+    im = AICSImage(image_path, known_dims=image_dims)
+    assert dict(zip(im.dims, im.data.shape))["C"] == len(channels)
+
+    # list of input max projects for each channels
+    Cmaxs = [im.get_image_data("YX", C=c) for c in sorted(channels.values())]
+
+    # auto contrast each channel according to what type of image it is
+    Cautos = [
+        contrast_fns[channel_types[c_name]](
+            Cmaxs[c_ind], **contrast_kwargs[channel_types[c_name]]
+        )
+        for (c_name, c_ind) in channels.items()
+    ]
+
+    return Cmaxs, Cautos
+
+
+def field_worker(
+    image_path,
+    image_dims="CYX",
+    out_dir=None,
+    contrast_method="simple_quantile",
+    contrast_kwargs=DEFAULT_CONTRAST_KWARGS,
+    channels=DEFAULT_CHANNELS,
+    channel_groups=DEFAULT_CHANNEL_GROUPS,
+    verbose=False,
+):
+    r"""
+    Process an entire field -- autocontrast + save, log info to df
+    Args:
+        image_path (str): location of input tiff image
+        image_dims (str): input image dimension ordering, default="CYX"
+        out_dir (str): where to save output images, default=None
+        contrast_method (str): method for autocontrasting, default=="simple_quantile"
+        contrast_kwargs (dict):, default=DEFAULT_CONTRAST_KWARGS
+        channels (dict): {"name":index} map for input tiff, default=DEFAULT_CHANNELS
+        channel_groups (dict): fluor/bf/seg grouping, default=DEFAULT_CHANNEL_GROUPS
+        verbose (bool): print info while processing or not, default=False
+    Returns:
+        field_info_df (pd.DataFrame): info for each field, merged with info for each cell
+    """
 
     # early exit if file does not exist -- return df of just
-    filepath = Path(filename)
-    if not filepath.is_file():
-        return pd.DataFrame({"field_image_path": [filepath]})
+    image_path = Path(image_path)
+    if not image_path.is_file():
+        return pd.DataFrame({"field_image_path": [image_path]})
 
     # set out dir if needed
     if out_dir is None:
@@ -280,11 +301,12 @@ def field_worker(
 
     # contrast stretch the field channels
     Cmaxs, Cautos = read_and_contrast_image(
-        filename,
-        verbose=verbose,
-        image_dims=image_dims,
+        image_path,
         contrast_method=contrast_method,
-        **auto_contrast_kwargs
+        contrast_kwargs=contrast_kwargs,
+        channel_groups=channel_groups,
+        image_dims=image_dims,
+        verbose=verbose,
     )
 
     # save original and rescaled field data
@@ -296,9 +318,9 @@ def field_worker(
     field_info_df["field_image_path"] = ""
     field_info_df["rescaled_field_image_path"] = ""
     for i, row in field_info_df.iterrows():
-        field_info_df.at[i, "field_image_path"] = filename
+        field_info_df.at[i, "field_image_path"] = image_path
         rescaled_field_channel_out_path = output_field_image_dir.joinpath(
-            "{0}_C{1}.png".format(filepath.stem, row["channel_name"])
+            "{0}_C{1}.png".format(image_path.stem, row["channel_name"])
         )
         field_info_df.at[
             i, "rescaled_field_image_path"
@@ -312,7 +334,7 @@ def field_worker(
     assert (cell_labels[0], cell_labels[-1]) == (1, len(cell_labels))
 
     if verbose:
-        print("processing {}".format(filename))
+        print("processing {}".format(image_path))
         print("found {} segmented cells".format(len(cell_labels)))
 
     # partial function for iterating over all cells in an image with map
@@ -320,7 +342,7 @@ def field_worker(
         cell_worker,
         Cautos=Cautos,
         label_channel="cell",
-        basename=filepath.stem,
+        basename=image_path.stem,
         out_dir=out_dir,
         channels=channels,
         verbose=verbose,
@@ -332,7 +354,7 @@ def field_worker(
     )
 
     # merge cell-wise data into field-wise data
-    all_cell_info_df["field_image_path"] = filename
+    all_cell_info_df["field_image_path"] = image_path
     field_info_df = field_info_df.merge(all_cell_info_df, how="inner")
 
     return field_info_df
