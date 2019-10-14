@@ -152,7 +152,7 @@ def cell_worker(
     verbose=False,
 ):
     r"""
-    segemtn single cells + save, log info to df
+    segment single cells + save, log info to df
     Args:
         cell_label_value (int): integer mask value in segmentation for this cell,
         Cautos (list): auto-contrasted images from single iimage field, default=[],
