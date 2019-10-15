@@ -8,11 +8,11 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
-import imageio
 from skimage.exposure import rescale_intensity, histogram
 from skimage import img_as_ubyte, img_as_float64
 
-from aicsimageio import AICSImage
+from aicsimageio import AICSImage, transforms
+from aicsimageio.writers import OmeTiffWriter
 
 
 DEFAULT_CHANNELS = {
@@ -55,7 +55,7 @@ def _simple_quantile_constrast(
     clip_quantiles=[0.0, 0.999],
     zero_below_median=False,
     verbose=False,
-    **kwargs
+    **kwargs,
 ):
     r"""
     Nonparametrically stretch the contrast of single channel image
@@ -81,7 +81,7 @@ def _imagej_rewrite_autocontrast(
     low_thresh_frac=1 / 5000,
     zero_high_count_pix=True,
     verbose=False,
-    **kwargs
+    **kwargs,
 ):
     r"""
     Imitation of imagej's autocontrast function
@@ -125,13 +125,11 @@ def _imagej_rewrite_autocontrast(
     out_array = rescale_intensity(im_array_n, in_range=(low_thresh, high_thresh))
 
     if verbose:
-        print("inpput array shape is {}".format(im_array.shape))
+        print(f"inpput array shape is {im_array.shape}")
         print(
-            "low_thresh = {}, high_thresh = {}, im_array_n.min()={}".format(
-                low_thresh, high_thresh, np.min(im_array_n)
-            )
+            f"low_thresh = {low_thresh}, high_thresh = {high_thresh}, im_array_n.min()={np.min(im_array_n)}"
         )
-        print("out array shape is {}".format(out_array.shape))
+        print(f"out array shape is {out_array.shape}")
 
     return out_array
 
@@ -146,7 +144,7 @@ def cell_worker(
     cell_label_value,
     Cautos=[],
     label_channel="cell",
-    basename="unnamed_image_field",
+    field_image_path="unnamed_image_field.tiff",
     out_dir=None,
     channels=DEFAULT_CHANNELS,
     verbose=False,
@@ -157,49 +155,57 @@ def cell_worker(
         cell_label_value (int): integer mask value in segmentation for this cell,
         Cautos (list): auto-contrasted images from single iimage field, default=[],
         label_channel (str): name of channel to use as the image mask, default=="cell",
-        basename (str): naem of the input image field, default=="unnamed_image_field",
+        field_image_path (str): location of input tiff imagee field, default=="unnamed_image_field.tiff",
         out_dir (str): where to save output images, default==None,
         channels (dict): {"name":index} map for input tiff, default=DEFAULT_CHANNELS
         verbose (bool): print info while processing or not, default=False
     Returns:
         cell_info_df (pd.DataFrame): info for each cell
     """
+
+    field_image_path = Path(field_image_path)
+
     if out_dir is None:
         out_dir = Path.cwd()
     else:
         out_dir = Path(out_dir)
+    out_dir = out_dir.absolute()
 
     img_out_dir = out_dir.joinpath("output_single_cell_images")
     img_out_dir.mkdir(exist_ok=True)
 
+    # crop to single cell boundaries
     label_image = Cautos[channels[label_channel]]
     y, x = np.where(label_image == cell_label_value)
     crop_slice = np.s_[min(y) : max(y) + 1, min(x) : max(x) + 1]
     label_crop = label_image[crop_slice]
     mask = (label_crop == cell_label_value).astype(np.float64)
-
-    cell_info_df = pd.DataFrame.from_records(
-        list(channels.items()), columns=["channel_name", "channel_index"]
+    out_data_sc = np.array(
+        [img_as_ubyte_nowarn(rescale_intensity(c[crop_slice] * mask)) for c in Cautos]
     )
-    cell_info_df["field_image_name"] = basename
-    cell_info_df["cell_label_value"] = cell_label_value
-    cell_info_df["single_cell_channel_output_path"] = ""
 
-    for i, row in cell_info_df.iterrows():
-        channel, c = row["channel_name"], row["channel_index"]
-        cell_object_crop = Cautos[c][crop_slice]
-        cell_object_crop = cell_object_crop * mask
-        cell_object_crop = img_as_ubyte_nowarn(rescale_intensity(cell_object_crop))
+    # Reshape prior to sending to save
+    out_data_sc = transforms.reshape_data(out_data_sc, "CYX", "TZCYX", S=0)
 
-        out_filename = "{0}_cell{1}_C{2}.png".format(
-            basename, cell_label_value, channel
-        )
-        out_path = img_out_dir.joinpath(out_filename)
-        imageio.imwrite(out_path, cell_object_crop)
-        cell_info_df.at[i, "single_cell_channel_output_path"] = out_path
+    # save input field path, cell label value, and output single cell path
+    out_image_path = img_out_dir.joinpath(
+        f"{field_image_path.stem}_rescaled_cell{cell_label_value}.ome.tiff"
+    )
+    cell_info_df = pd.DataFrame(
+        {
+            "field_image_path": [field_image_path],
+            "cell_label_value": [cell_label_value],
+            "single_cell_channel_output_path": [out_image_path],
+        }
+    )
+
+    # Write tiff with channel metadata
+    channel_names = [k for k, v in sorted(channels.items(), key=lambda kv: kv[1])]
+    with OmeTiffWriter(out_image_path, overwrite_file=True) as writer:
+        writer.save(out_data_sc, channel_names=channel_names)
 
     if verbose:
-        print("cell_label_value = {}".format(cell_label_value))
+        print(f"cell_label_value = {cell_label_value}")
 
     return cell_info_df
 
@@ -230,7 +236,7 @@ def read_and_contrast_image(
             - stretched versions of same (for channels to be stretched, else unadjusted)
     """
 
-    channel_types = dict((v, k) for k in channel_groups for v in channel_groups[k])
+    channel_types = {c: g for g, ms in channel_groups.items() for c in ms}
 
     # set which contrast function we're using
     contrast_fn = CONTRAST_METHOD[contrast_method]
@@ -294,6 +300,7 @@ def field_worker(
         out_dir = Path.cwd()
     else:
         out_dir = Path(out_dir)
+    out_dir = out_dir.absolute()
 
     # set out dir for rescaled images and create if needed
     output_field_image_dir = out_dir.joinpath("output_field_images")
@@ -310,22 +317,24 @@ def field_worker(
     )
 
     # save original and rescaled field data
-    field_info_df = pd.DataFrame.from_records(
-        list(channels.items()), columns=["channel_name", "channel_index"]
+    rescaled_out_path = output_field_image_dir.joinpath(
+        f"{image_path.stem}_rescaled.ome.tiff"
+    )
+    field_info_df = pd.DataFrame(
+        {
+            "field_image_path": [image_path],
+            "rescaled_field_image_path": [rescaled_out_path],
+        }
     )
 
-    # save field level metadate to df
-    field_info_df["field_image_path"] = ""
-    field_info_df["rescaled_field_image_path"] = ""
-    for i, row in field_info_df.iterrows():
-        field_info_df.at[i, "field_image_path"] = image_path
-        rescaled_field_channel_out_path = output_field_image_dir.joinpath(
-            "{0}_C{1}.png".format(image_path.stem, row["channel_name"])
-        )
-        field_info_df.at[
-            i, "rescaled_field_image_path"
-        ] = rescaled_field_channel_out_path
-        imageio.imwrite(rescaled_field_channel_out_path, Cautos[row["channel_index"]])
+    # Reshape prior to sending to save
+    out_data = np.array(Cautos)
+    out_data = transforms.reshape_data(out_data, "CYX", "TZCYX", S=0)
+
+    # Write with channel metadata
+    channel_names = [k for k, v in sorted(channels.items(), key=lambda kv: kv[1])]
+    with OmeTiffWriter(rescaled_out_path, overwrite_file=True) as writer:
+        writer.save(out_data, channel_names=channel_names)
 
     # extract napari annotation channel and grab unique labels for cells
     label_image = Cautos[channels["cell"]]
@@ -334,15 +343,15 @@ def field_worker(
     assert (cell_labels[0], cell_labels[-1]) == (1, len(cell_labels))
 
     if verbose:
-        print("processing {}".format(image_path))
-        print("found {} segmented cells".format(len(cell_labels)))
+        print(f"processing {image_path}")
+        print(f"found {len(cell_labels)} segmented cells")
 
     # partial function for iterating over all cells in an image with map
     _cell_worker_partial = partial(
         cell_worker,
         Cautos=Cautos,
         label_channel="cell",
-        basename=image_path.stem,
+        field_image_path=image_path,
         out_dir=out_dir,
         channels=channels,
         verbose=verbose,

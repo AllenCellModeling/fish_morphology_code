@@ -55,6 +55,7 @@ def run(
         out_dir = Path.cwd()
     else:
         out_dir = Path(out_dir)
+    out_dir = out_dir.absolute()
     out_dir.mkdir(exist_ok=True)
 
     # write run parameters
@@ -71,7 +72,7 @@ def run(
 
     # print task info
     if verbose:
-        print("found {} image fields -- beginging processing".format(len(file_names)))
+        print(f"found {len(file_names)} image fields -- beginging processing")
 
     # partial function for iterating through files with map
     _field_worker_partial = partial(
@@ -100,11 +101,8 @@ def run(
 
     # reorder dataframe columns
     ordered_cols = [
-        "field_image_name",
         "field_image_path",
         "rescaled_field_image_path",
-        "channel_name",
-        "channel_index",
         "cell_label_value",
         "single_cell_channel_output_path",
     ]
