@@ -230,7 +230,7 @@ def read_and_contrast_image(
             - stretched versions of same (for channels to be stretched, else unadjusted)
     """
 
-    channel_types = dict((v, k) for k in channel_groups for v in channel_groups[k])
+    channel_types = {c: g for g, ms in channel_groups.items() for c in ms}
 
     # set which contrast function we're using
     contrast_fn = CONTRAST_METHOD[contrast_method]
