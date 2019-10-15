@@ -330,7 +330,7 @@ def field_worker(
     )
 
     # Reshape prior to sending to save
-    out_data = np.array(Cmaxs)
+    out_data = np.array(Cautos)
     out_data = transforms.reshape_data(out_data, "CYX", "TZCYX", S=0)
 
     # Write with channel metadata
