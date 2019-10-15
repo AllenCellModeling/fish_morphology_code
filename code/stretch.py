@@ -55,6 +55,7 @@ def run(
         out_dir = Path.cwd()
     else:
         out_dir = Path(out_dir)
+    out_dir = out_dir.absolute()
     out_dir.mkdir(exist_ok=True)
 
     # write run parameters

@@ -171,6 +171,7 @@ def cell_worker(
         out_dir = Path.cwd()
     else:
         out_dir = Path(out_dir)
+    out_dir = out_dir.absolute()
 
     img_out_dir = out_dir.joinpath("output_single_cell_images")
     img_out_dir.mkdir(exist_ok=True)
@@ -301,6 +302,7 @@ def field_worker(
         out_dir = Path.cwd()
     else:
         out_dir = Path(out_dir)
+    out_dir = out_dir.absolute()
 
     # set out dir for rescaled images and create if needed
     output_field_image_dir = out_dir.joinpath("output_field_images")
