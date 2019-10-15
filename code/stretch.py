@@ -72,7 +72,7 @@ def run(
 
     # print task info
     if verbose:
-        print("found {} image fields -- beginging processing".format(len(file_names)))
+        print(f"found {len(file_names)} image fields -- beginging processing")
 
     # partial function for iterating through files with map
     _field_worker_partial = partial(

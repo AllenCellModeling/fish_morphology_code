@@ -125,13 +125,11 @@ def _imagej_rewrite_autocontrast(
     out_array = rescale_intensity(im_array_n, in_range=(low_thresh, high_thresh))
 
     if verbose:
-        print("inpput array shape is {}".format(im_array.shape))
+        print(f"inpput array shape is {im_array.shape}")
         print(
-            "low_thresh = {}, high_thresh = {}, im_array_n.min()={}".format(
-                low_thresh, high_thresh, np.min(im_array_n)
-            )
+            f"low_thresh = {low_thresh}, high_thresh = {high_thresh}, im_array_n.min()={np.min(im_array_n)}"
         )
-        print("out array shape is {}".format(out_array.shape))
+        print(f"out array shape is {out_array.shape}")
 
     return out_array
 
@@ -207,7 +205,7 @@ def cell_worker(
         writer.save(out_data_sc, channel_names=channel_names)
 
     if verbose:
-        print("cell_label_value = {}".format(cell_label_value))
+        print(f"cell_label_value = {cell_label_value}")
 
     return cell_info_df
 
@@ -345,8 +343,8 @@ def field_worker(
     assert (cell_labels[0], cell_labels[-1]) == (1, len(cell_labels))
 
     if verbose:
-        print("processing {}".format(image_path))
-        print("found {} segmented cells".format(len(cell_labels)))
+        print(f"processing {image_path}")
+        print(f"found {len(cell_labels)} segmented cells")
 
     # partial function for iterating over all cells in an image with map
     _cell_worker_partial = partial(
