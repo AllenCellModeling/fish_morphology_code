@@ -100,11 +100,8 @@ def run(
 
     # reorder dataframe columns
     ordered_cols = [
-        "field_image_name",
         "field_image_path",
         "rescaled_field_image_path",
-        "channel_name",
-        "channel_index",
         "cell_label_value",
         "single_cell_channel_output_path",
     ]
