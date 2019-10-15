@@ -37,7 +37,10 @@ Direct commits to master should be disabled, but if not please don't push commit
 
 ## Running the code
 
-One day...
+To run the image normalization code, from the main repo dir:
+```
+python code/stretch.py data/input_segs_and_tiffs/raw_seg_013_014_images.csv data/channel_defs.json --out_dir=/allen/aics/modeling/data/cardio_fish/normalized_2D_tiffs
+```
 
 ## Running the tests
 
