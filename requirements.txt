@@ -1,8 +1,8 @@
-aicsimageio>=0.6.4
+aicsimageio>=3.0.2
 fire>=0.2.1
-imageio>=2.5
-numpy>=1.17
-pandas>=0.25
-scikit-image>=0.15
-tqdm>=4.32.2
+imageio>=2.6.1
+numpy>=1.17.2
+pandas>=0.25.1
+scikit-image>=0.16.1
+tqdm>=4.36.1
 

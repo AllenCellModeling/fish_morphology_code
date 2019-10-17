@@ -1,5 +1,6 @@
 /test/output_data*
 
+.nfs*
 .DS_Store
 *.ipynb
 
