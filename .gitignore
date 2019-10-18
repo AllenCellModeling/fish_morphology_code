@@ -1,4 +1,4 @@
-/test/output_data*
+output_data/
 
 .nfs*
 .DS_Store
