@@ -39,22 +39,22 @@ Direct commits to master should be disabled, but if not please don't push commit
 
 To run the image normalization code, from the main repo dir:
 ```
-python code/stretch.py data/input_segs_and_tiffs/raw_seg_013_014_images.csv data/channel_defs.json --out_dir=/allen/aics/modeling/data/cardio_fish/normalized_2D_tiffs
+python fish_morphology/processing/auto_contrast/stretch.py data/input_segs_and_tiffs/raw_seg_013_014_images.csv data/channel_defs.json --out_dir=/allen/aics/modeling/data/cardio_fish/normalized_2D_tiffs
 ```
 
 ## Running the tests
 
 ### Image normalization
 
-To run with mostly default settings, this should work (only with access to `/allen/aics`):
+To run with mostly default settings, from `fish_morphology/tests/` (only with access to `/allen/aics`):
 ```
-python code/stretch.py test/input_data/input_tiffs.csv test/input_data/channel_defs.json --out_dir=test/output_data/
+./test.sh
 ```
 
 ## Bare minimum contents contains:
 
-- [ ] manifest of the locations of original image data + segmentations
-- [ ] script for taking original images and generating 2D normalized images
+- [x] manifest of the locations of original image data + segmentations
+- [x] script for taking original images and generating 2D normalized images
 - [x] structure annotations for each segmented cell
 - [ ] text-ish version of cellprofiler workflow to generate single cell segmentations and features from image data + segmentations
 
