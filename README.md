@@ -47,14 +47,14 @@ For full package documentation please visit [AllenCellModeling.github.io/fish_mo
 
 To run the image normalization code, from the main repo dir:
 ```
-python fish_morphology/processing/auto_contrast/stretch.py data/input_segs_and_tiffs/raw_seg_013_014_images.csv data/channel_defs.json --out_dir=/allen/aics/modeling/data/cardio_fish/normalized_2D_tiffs
+python fish_morphology_code/processing/auto_contrast/stretch.py data/input_segs_and_tiffs/raw_seg_013_014_images.csv data/channel_defs.json --out_dir=/allen/aics/modeling/data/cardio_fish/normalized_2D_tiffs
 ```
 
 ## Running the tests
 
 ### Image normalization
 
-To run with mostly default settings, from `fish_morphology/tests/` (only with access to `/allen/aics`):
+To run with mostly default settings, from `fish_morphology_code/tests/` (only with access to `/allen/aics`):
 ```
 ./test.sh
 ```
