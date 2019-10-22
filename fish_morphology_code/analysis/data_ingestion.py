@@ -5,6 +5,7 @@ import pandas as pd
 
 COLUMN_GROUPS = {
     "score": ["mh_score", "kg_score"],
+    "loc_score": ["probe_561_loc_score", "probe_638_loc_score"],
     "required_feats": ["nuc_AreaShape_Area", "cell_napari_AreaShape_Area"],
     "metadata": [
         "ImageNumber",
@@ -56,7 +57,7 @@ def drop_bad_struct_scores(df, exclude_scores=[-1, 0]):
     ].reset_index(drop=True)
 
 
-def get_probe_pairs(df, probe_name_cols=["probe_561", "probe_638"]):
+def get_probe_pairs(df, probe_name_cols=COLUMN_GROUPS["loc_score"]):
     """unique probe pairs in dataset"""
     return list(list(x) for x in df[probe_name_cols].drop_duplicates().values)
 
