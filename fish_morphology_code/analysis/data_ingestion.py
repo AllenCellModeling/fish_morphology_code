@@ -3,6 +3,9 @@ import itertools
 import numpy as np
 import pandas as pd
 
+from sklearn.model_selection import train_test_split
+from sklearn.feature_selection import VarianceThreshold
+
 COLUMN_GROUPS = {
     "struct_score": ["mh_score", "kg_score"],
     "loc_score": ["probe_561_loc_score", "probe_638_loc_score"],
@@ -115,3 +118,76 @@ def subset_to_probe_pair(df, probe_pair=["MYH6", "MYH7"]):
     return df[np.all(df[["probe_561", "probe_638"]] == probe_pair, axis=1)].reset_index(
         drop=True
     )
+
+
+def get_feat_col_groups(df, prune_loc_feats=True):
+    """get dict of col names corresponding to different types of features"""
+
+    all_non_metadata_cols = [
+        c for c in df.columns if c not in COLUMN_GROUPS["metadata"]
+    ]
+
+    feat_cols = {
+        "probe_561": [c for c in all_non_metadata_cols if "probe_561" in c],
+        "probe_638": [c for c in all_non_metadata_cols if "probe_638" in c],
+        "nuc_shape": [c for c in all_non_metadata_cols if "nuc_AreaShape" in c],
+        "nuc_texture": [c for c in all_non_metadata_cols if "nuc_Texture" in c],
+        "cell_shape": [
+            c for c in all_non_metadata_cols if "cell_napari_AreaShape" in c
+        ],
+        "cell_texture": [
+            c for c in all_non_metadata_cols if "cell_napari_Texture" in c
+        ],
+    }
+    feat_cols["morphological"] = (
+        feat_cols["nuc_shape"]
+        + feat_cols["nuc_texture"]
+        + feat_cols["cell_shape"]
+        + feat_cols["cell_texture"]
+    )
+
+    if prune_loc_feats:
+        feat_cols = {
+            k: [c for c in v if not any([f"Center_{s}" in c for s in ["X", "Y", "Z"]])]
+            for k, v in feat_cols.items()
+        }
+
+    return feat_cols
+
+
+def split_data(df, stratify_on="kg_score", random_state=0, test_size=0.25):
+    """splits df and returns dict of inds/dfs for test and train split"""
+    inds = np.arange(len(df))
+    inds_train, inds_test, _, _ = train_test_split(
+        inds,
+        df,
+        test_size=test_size,
+        random_state=random_state,
+        stratify=df[stratify_on],
+    )
+    return {
+        "dfs": {
+            "train": df.loc[inds_train, :].reset_index(drop=True),
+            "test": df.loc[inds_test, :].reset_index(drop=True),
+        },
+        "indices": {"train": inds_train, "test": inds_test},
+    }
+
+
+def check_low_var_cols(df_train):
+    """for each probe pair check that no cols are zero variance"""
+    feat_cols = get_feat_col_groups(df_train)
+    my_feats = [
+        e
+        for k, v in feat_cols.items()
+        for e in v
+        if e not in COLUMN_GROUPS["loc_score"]
+    ]
+
+    probe_pairs = get_probe_pairs(df_train)
+    for probe_pair in probe_pairs:
+        df_pp = subset_to_probe_pair(probe_pair)
+
+        selector = VarianceThreshold()
+        selector.fit(df_pp[my_feats])
+        assert np.all(selector.get_support())
