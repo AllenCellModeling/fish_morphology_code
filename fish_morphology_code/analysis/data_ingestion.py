@@ -61,7 +61,7 @@ def get_probe_pairs(df, probe_name_cols=["probe_561", "probe_638"]):
     return list(list(x) for x in df[probe_name_cols].drop_duplicates().values)
 
 
-def clean_up_scores(
+def clean_up_loc_scores(
     df,
     probe_loc_cols=["probe_561_loc_score", "probe_638_loc_score"],
     ints=["0", "1", "2", "3"],
