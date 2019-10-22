@@ -1,5 +1,6 @@
 import itertools
 
+import numpy as np
 import pandas as pd
 
 COLUMN_GROUPS = {
@@ -53,3 +54,37 @@ def drop_bad_struct_scores(df, exclude_scores=[-1, 0]):
     return df[
         (~df[COLUMN_GROUPS["score"]].isin(exclude_scores)).all(axis="columns")
     ].reset_index(drop=True)
+
+
+def get_probe_pairs(df, probe_name_cols=["probe_561", "probe_638"]):
+    """unique probe pairs in dataset"""
+    return list(list(x) for x in df[probe_name_cols].drop_duplicates().values)
+
+
+def clean_up_scores(
+    df,
+    probe_loc_cols=["probe_561_loc_score", "probe_638_loc_score"],
+    ints=["0", "1", "2", "3"],
+    nans=[" ", "b", "n", "N", np.nan],
+    threes2twos=True,
+):
+    """
+    look at probe_loc_cols and map some scores to nans and others to ints
+    threes2twos sets threes to twos, which becky and kaytlyn advised
+    """
+
+    loc_scores = list(
+        set(x for l in [list(df[col].unique()) for col in probe_loc_cols] for x in l)
+    )
+
+    d_nan = {k: np.nan for k in loc_scores if k in nans}
+    d_int = {k: int(k) for k in loc_scores if k in ints}
+    if threes2twos:
+        d_int["3"] = 2  # becky said ignore 3s and call them 2s
+    d_map = {**d_nan, **d_int}
+
+    df_out = df.copy()
+    for col in probe_loc_cols:
+        df_out[col] = df[col].map(d_map)
+
+    return df_out
