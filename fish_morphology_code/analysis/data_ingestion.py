@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 COLUMN_GROUPS = {
-    "score": ["mh_score", "kg_score"],
+    "struct_score": ["mh_score", "kg_score"],
     "loc_score": ["probe_561_loc_score", "probe_638_loc_score"],
     "required_feats": ["nuc_AreaShape_Area", "cell_napari_AreaShape_Area"],
     "metadata": [
@@ -45,7 +45,14 @@ def prune_data(
     return df.drop(drop_cols, axis="columns")
 
 
-def drop_rows_with_nans(df, nonan_cols=list(itertools.chain(*COLUMN_GROUPS.values()))):
+def drop_rows_with_nans(
+    df,
+    nonan_cols=list(
+        itertools.chain(
+            [e for k, v in COLUMN_GROUPS.items() if k != "loc_score" for e in v]
+        )
+    ),
+):
     """drop rows with values missing in those cols"""
     return df.dropna(subset=nonan_cols, axis="rows").reset_index(drop=True)
 
@@ -53,11 +60,11 @@ def drop_rows_with_nans(df, nonan_cols=list(itertools.chain(*COLUMN_GROUPS.value
 def drop_bad_struct_scores(df, exclude_scores=[-1, 0]):
     """-1 is a bad cell and 0 was non expressing i think?"""
     return df[
-        (~df[COLUMN_GROUPS["score"]].isin(exclude_scores)).all(axis="columns")
+        (~df[COLUMN_GROUPS["struct_score"]].isin(exclude_scores)).all(axis="columns")
     ].reset_index(drop=True)
 
 
-def get_probe_pairs(df, probe_name_cols=COLUMN_GROUPS["loc_score"]):
+def get_probe_pairs(df, probe_name_cols=["probe_561", "probe_638"]):
     """unique probe pairs in dataset"""
     return list(list(x) for x in df[probe_name_cols].drop_duplicates().values)
 
@@ -89,3 +96,22 @@ def clean_up_loc_scores(
         df_out[col] = df[col].map(d_map)
 
     return df_out
+
+
+def remap_struct_scores(
+    df,
+    struct_score_cols=COLUMN_GROUPS["struct_score"],
+    map_dict={1: 1, 2: 1, 3: 2, 4: 3, 5: 3},
+):
+    """remap structure scores from 1:5 to 1:3 or whatever"""
+    df_out = df.copy()
+    for col in struct_score_cols:
+        df_out[col] = df_out[col].map(map_dict)
+    return df_out
+
+
+def subset_to_probe_pair(df, probe_pair=["MYH6", "MYH7"]):
+    """subset the df to only a certain probe pair"""
+    return df[np.all(df[["probe_561", "probe_638"]] == probe_pair, axis=1)].reset_index(
+        drop=True
+    )
