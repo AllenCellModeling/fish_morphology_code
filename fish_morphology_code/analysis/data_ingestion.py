@@ -5,6 +5,7 @@ import pandas as pd
 
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import VarianceThreshold
+from sklearn.preprocessing import StandardScaler
 
 COLUMN_GROUPS = {
     "struct_score": ["mh_score", "kg_score"],
@@ -127,7 +128,7 @@ def subset_to_probe_pair(df, probe_pair=["MYH6", "MYH7"]):
     )
 
 
-def get_feat_col_groups(df, prune_loc_feats=True):
+def get_feat_col_groups(df, extended_probe_feats=False, prune_loc_feats=True):
     """get dict of col names corresponding to different types of features"""
 
     all_non_metadata_cols = [
@@ -135,8 +136,6 @@ def get_feat_col_groups(df, prune_loc_feats=True):
     ]
 
     feat_cols = {
-        "probe_561": [c for c in all_non_metadata_cols if "probe_561" in c],
-        "probe_638": [c for c in all_non_metadata_cols if "probe_638" in c],
         "nuc_shape": [c for c in all_non_metadata_cols if "nuc_AreaShape" in c],
         "nuc_texture": [c for c in all_non_metadata_cols if "nuc_Texture" in c],
         "cell_shape": [
@@ -152,6 +151,25 @@ def get_feat_col_groups(df, prune_loc_feats=True):
         + feat_cols["cell_shape"]
         + feat_cols["cell_texture"]
     )
+
+    if extended_probe_feats:
+        feat_cols = {
+            **feat_cols,
+            "probe_561": [c for c in all_non_metadata_cols if "probe_561" in c],
+            "probe_638": [c for c in all_non_metadata_cols if "probe_638" in c],
+        }
+    else:
+        feat_cols = {
+            **feat_cols,
+            "probe_561": [
+                "nuc_Children_seg_probe_561_Count",
+                "cell_napari_Children_seg_probe_561_Count",
+            ],
+            "probe_638": [
+                "nuc_Children_seg_probe_638_Count",
+                "cell_napari_Children_seg_probe_638_Count",
+            ],
+        }
 
     if prune_loc_feats:
         feat_cols = {
@@ -220,3 +238,57 @@ def drop_zernike_fish_feats(
     "these are mostly nans"
     cols = [f for f in df.columns if any([x in f for x in feat_patterns])]
     return df.drop(cols, axis="columns")
+
+
+def replace_nans(dfs, replace_with=0):
+    """
+    i think most of these are divide by zero errors for no spots.
+    needed for training classifiers.
+    """
+    return {k: v.fillna(replace_with) for k, v in dfs.items()}
+
+
+def remove_low_var_feat_cols(dfs, threshold=0.0):
+    """
+    checks train df for low/zero var feature cols and removes them from both test and train dfs.
+    each check is done independently for each probe pairs, cols with low var in any subset are removed from all.
+    """
+    feat_cols = [
+        e
+        for g, l in get_feat_col_groups(dfs["train"]).items()
+        for e in l
+        if e not in COLUMN_GROUPS["loc_score"]
+    ]
+
+    drop_cols = set()
+    probe_pairs = get_probe_pairs(dfs["train"])
+    for probe_pair in probe_pairs:
+        df_pp = subset_to_probe_pair(dfs["train"], probe_pair)
+
+        selector = VarianceThreshold(threshold=threshold)
+        selector.fit(df_pp[feat_cols])
+        drop_cols |= set(df_pp[feat_cols].columns[~selector.get_support()])
+
+    return {k: v.drop(drop_cols, axis="columns") for k, v in dfs.items()}
+
+
+def z_score_feats(dfs):
+    """z-score train and test feat data based on train params, return params as well as scaled dfs"""
+    feat_cols = set(
+        [
+            e
+            for g, l in get_feat_col_groups(dfs["train"]).items()
+            for e in l
+            if e not in COLUMN_GROUPS["loc_score"]
+        ]
+    )
+    scaler = StandardScaler().fit(dfs["train"][feat_cols])
+    dfs_s = {
+        k: pd.DataFrame(scaler.transform(v[feat_cols]), columns=feat_cols)
+        for k, v in dfs.items()
+    }
+    dfs_out = {k: v.copy() for k, v in dfs.items()}
+    for k, v in dfs_s.items():
+        dfs_out[k].update(v)
+
+    return dfs_out, {"means": scaler.mean_, "scales": scaler.scale_}
