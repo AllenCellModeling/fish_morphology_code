@@ -193,6 +193,16 @@ def check_low_var_cols(df_train):
         assert np.all(selector.get_support())
 
 
+def drop_xyz_locs(df):
+    """xyz positions in field shouldn't matter to single cell stats"""
+    cols = [
+        c
+        for c in df.columns
+        if any(x in c for x in ["Center_X", "Center_Y", "Center_Z"])
+    ]
+    return df.drop(cols, axis="columns")
+
+
 def drop_zernike_fish_feats(
     df,
     feat_patterns=[
