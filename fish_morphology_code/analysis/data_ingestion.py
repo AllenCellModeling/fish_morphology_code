@@ -9,7 +9,14 @@ from sklearn.feature_selection import VarianceThreshold
 COLUMN_GROUPS = {
     "struct_score": ["mh_score", "kg_score"],
     "loc_score": ["probe_561_loc_score", "probe_638_loc_score"],
-    "required_feats": ["nuc_AreaShape_Area", "cell_napari_AreaShape_Area"],
+    "required_feats": [
+        "nuc_AreaShape_Area",
+        "cell_napari_AreaShape_Area",
+        "nuc_Children_seg_probe_561_Count",
+        "nuc_Children_seg_probe_638_Count",
+        "cell_napari_Children_seg_probe_561_Count",
+        "cell_napari_Children_seg_probe_638_Count",
+    ],
     "metadata": [
         "ImageNumber",
         "FileName_bf",
