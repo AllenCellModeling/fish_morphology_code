@@ -44,7 +44,7 @@ def prune_data(
         "cell_napari_AreaShape_EulerNumber",
     ],
 ):
-    """drop some columns"""
+    """drop some columns that are mostly nans / useless"""
     return df.drop(drop_cols, axis="columns")
 
 
@@ -191,3 +191,15 @@ def check_low_var_cols(df_train):
         selector = VarianceThreshold()
         selector.fit(df_pp[my_feats])
         assert np.all(selector.get_support())
+
+
+def drop_zernike_fish_feats(
+    df,
+    feat_patterns=[
+        "seg_probe_561_AreaShape_Zernike",
+        "seg_probe_638_AreaShape_Zernike",
+    ],
+):
+    "these are mostly nans"
+    cols = [f for f in df.columns if any([x in f for x in feat_patterns])]
+    return df.drop(cols, axis="columns")
