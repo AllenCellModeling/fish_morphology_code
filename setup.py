@@ -36,6 +36,7 @@ requirements = [
     "fire>=0.2.1",
     "imageio>=2.6.1",
     "numpy>=1.17.2",
+    "quilt3distribute>=0.1.1",
     "pandas>=0.25.1",
     "scikit-image>=0.16.1",
     "tqdm>=4.36.1",
@@ -68,7 +69,10 @@ setup(
     ],
     description="data ingestion, processing, and analysis for cardio/FISH project",
     entry_points={
-        "console_scripts": ["my_example=fish_morphology_code.bin.my_example:main"]
+        "console_scripts": [
+            "download_2D_segs_test=fish_morphology_code.bin.download_quilt_data:download_2D_segs_test",
+            "download_2D_segs_all=fish_morphology_code.bin.download_quilt_data:download_2D_segs_all",
+        ]
     },
     install_requires=requirements,
     license="Allen Institute Software License",
