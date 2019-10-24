@@ -5,7 +5,8 @@ from quilt3distribute.validation import validate
 
 
 def distribute_seg_dataset(
-    csv_loc="data/input_segs_and_tiffs/raw_seg_013_014_images.csv",
+    csv_loc="input_segs_and_tiffs/raw_seg_013_014_images.csv",
+    n_subsamples=None,
     col_name_map={
         "fov_path": "original_fov_location",
         "FOVId": "fov_id",
@@ -26,18 +27,22 @@ def distribute_seg_dataset(
     vds = validate(df, drop_on_error=True)
     df = vds.data.reset_index(drop=True)
 
+    # subsample df for eg a test dataset
+    if n_subsamples is not None:
+        df = df.sample(n_subsamples)
+
     # create the dataset
     ds = Dataset(
         dataset=df,
         name=dataset_name,
         package_owner=package_owner,
-        readme_path="data/README.md",
+        readme_path="README.md",
     )
 
     # set data path cols, metadata cols, and extra files
     ds.set_metadata_columns(["fov_id", "original_fov_location"])
     ds.set_path_columns(["2D_tiff_path"])
-    ds.set_extra_files(["data/channel_defs.json"])
+    ds.set_extra_files(["channel_defs.json"])
 
     ds.distribute(s3_bucket)
 
