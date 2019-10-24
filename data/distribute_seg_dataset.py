@@ -1,4 +1,5 @@
 import pandas as pd
+import fire
 from quilt3distribute import Dataset
 from quilt3distribute.validation import validate
 
@@ -39,3 +40,7 @@ def distribute_seg_dataset(
     ds.set_extra_files(["data/channel_defs.json"])
 
     ds.distribute(s3_bucket)
+
+
+if __name__ == "__main__":
+    fire.Fire(distribute_seg_dataset)
