@@ -13,6 +13,7 @@ from cp_processing_utils import (
     add_sample_image_metadata,
     add_cell_structure_scores,
     cat_structure_scores,
+    remove_missing_images,
     DEFAULT_CELLPROFILER_CSVS,
 )
 
@@ -100,8 +101,10 @@ cp_feature_metadata_df = add_sample_image_metadata(
 cell_structure_scores_df = cat_structure_scores(score_files=args.structure_score_paths)
 
 # add manual structure scores to feature data frame
-final_feature_df = add_cell_structure_scores(
+feature_df = add_cell_structure_scores(
     cell_feature_df=cp_feature_metadata_df, structure_score_df=cell_structure_scores_df
 )
 
-final_feature_df.to_csv(args.out_csv)
+final_feature_df = remove_missing_images(feature_df)
+
+final_feature_df.to_csv(args.out_csv, index=False)

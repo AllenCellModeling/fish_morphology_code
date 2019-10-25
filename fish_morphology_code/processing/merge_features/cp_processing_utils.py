@@ -390,3 +390,18 @@ def cat_structure_scores(score_files):
     structure_scores_df = pd.concat(score_df_list, axis=0, ignore_index=True)
 
     return structure_scores_df
+
+
+def remove_missing_images(feature_df):
+    r"""
+        Remove rows from feature data frame that have an undefined ImageNumber (image is one of the manifests but wasn't part of cellprofiler run"
+        Args:
+            feature_df (pd.DataFrame): cell features including column with ImageNumber
+        Returns:
+            feature_df_clean (pd.DataFrame): cell features without undefined ImageNumber rows
+    """
+
+    missing_images = feature_df["ImageNumber"].isna()
+    feature_df_clean = feature_df.loc[~missing_images, :]
+
+    return feature_df_clean
