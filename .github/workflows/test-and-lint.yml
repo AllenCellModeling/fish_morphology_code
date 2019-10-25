@@ -23,8 +23,7 @@ jobs:
         pip install .[test]
     - name: Test with pytest
       run: |
-        pytest --cov-report xml --cov=fish_morphology_code fish_morphology_code/tests/
-        codecov -t ${{ secrets.CODECOV_TOKEN }}
+        pytest fish_morphology_code/tests/
 
   lint:
     runs-on: ubuntu-latest
