@@ -70,8 +70,7 @@ setup(
     description="data ingestion, processing, and analysis for cardio/FISH project",
     entry_points={
         "console_scripts": [
-            "download_2D_segs_test=fish_morphology_code.bin.download_quilt_data:download_2D_segs_test",
-            "download_2D_segs_all=fish_morphology_code.bin.download_quilt_data:download_2D_segs_all",
+            "download_2D_segs=fish_morphology_code.bin.download_quilt_data:main"
         ]
     },
     install_requires=requirements,

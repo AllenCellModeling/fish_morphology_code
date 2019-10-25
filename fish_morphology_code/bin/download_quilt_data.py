@@ -20,23 +20,23 @@ def download_quilt_data(
         dataset_manifest.fetch("quilt_data")
 
 
-def download_2D_segs_all():
-    download_quilt_data(
-        package="rorydm/2d_segmented_fields",
-        bucket="s3://allencell-internal-quilt",
-        data_save_loc="quilt_data",
-        ignore_warnings=True,
-    )
+def download_2D_segs(test=False):
+    """download maxporject/seg data. if test=True, only download two randomly dampled images."""
+    if test:
+        download_quilt_data(
+            package="rorydm/2d_segmented_fields_test",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_test",
+            ignore_warnings=True,
+        )
+    else:
+        download_quilt_data(
+            package="rorydm/2d_segmented_fields",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data",
+            ignore_warnings=True,
+        )
 
 
-def download_2D_segs_test():
-    download_quilt_data(
-        package="rorydm/2d_segmented_fields_test",
-        bucket="s3://allencell-internal-quilt",
-        data_save_loc="quilt_data_test",
-        ignore_warnings=True,
-    )
-
-
-if __name__ == "__main__":
-    fire.Fire(download_quilt_data)
+def main():
+    fire.Fire(download_2D_segs)

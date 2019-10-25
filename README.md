@@ -39,8 +39,19 @@ This will install the black formatter and flake8 linter, and configure them to r
 **Stable Release:** `pip install fish_morphology_code`<br>
 **Development Head:** `pip install git+https://github.com/AllenCellModeling/fish_morphology_code.git`
 
+
 ## Documentation
 For full package documentation please visit [AllenCellModeling.github.io/fish_morphology_code](https://AllenCellModeling.github.io/fish_morphology_code).
+
+
+## Downloading the data
+To download a test dataset (~40 MB) of just two fields:
+
+```download_2D_segs --test=True```
+
+To get the whole dataset (~9 GB) of all 478 fields:
+
+```download_2D_segs```
 
 
 ## Running the code
