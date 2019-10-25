@@ -12,12 +12,17 @@ import fire
 import pandas as pd
 from tqdm import tqdm
 
-from stretch_utils import field_worker, DEFAULT_CONTRAST_KWARGS, DEFAULT_CHANNEL_GROUPS
+from fish_morphology_code.processing.auto_contrast.stretch_utils import (
+    field_worker,
+    DEFAULT_CONTRAST_KWARGS,
+    DEFAULT_CHANNEL_GROUPS,
+)
 
 
 def run(
     image_file_csv,
     channels_json,
+    relative_paths=True,
     out_dir=None,
     image_dims="CYX",
     contrast_method="simple_quantile",
@@ -31,6 +36,7 @@ def run(
     Args:
         image_file_csv (str): csv file with list *absolute_paths* of max projects + seg file tiffs
         channels_json (str): json file with channel identifiers {"name": index}
+        relative_paths (bool): if True, paths are interpreted as relative to the location of image_file_csv, default=True
         out_dir (str): where to save output images, default=None
         image_dims (str): input image dimension ordering, default="CYX"
         contrast_method (str): method for autocontrasting, default=="simple_quantile"
@@ -68,8 +74,11 @@ def run(
 
     # read input file manifest
     input_files = pd.read_csv(image_file_csv)
-    file_names = input_files["seg_file_name"]
+    file_names = [Path(f) for f in input_files["2D_tiff_path"]]
+    if relative_paths:
+        file_names = [Path(image_file_csv).parent / f for f in file_names]
 
+    print(f"file_names={file_names}")
     # print task info
     if verbose:
         print(f"found {len(file_names)} image fields -- beginging processing")
@@ -99,6 +108,9 @@ def run(
             sort=False,
         )
 
+    print(f"main_log_df.shape={main_log_df.shape}")
+    print(f"main_log_df.columns={main_log_df.columns}")
+
     # reorder dataframe columns
     ordered_cols = [
         "field_image_path",
@@ -112,5 +124,5 @@ def run(
     main_log_df.to_csv(out_dir.joinpath("output_image_manifest.csv"), index=False)
 
 
-if __name__ == "__main__":
+def main():
     fire.Fire(run)
