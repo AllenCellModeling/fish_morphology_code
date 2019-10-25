@@ -8,7 +8,14 @@ from setuptools import find_packages, setup
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-test_requirements = ["codecov", "flake8", "pytest", "pytest-cov", "pytest-raises"]
+test_requirements = [
+    "codecov",
+    "black",
+    "flake8",
+    "pytest",
+    "pytest-cov",
+    "pytest-raises",
+]
 
 setup_requirements = ["pytest-runner"]
 
