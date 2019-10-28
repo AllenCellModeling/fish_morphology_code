@@ -46,6 +46,7 @@ clean:  ## clean all build, python, and testing files
 	rm -fr .pytest_cache
 
 build: ## run tox / run tests and lint
+	rm -rf quilt_data_test/
 	tox
 
 gen-docs: ## generate Sphinx HTML documentation, including API docs
