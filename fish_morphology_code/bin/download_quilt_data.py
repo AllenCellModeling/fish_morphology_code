@@ -2,6 +2,8 @@ import warnings
 import quilt3
 import fire
 
+from pathlib import Path
+
 
 def download_quilt_data(
     package="rorydm/2d_segmented_fields",
@@ -12,6 +14,7 @@ def download_quilt_data(
     """download a quilt dataset and supress nfs file attribe warnings by default"""
     dataset_manifest = quilt3.Package.browse(package, bucket)
 
+    print(f"download_2d_segs_path = {Path.cwd()}")
     if ignore_warnings:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
