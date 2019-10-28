@@ -14,13 +14,16 @@ def download_quilt_data(
     """download a quilt dataset and supress nfs file attribe warnings by default"""
     dataset_manifest = quilt3.Package.browse(package, bucket)
 
-    print(f"download_2d_segs_path = {Path.cwd()}")
     if ignore_warnings:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
             dataset_manifest.fetch("quilt_data")
     else:
         dataset_manifest.fetch("quilt_data")
+
+    print(f"listing contents of data_save_loc = {Path(data_save_loc).resolve()}")
+    for x in Path(data_save_loc).iterdir():
+        print(x)
 
 
 def download_2D_segs(test=False):
