@@ -2,8 +2,6 @@ import warnings
 import quilt3
 import fire
 
-from pathlib import Path
-
 
 def download_quilt_data(
     package="rorydm/2d_segmented_fields",
@@ -20,10 +18,6 @@ def download_quilt_data(
             dataset_manifest.fetch(data_save_loc)
     else:
         dataset_manifest.fetch(data_save_loc)
-
-    print(f"data_save_loc = {Path(data_save_loc).resolve()} has")
-    for x in Path(data_save_loc).iterdir():
-        print(x)
 
 
 def download_2D_segs(test=False):
