@@ -42,7 +42,7 @@ def distribute_seg_dataset(
 
     # structure scores as auxilary file
     score_files = [
-        f"data/structure_scores/structure_score_55000000{p}.csv" for p in (13, 14)
+        f"structure_scores/structure_score_55000000{p}.csv" for p in (13, 14)
     ]
     score_dfs = [
         pd.read_csv(f).rename({"mh Score": "mh score"}, axis="columns")
