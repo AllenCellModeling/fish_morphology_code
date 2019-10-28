@@ -17,11 +17,11 @@ def download_quilt_data(
     if ignore_warnings:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            dataset_manifest.fetch("quilt_data")
+            dataset_manifest.fetch(data_save_loc)
     else:
-        dataset_manifest.fetch("quilt_data")
+        dataset_manifest.fetch(data_save_loc)
 
-    print(f"listing contents of data_save_loc = {Path(data_save_loc).resolve()}")
+    print(f"data_save_loc = {Path(data_save_loc).resolve()} has")
     for x in Path(data_save_loc).iterdir():
         print(x)
 
