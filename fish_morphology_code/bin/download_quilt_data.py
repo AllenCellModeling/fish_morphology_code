@@ -15,9 +15,9 @@ def download_quilt_data(
     if ignore_warnings:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            dataset_manifest.fetch("quilt_data")
+            dataset_manifest.fetch(data_save_loc)
     else:
-        dataset_manifest.fetch("quilt_data")
+        dataset_manifest.fetch(data_save_loc)
 
 
 def download_2D_segs(test=False):

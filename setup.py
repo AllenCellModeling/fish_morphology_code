@@ -8,7 +8,14 @@ from setuptools import find_packages, setup
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-test_requirements = ["codecov", "flake8", "pytest", "pytest-cov", "pytest-raises"]
+test_requirements = [
+    "codecov",
+    "black",
+    "flake8",
+    "pytest",
+    "pytest-cov",
+    "pytest-raises",
+]
 
 setup_requirements = ["pytest-runner"]
 
@@ -70,7 +77,8 @@ setup(
     description="data ingestion, processing, and analysis for cardio/FISH project",
     entry_points={
         "console_scripts": [
-            "download_2D_segs=fish_morphology_code.bin.download_quilt_data:main"
+            "download_2D_segs=fish_morphology_code.bin.download_quilt_data:main",
+            "contrast_and_segment=fish_morphology_code.bin.stretch:main",
         ]
     },
     install_requires=requirements,
