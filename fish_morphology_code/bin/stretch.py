@@ -78,7 +78,6 @@ def run(
     if relative_paths:
         file_names = [Path(image_file_csv).parent / f for f in file_names]
 
-    print(f"file_names={file_names}")
     # print task info
     if verbose:
         print(f"found {len(file_names)} image fields -- beginging processing")
@@ -107,9 +106,6 @@ def run(
             ignore_index=True,
             sort=False,
         )
-
-    print(f"main_log_df.shape={main_log_df.shape}")
-    print(f"main_log_df.columns={main_log_df.columns}")
 
     # reorder dataframe columns
     ordered_cols = [
