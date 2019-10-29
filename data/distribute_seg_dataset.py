@@ -1,3 +1,4 @@
+import subprocess
 import pandas as pd
 import fire
 from quilt3distribute import Dataset
@@ -39,12 +40,29 @@ def distribute_seg_dataset(
         readme_path="README.md",
     )
 
+    # structure scores as auxilary file
+    score_files = [
+        f"structure_scores/structure_score_55000000{p}.csv" for p in (13, 14)
+    ]
+    score_dfs = [
+        pd.read_csv(f).rename({"mh Score": "mh score"}, axis="columns")
+        for f in score_files
+    ]
+    df_score = pd.concat(score_dfs, axis="rows", ignore_index=True, sort=False)
+    df_score.to_csv("structure_scores.csv")
+
     # set data path cols, metadata cols, and extra files
     ds.set_metadata_columns(["fov_id", "original_fov_location"])
     ds.set_path_columns(["2D_tiff_path"])
-    ds.set_extra_files(["channel_defs.json"])
+    ds.set_extra_files(["channel_defs.json", "structure_scores.csv"])
 
-    ds.distribute(s3_bucket)
+    # tag with commit hash
+    label = (
+        subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
+    )
+    ds.distribute(
+        s3_bucket, message=f"git commit hash of fish_morphology_code = {label}"
+    )
 
 
 if __name__ == "__main__":
