@@ -11,7 +11,7 @@ def distribute_seg_dataset(
     col_name_map={
         "fov_path": "original_fov_location",
         "FOVId": "fov_id",
-        "seg_file_name": "2D_tiff_path",
+        "seg_file_name": "2D_fov_tiff_path",
     },
     dataset_name="2d_segmented_fields",
     package_owner="rorydm",
@@ -53,7 +53,7 @@ def distribute_seg_dataset(
 
     # set data path cols, metadata cols, and extra files
     ds.set_metadata_columns(["fov_id", "original_fov_location"])
-    ds.set_path_columns(["2D_tiff_path"])
+    ds.set_path_columns(["2D_fov_tiff_path"])
     ds.set_extra_files(["channel_defs.json", "structure_scores.csv"])
 
     # tag with commit hash
