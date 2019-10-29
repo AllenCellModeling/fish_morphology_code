@@ -6,8 +6,8 @@ from quilt3distribute.validation import validate
 
 
 def distribute_seg_dataset(
+    test=False,
     csv_loc="input_segs_and_tiffs/raw_seg_013_014_images.csv",
-    n_subsamples=None,
     col_name_map={
         "fov_path": "original_fov_location",
         "FOVId": "fov_id",
@@ -29,8 +29,9 @@ def distribute_seg_dataset(
     df = vds.data.reset_index(drop=True)
 
     # subsample df for eg a test dataset
-    if n_subsamples is not None:
-        df = df.sample(n_subsamples)
+    if test:
+        df = df.sample(2, random_state=0)
+        dataset_name = f"{dataset_name}_test"
 
     # create the dataset
     ds = Dataset(
