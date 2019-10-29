@@ -195,7 +195,7 @@ def cell_worker(
         {
             "field_image_path": [field_image_path],
             "cell_label_value": [cell_label_value],
-            "single_cell_channel_output_path": [out_image_path],
+            "single_cell_output_path": [out_image_path],
         }
     )
 
