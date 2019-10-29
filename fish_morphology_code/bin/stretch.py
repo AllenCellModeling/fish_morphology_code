@@ -74,7 +74,7 @@ def run(
 
     # read input file manifest
     input_files = pd.read_csv(image_file_csv)
-    file_names = [Path(f) for f in input_files["2D_tiff_path"]]
+    file_names = [Path(f) for f in input_files["2D_fov_tiff_path"]]
     if relative_paths:
         file_names = [Path(image_file_csv).parent / f for f in file_names]
 
@@ -109,14 +109,25 @@ def run(
 
     # reorder dataframe columns
     ordered_cols = [
-        "field_image_path",
-        "rescaled_field_image_path",
+        "2D_fov_tiff_path",
+        "rescaled_2D_fov_tiff_path",
         "cell_label_value",
-        "single_cell_channel_output_path",
+        "rescaled_2D_single_cell_tiff_path",
     ]
     unordered_cols = [c for c in main_log_df.columns if c not in ordered_cols]
     cols = ordered_cols + unordered_cols
     main_log_df = main_log_df[cols]
+
+    # if relative paths, reset
+    if relative_paths:
+        main_log_df["2D_fov_tiff_path"] = main_log_df["2D_fov_tiff_path"].apply(
+            lambda p: str(Path(p).relative_to(Path(p).parent.parent))
+        )
+
+    # merge with input metadata
+    main_log_df = input_files.merge(main_log_df)
+
+    # write out csv
     main_log_df.to_csv(out_dir.joinpath("output_image_manifest.csv"), index=False)
 
 

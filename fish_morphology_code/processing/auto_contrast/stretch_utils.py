@@ -193,9 +193,9 @@ def cell_worker(
     )
     cell_info_df = pd.DataFrame(
         {
-            "field_image_path": [field_image_path],
+            "2D_fov_tiff_path": [field_image_path],
             "cell_label_value": [cell_label_value],
-            "single_cell_output_path": [out_image_path],
+            "rescaled_2D_single_cell_tiff_path": [out_image_path],
         }
     )
 
@@ -322,8 +322,8 @@ def field_worker(
     )
     field_info_df = pd.DataFrame(
         {
-            "field_image_path": [image_path],
-            "rescaled_field_image_path": [rescaled_out_path],
+            "2D_fov_tiff_path": [image_path],
+            "rescaled_2D_fov_tiff_path": [rescaled_out_path],
         }
     )
 
@@ -363,7 +363,7 @@ def field_worker(
     )
 
     # merge cell-wise data into field-wise data
-    all_cell_info_df["field_image_path"] = image_path
+    all_cell_info_df["2D_fov_tiff_path"] = image_path
     field_info_df = field_info_df.merge(all_cell_info_df, how="inner")
 
     return field_info_df
