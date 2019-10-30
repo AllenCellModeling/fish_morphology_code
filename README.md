@@ -112,21 +112,3 @@ python distribute_autocontrasted_dataset.py
 ## Stretch goals
 
 - [ ] original image data + annotations into fms/labkey/quilt, or somehow programatically downloadable
-
-
-## Development
-See [CONTRIBUTING.md](CONTRIBUTING.md) for information related to developing the code.
-
-#### The Three Commands You Need To Know
-1. `make build`
-
-    This will run `tox` which will run all your tests in Python 3.7 as well as linting your code.
-
-2. `make clean`
-
-    This will clean up various Python and build generated files so that you can ensure that you are working in a clean
-    environment.
-
-
-***Free software: Allen Institute Software License***
-
