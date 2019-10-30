@@ -43,12 +43,16 @@ The images in this dataset are 16 bits.
 
 #### Test
 To download a test dataset (~40 MB) of just two fields:
-```download_2D_segs --test=True```
+```
+download_2D_segs --test=True
+```
 This will download the dataset and save it to the `quilt_data_test` directory.
 
 #### Whole dataset
 To get the whole dataset (~9 GB) of all 478 fields:
-```download_2D_segs```
+```
+download_2D_segs
+```
 This will download the dataset and save it to the `quilt_data` directory.
 
 ### Normalized (autocontrasted) 2D tiffs
@@ -56,12 +60,16 @@ The images in this dataset are 8 bits.
 
 #### Test
 To download a test dataset (~20 MB) of just two fields:
-```download_2D_contrasted --test=True```
+```
+download_2D_contrasted --test=True
+```
 This will download the dataset and save it to the `2d_autocontrasted_fields_and_single_cells_test` directory.
 
 #### Whole dataset
 To get the whole dataset (~7 GB) of all 478 fields:
-```download_2D_contrasted```
+```
+download_2D_contrasted
+```
 This will download the dataset and save it to the `2d_autocontrasted_fields_and_single_cells` directory.
 
 ## Running the auto-contrasting code
@@ -82,14 +90,18 @@ Uploading to quilt should happen infrequently so all the code has been put in th
 
 ### Un-normalized 2D tiffs
 To upload a new version of the un-normalized 2D fovs, from the `data` directory:
-```python distribute_seg_dataset.py```
+```
+python distribute_seg_dataset.py
+```
 
 ### Normalized 2D tiffs
 To upload a new version of the normalized (autocontrasted) 2D fovs + single cell images, from the `data` directory:
-```python distribute_autocontrasted_dataset.py```
+```
+python distribute_autocontrasted_dataset.py
+```
 
 
-## Bare minimum contents contains:
+## Bare minimum contents:
 
 - [x] manifest of the locations of original image data + segmentations
 - [x] script for taking original images and generating 2D normalized images
