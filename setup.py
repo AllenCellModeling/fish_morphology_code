@@ -8,7 +8,14 @@ from setuptools import find_packages, setup
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-test_requirements = ["codecov", "flake8", "pytest", "pytest-cov", "pytest-raises"]
+test_requirements = [
+    "codecov",
+    "black",
+    "flake8",
+    "pytest",
+    "pytest-cov",
+    "pytest-raises",
+]
 
 setup_requirements = ["pytest-runner"]
 
@@ -18,6 +25,7 @@ dev_requirements = [
     "flake8>=3.7.7",
     "ipython>=7.5.0",
     "m2r>=0.2.1",
+    "pre-commit>=1.20.0",
     "pytest>=4.3.0",
     "pytest-cov==2.6.1",
     "pytest-raises>=0.10",
@@ -36,6 +44,7 @@ requirements = [
     "fire>=0.2.1",
     "imageio>=2.6.1",
     "numpy>=1.17.2",
+    "quilt3distribute>=0.1.1",
     "pandas>=0.25.1",
     "scikit-image>=0.16.1",
     "tqdm>=4.36.1",
@@ -68,7 +77,11 @@ setup(
     ],
     description="data ingestion, processing, and analysis for cardio/FISH project",
     entry_points={
-        "console_scripts": ["my_example=fish_morphology_code.bin.my_example:main"]
+        "console_scripts": [
+            "download_2D_segs=fish_morphology_code.bin.download_quilt_data:main_segs",
+            "download_2D_contrasted=fish_morphology_code.bin.download_quilt_data:main_contrasted",
+            "contrast_and_segment=fish_morphology_code.bin.stretch:main",
+        ]
     },
     install_requires=requirements,
     license="Allen Institute Software License",

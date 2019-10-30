@@ -1,8 +1,11 @@
-output_data/
+quilt_data*/
+output_data*/
 
 .nfs*
 .DS_Store
 *.ipynb
+
+pip-wheel-metadata/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
