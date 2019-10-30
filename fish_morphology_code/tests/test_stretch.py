@@ -15,5 +15,5 @@ def test_stretch():
     run(
         "quilt_data_test/metadata.csv",
         "quilt_data_test/supporting_files/channel_defs.json",
-        out_dir="output_data",
+        out_dir="output_data_test",
     )
