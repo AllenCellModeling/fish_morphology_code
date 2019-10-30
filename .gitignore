@@ -5,6 +5,8 @@ output_data*/
 .DS_Store
 *.ipynb
 
+pip-wheel-metadata/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
