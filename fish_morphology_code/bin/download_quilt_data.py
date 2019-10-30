@@ -56,9 +56,31 @@ def download_2D_contrasted(test=False):
         )
 
 
+def download_2D_features(test=False):
+    """download maxporject/seg data. if test=True, only download two randomly dampled images."""
+    if test:
+        download_quilt_data(
+            package="tanyasg/2d_autocontrasted_single_cell_features_test",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_features_test",
+            ignore_warnings=True,
+        )
+    else:
+        download_quilt_data(
+            package="tanyasg/2d_autocontrasted_single_cell_features",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_features",
+            ignore_warnings=True,
+        )
+
+
 def main_segs():
     fire.Fire(download_2D_segs)
 
 
 def main_contrasted():
     fire.Fire(download_2D_contrasted)
+
+
+def main_features():
+    fire.Fire(download_2D_features)
