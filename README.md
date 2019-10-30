@@ -29,11 +29,13 @@ pip install -e .
 After following the "Normal users" installation instructions,
 
 ```
+pip install -e .[all]
 pip install pre-commit
 pre-commit install
 ```
 
-This will install the black formatter and flake8 linter, and configure them to run as pre-commit hooks.
+This will install the the dev dependencies.
+It will also install the black formatter and flake8 linter, and configure them to run as pre-commit hooks.
 
 ### Versions
 **Stable Release:** `pip install fish_morphology_code`<br>
@@ -45,30 +47,67 @@ For full package documentation please visit [AllenCellModeling.github.io/fish_mo
 
 
 ## Downloading the data
+
+### Un-normalized 2D tiffs
+
+The images in this dataset are 16 bits.
+
 To download a test dataset (~40 MB) of just two fields:
 
 ```download_2D_segs --test=True```
+
+This will download the dataset and save it to the `quilt_data_test` directory.
 
 To get the whole dataset (~9 GB) of all 478 fields:
 
 ```download_2D_segs```
 
+This will download the dataset and save it to the `quilt_data` directory.
 
-## Running the code
+
+### Normalized (autocontrasted) 2D tiffs
+
+The images in this dataset are 8 bits.
+
+To download a test dataset (~25 MB) of just two fields:
+
+```download_2D_contrasted --test=True```
+
+This will download the dataset and save it to the `2d_autocontrasted_fields_and_single_cells_test` directory.
+
+To get the whole dataset (~7 GB) of all 478 fields:
+
+```download_2D_contrasted```
+
+This will download the dataset and save it to the `2d_autocontrasted_fields_and_single_cells` directory.
+
+
+## Running the auto-contrasting code
 
 To run the image normalization code, from the main repo dir:
 ```
-python fish_morphology_code/processing/auto_contrast/stretch.py data/input_segs_and_tiffs/raw_seg_013_014_images.csv data/channel_defs.json --out_dir=/allen/aics/modeling/data/cardio_fish/normalized_2D_tiffs
+contrast_and_segment quilt_data/metadata.csv quilt_data/supporting_files/channel_defs.json --out_dir=output_data
 ```
 
 ## Running the tests
 
-### Image normalization
+To run the `pytest` tests defined in `fish_morphology_code/tests` via `tox`, use
+```
+make build
+```
 
-To run with mostly default settings, from `fish_morphology_code/tests/` (only with access to `/allen/aics`):
-```
-./test.sh
-```
+## Uploading data to quilt
+
+Uploading to quilt should happen infrequently so all the code has been put in the `data` directory outside of the main `fish_morphology_code` library.
+
+### Un-normalized 2D tiffs
+To upload a new version of the un-normalized 2D fovs, from the `data` directory:
+```python distribute_seg_dataset.py```
+
+### Normalized 2D tiffs
+To upload a new version of the normalized (autocontrasted) 2D fovs + single cell images, from the `data` directory:
+```python distribute_autocontrasted_dataset.py```
+
 
 ## Bare minimum contents contains:
 
@@ -89,7 +128,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for information related to developing the
 #### The Three Commands You Need To Know
 1. `make build`
 
-    This will run `tox` which will run all your tests in both Python 3.6 and Python 3.7 as well as linting your code.
+    This will run `tox` which will run all your tests in Python 3.7 as well as linting your code.
 
 2. `make clean`
 
