@@ -80,6 +80,7 @@ setup(
         "console_scripts": [
             "download_2D_segs=fish_morphology_code.bin.download_quilt_data:main_segs",
             "download_2D_contrasted=fish_morphology_code.bin.download_quilt_data:main_contrasted",
+            "download_2D_features=fish_morphology_code.bin.download_quilt_data:main_features",
             "contrast_and_segment=fish_morphology_code.bin.stretch:main",
             "merge_cellprofiler_output=fish_morphology_code.bin.merge_cellprofiler_output:main",
         ]
