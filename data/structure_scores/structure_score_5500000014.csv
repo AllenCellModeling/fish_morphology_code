@@ -1,4 +1,4 @@
-cell_num,file_name,mh score,kg score
+cell_num,file_name,mh_score,kg_score
 1,5500000014_63X_20190816_S1_P1_B2_annotations_corrected.Actn2_cell1.jpg,0,0
 2,5500000014_63X_20190816_S1_P1_B2_annotations_corrected.Actn2_cell2.jpg,4,4
 3,5500000014_63X_20190816_S1_P1_B2_annotations_corrected.Actn2_cell3.jpg,4,4

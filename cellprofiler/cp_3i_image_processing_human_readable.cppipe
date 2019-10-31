@@ -1,0 +1,691 @@
+CellProfiler Pipeline: http://www.cellprofiler.org
+Version:4
+DateRevision:318
+GitHash:
+ModuleCount:35
+HasImagePlaneDetails:False
+
+LoadData:[module_num:1|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Input data file location:Default Input Folder\x7C\\\\allen\\aics\\gene-editing\\FISH\\2019\\chaos\\data\\cp_testing\\testing_pipeline_image_input
+    Name of the file:normalized_13_14_image_set_listing_fortesting.csv
+    Load images based on this data?:Yes
+    Base image location:None\x7C
+    Process just a range of rows?:No
+    Rows to process:1,100000
+    Group images by metadata?:No
+    Select metadata tags for grouping:
+    Rescale intensities?:No
+
+IdentifyPrimaryObjects:[module_num:2|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\'Segment nuclei\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:nuc
+    Name the primary objects to be identified:nuc
+    Typical diameter of objects, in pixel units (Min,Max):20,60
+    Discard objects outside the diameter range?:No
+    Discard objects touching the border of the image?:No
+    Method to distinguish clumped objects:Shape
+    Method to draw dividing lines between clumped objects:Shape
+    Size of smoothing filter:35
+    Suppress local maxima that are closer than this minimum allowed distance:35
+    Speed up by using lower-resolution image to find local maxima?:Yes
+    Fill holes in identified objects?:After both thresholding and declumping
+    Automatically calculate size of smoothing filter for declumping?:No
+    Automatically calculate minimum allowed distance between local maxima?:No
+    Handling of objects if excessive number of objects identified:Continue
+    Maximum number of objects:500
+    Use advanced settings?:Yes
+    Threshold setting version:10
+    Threshold strategy:Global
+    Thresholding method:Minimum cross entropy
+    Threshold smoothing scale:1
+    Threshold correction factor:1.0
+    Lower and upper bounds on threshold:0.0,1.0
+    Manual threshold:0.0
+    Select the measurement to threshold with:None
+    Two-class or three-class thresholding?:Two classes
+    Assign pixels in the middle intensity class to the foreground or the background?:Foreground
+    Size of adaptive window:50
+    Lower outlier fraction:0.05
+    Upper outlier fraction:0.05
+    Averaging method:Mean
+    Variance method:Standard deviation
+    # of deviations:2.0
+    Thresholding method:Otsu
+
+RescaleIntensity:[module_num:3|svn_version:\'Unknown\'|variable_revision_number:3|show_window:False|notes:\x5B\'Rescale intensity of brightfield channel; used only when saving cell outline and object number images\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:bf
+    Name the output image:RescaleIntensity
+    Rescaling method:Stretch each image to use the full intensity range
+    Method to calculate the minimum intensity:Custom
+    Method to calculate the maximum intensity:Custom
+    Lower intensity limit for the input image:0.0
+    Upper intensity limit for the input image:1.0
+    Intensity range for the input image:0.0,1.0
+    Intensity range for the output image:0.0,1.0
+    Select image to match in maximum intensity:None
+    Divisor value:1.0
+    Divisor measurement:None
+
+RescaleIntensity:[module_num:4|svn_version:\'Unknown\'|variable_revision_number:3|show_window:False|notes:\x5B\'Rescale intensity of nuclear channel; used only when saving cell outlines and object numbers\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:nuc
+    Name the output image:RescaleIntensityNuc
+    Rescaling method:Stretch each image to use the full intensity range
+    Method to calculate the minimum intensity:Custom
+    Method to calculate the maximum intensity:Custom
+    Lower intensity limit for the input image:0.0
+    Upper intensity limit for the input image:1.0
+    Intensity range for the input image:0.0,1.0
+    Intensity range for the output image:0.0,1.0
+    Select image to match in maximum intensity:None
+    Divisor value:1.0
+    Divisor measurement:None
+
+MeasureObjectSizeShape:[module_num:5|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\'Measure size of nuclei; use in next step to filter nuclei by area\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select objects to measure:nuc
+    Calculate the Zernike features?:No
+
+FilterObjects:[module_num:6|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B\'Create new nuclei objects that pass minimim area threshold (min area = 2500); this threshold is based on looking at the distribution of all nuclei areas\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the objects to filter:nuc
+    Name the output objects:FilterNuc
+    Select the filtering mode:Measurements
+    Select the filtering method:Limits
+    Select the objects that contain the filtered objects:None
+    Select the location of the rules or classifier file:Elsewhere...\x7C
+    Rules or classifier file name:rules.txt
+    Class number:1
+    Measurement count:1
+    Additional object count:0
+    Assign overlapping child to:Both parents
+    Select the measurement to filter by:AreaShape_Area
+    Filter using a minimum measurement value?:Yes
+    Minimum value:2500
+    Filter using a maximum measurement value?:No
+    Maximum value:1.0
+
+FilterObjects:[module_num:7|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B\'Create new object for just nuclei objects that fall below the minimum nucleus area; these objects are potential debris\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the objects to filter:nuc
+    Name the output objects:NucBubble
+    Select the filtering mode:Measurements
+    Select the filtering method:Limits
+    Select the objects that contain the filtered objects:None
+    Select the location of the rules or classifier file:Elsewhere...\x7C
+    Rules or classifier file name:rules.txt
+    Class number:1
+    Measurement count:1
+    Additional object count:0
+    Assign overlapping child to:Both parents
+    Select the measurement to filter by:AreaShape_Area
+    Filter using a minimum measurement value?:No
+    Minimum value:2500
+    Filter using a maximum measurement value?:Yes
+    Maximum value:2500
+
+FilterObjects:[module_num:8|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B"Create new nuclei objects that don\'t touch the border of the cell"\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the objects to filter:FilterNuc
+    Name the output objects:FilterNucBorder
+    Select the filtering mode:Image or mask border
+    Select the filtering method:Limits
+    Select the objects that contain the filtered objects:None
+    Select the location of the rules or classifier file:Elsewhere...\x7C
+    Rules or classifier file name:rules.txt
+    Class number:1
+    Measurement count:1
+    Additional object count:0
+    Assign overlapping child to:Both parents
+    Select the measurement to filter by:AreaShape_Area
+    Filter using a minimum measurement value?:Yes
+    Minimum value:0.0
+    Filter using a maximum measurement value?:Yes
+    Maximum value:1.0
+
+OverlayOutlines:[module_num:9|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Display outlines on a blank image?:No
+    Select image on which to display outlines:RescaleIntensityNuc
+    Name the output image:cell_filter_nuc_boundaries
+    Outline display mode:Color
+    Select method to determine brightness of outlines:Max of image
+    How to outline:Inner
+    Select outline color:cyan
+    Select objects to display:FilterNuc
+    Select outline color:Yellow
+    Select objects to display:napari_cell
+
+DisplayDataOnImage:[module_num:10|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Display object or image measurements?:Object
+    Select the input objects:FilterNuc
+    Measurement to display:Number_Object_Number
+    Select the image on which to display the measurements:cell_filter_nuc_boundaries
+    Text color:#008000
+    Name the output image that has the measurements displayed:save1
+    Font size (points):14
+    Number of decimals:0
+    Image elements to save:Image
+    Annotation offset (in pixels):0
+    Display mode:Text
+    Color map:Default
+    Display background image?:Yes
+    Color map scale:Use this image\'s measurement range
+    Color map range:0.0,1.0
+
+IdentifyPrimaryObjects:[module_num:11|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\'Segment probe channel 561\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:seg_561
+    Name the primary objects to be identified:seg_probe_561
+    Typical diameter of objects, in pixel units (Min,Max):1,60
+    Discard objects outside the diameter range?:No
+    Discard objects touching the border of the image?:No
+    Method to distinguish clumped objects:None
+    Method to draw dividing lines between clumped objects:Intensity
+    Size of smoothing filter:10
+    Suppress local maxima that are closer than this minimum allowed distance:7.0
+    Speed up by using lower-resolution image to find local maxima?:Yes
+    Fill holes in identified objects?:Never
+    Automatically calculate size of smoothing filter for declumping?:Yes
+    Automatically calculate minimum allowed distance between local maxima?:Yes
+    Handling of objects if excessive number of objects identified:Continue
+    Maximum number of objects:500
+    Use advanced settings?:Yes
+    Threshold setting version:10
+    Threshold strategy:Global
+    Thresholding method:Manual
+    Threshold smoothing scale:1.3488
+    Threshold correction factor:1.0
+    Lower and upper bounds on threshold:0.0,1.0
+    Manual threshold:0.95
+    Select the measurement to threshold with:None
+    Two-class or three-class thresholding?:Two classes
+    Assign pixels in the middle intensity class to the foreground or the background?:Foreground
+    Size of adaptive window:50
+    Lower outlier fraction:0.05
+    Upper outlier fraction:0.05
+    Averaging method:Mean
+    Variance method:Standard deviation
+    # of deviations:2.0
+    Thresholding method:Otsu
+
+IdentifyPrimaryObjects:[module_num:12|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\'Segment probe channel 638\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:seg_638
+    Name the primary objects to be identified:seg_probe_638
+    Typical diameter of objects, in pixel units (Min,Max):1,60
+    Discard objects outside the diameter range?:No
+    Discard objects touching the border of the image?:No
+    Method to distinguish clumped objects:None
+    Method to draw dividing lines between clumped objects:Intensity
+    Size of smoothing filter:10
+    Suppress local maxima that are closer than this minimum allowed distance:7.0
+    Speed up by using lower-resolution image to find local maxima?:Yes
+    Fill holes in identified objects?:Never
+    Automatically calculate size of smoothing filter for declumping?:Yes
+    Automatically calculate minimum allowed distance between local maxima?:Yes
+    Handling of objects if excessive number of objects identified:Continue
+    Maximum number of objects:500
+    Use advanced settings?:Yes
+    Threshold setting version:10
+    Threshold strategy:Global
+    Thresholding method:Manual
+    Threshold smoothing scale:1.3488
+    Threshold correction factor:1.0
+    Lower and upper bounds on threshold:0.0,1.0
+    Manual threshold:0.95
+    Select the measurement to threshold with:None
+    Two-class or three-class thresholding?:Two classes
+    Assign pixels in the middle intensity class to the foreground or the background?:Foreground
+    Size of adaptive window:50
+    Lower outlier fraction:0.05
+    Upper outlier fraction:0.05
+    Averaging method:Mean
+    Variance method:Standard deviation
+    # of deviations:2.0
+    Thresholding method:Otsu
+
+ShrinkToObjectCenters:[module_num:13|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\'Get nuclei centroids\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input object:FilterNuc
+    Name the output object:NucCentroid
+
+DilateObjects:[module_num:14|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\'For display purposes only; dilate centroids so that they are visible on image\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input object:NucCentroid
+    Name the output object:DilateCentroid
+    Structuring element:disk,10
+
+RelateObjects:[module_num:15|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign each nucleus centroid to a cell (centroid is single pixel)\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Parent objects:napari_cell
+    Child objects:NucCentroid
+    Name the output object:RelateNapariNucCentroid
+    Calculate child-parent distances?:None
+    Calculate per-parent means for all child measurements?:No
+    Calculate distances to other parents?:No
+    Parent name:None
+    Parent name:None
+    Parent name:None
+
+SplitOrMergeObjects:[module_num:16|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\'Merge centroids by parent napari cell\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input objects:NucCentroid
+    Name the new objects:MergedNucCentroidByCell
+    Operation:Merge
+    Maximum distance within which to merge objects:0
+    Merge using a grayscale image?:No
+    Select the grayscale image to guide merging:None
+    Minimum intensity fraction:0.9
+    Method to find object intensity:Closest point
+    Merging method:Per-parent
+    Select the parent object:napari_cell
+    Output object type:Disconnected
+
+RelateObjects:[module_num:17|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Relate size filtered nuclei objects to new object composed of all nuclei centroids that are in one cell; each parent merged centroid object can have multiple FilterNuc children\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Parent objects:MergedNucCentroidByCell
+    Child objects:FilterNuc
+    Name the output object:NucToNucCentroid
+    Calculate child-parent distances?:None
+    Calculate per-parent means for all child measurements?:No
+    Calculate distances to other parents?:No
+    Parent name:None
+    Parent name:None
+    Parent name:None
+
+SplitOrMergeObjects:[module_num:18|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\'Get final merged nuclei object (actual nuclei that will be used for calculating features, not just centroids) by merging FilterNuc objects by parent merged centroid object => FilterNuc with centroids in a cell will have same mergednuccentroidbycell parent\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input objects:FilterNuc
+    Name the new objects:FinalNuc
+    Operation:Merge
+    Maximum distance within which to merge objects:0
+    Merge using a grayscale image?:No
+    Select the grayscale image to guide merging:None
+    Minimum intensity fraction:0.9
+    Method to find object intensity:Closest point
+    Merging method:Per-parent
+    Select the parent object:MergedNucCentroidByCell
+    Output object type:Disconnected
+
+MeasureObjectSizeShape:[module_num:19|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select objects to measure:FilterNuc
+    Select objects to measure:seg_probe_561
+    Select objects to measure:seg_probe_638
+    Select objects to measure:napari_cell
+    Select objects to measure:FinalNuc
+    Calculate the Zernike features?:Yes
+
+MeasureTexture:[module_num:20|svn_version:\'Unknown\'|variable_revision_number:5|show_window:False|notes:\x5B\'Measure textures for cell and nuclei objects from the brightfield, gfp structure, and nuclear channels at 3 different scales\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Hidden:3
+    Hidden:2
+    Hidden:3
+    Select an image to measure:bf
+    Select an image to measure:structure
+    Select an image to measure:nuc
+    Select objects to measure:napari_cell
+    Select objects to measure:FinalNuc
+    Texture scale to measure:3
+    Texture scale to measure:5
+    Texture scale to measure:10
+    Measure images or objects?:Objects
+
+FilterObjects:[module_num:21|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the objects to filter:FinalNuc
+    Name the output objects:FinalNucBorder
+    Select the filtering mode:Image or mask border
+    Select the filtering method:Limits
+    Select the objects that contain the filtered objects:None
+    Select the location of the rules or classifier file:Elsewhere...\x7C
+    Rules or classifier file name:rules.txt
+    Class number:1
+    Measurement count:1
+    Additional object count:0
+    Assign overlapping child to:Both parents
+    Select the measurement to filter by:AreaShape_Area
+    Filter using a minimum measurement value?:Yes
+    Minimum value:0.0
+    Filter using a maximum measurement value?:Yes
+    Maximum value:1.0
+
+OverlayOutlines:[module_num:22|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Display outlines on a blank image?:No
+    Select image on which to display outlines:RescaleIntensityNuc
+    Name the output image:cell_filter_nuc_centroid_boundaries
+    Outline display mode:Color
+    Select method to determine brightness of outlines:Max of image
+    How to outline:Inner
+    Select outline color:cyan
+    Select objects to display:FinalNuc
+    Select outline color:yellow
+    Select objects to display:napari_cell
+    Select outline color:red
+    Select objects to display:DilateCentroid
+
+DisplayDataOnImage:[module_num:23|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Display object or image measurements?:Object
+    Select the input objects:FinalNuc
+    Measurement to display:Number_Object_Number
+    Select the image on which to display the measurements:cell_filter_nuc_centroid_boundaries
+    Text color:#008000
+    Name the output image that has the measurements displayed:save2
+    Font size (points):14
+    Number of decimals:0
+    Image elements to save:Image
+    Annotation offset (in pixels):0
+    Display mode:Text
+    Color map:Default
+    Display background image?:Yes
+    Color map scale:Use this image\'s measurement range
+    Color map range:0.0,1.0
+
+OverlayOutlines:[module_num:24|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Display outlines on a blank image?:No
+    Select image on which to display outlines:RescaleIntensity
+    Name the output image:cell_number_filter_nuc_centroid_boundaries
+    Outline display mode:Color
+    Select method to determine brightness of outlines:Max of image
+    How to outline:Inner
+    Select outline color:cyan
+    Select objects to display:FinalNuc
+    Select outline color:yellow
+    Select objects to display:napari_cell
+    Select outline color:red
+    Select objects to display:DilateCentroid
+
+DisplayDataOnImage:[module_num:25|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Display object or image measurements?:Object
+    Select the input objects:napari_cell
+    Measurement to display:Number_Object_Number
+    Select the image on which to display the measurements:cell_number_filter_nuc_centroid_boundaries
+    Text color:yellow
+    Name the output image that has the measurements displayed:saver3
+    Font size (points):14
+    Number of decimals:0
+    Image elements to save:Image
+    Annotation offset (in pixels):0
+    Display mode:Text
+    Color map:Default
+    Display background image?:Yes
+    Color map scale:Use this image\'s measurement range
+    Color map range:0.0,1.0
+
+RelateObjects:[module_num:26|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to napari cells\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
+    Parent objects:napari_cell
+    Child objects:seg_probe_561
+    Name the output object:probe561RelateNapari
+    Calculate child-parent distances?:None
+    Calculate per-parent means for all child measurements?:Yes
+    Calculate distances to other parents?:No
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+
+RelateObjects:[module_num:27|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to napari cells\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Parent objects:napari_cell
+    Child objects:seg_probe_638
+    Name the output object:probe638RelateNapari
+    Calculate child-parent distances?:None
+    Calculate per-parent means for all child measurements?:Yes
+    Calculate distances to other parents?:No
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+
+RelateObjects:[module_num:28|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to nuclei objects\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
+    Parent objects:FinalNuc
+    Child objects:seg_probe_561
+    Name the output object:probe561RelateNuc
+    Calculate child-parent distances?:None
+    Calculate per-parent means for all child measurements?:Yes
+    Calculate distances to other parents?:No
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+
+RelateObjects:[module_num:29|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to nuclei objects\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Parent objects:FinalNuc
+    Child objects:seg_probe_638
+    Name the output object:probe638RelateNuc
+    Calculate child-parent distances?:None
+    Calculate per-parent means for all child measurements?:Yes
+    Calculate distances to other parents?:No
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+    Parent name:None
+
+ConvertObjectsToImage:[module_num:30|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input objects:FinalNucBorder
+    Name the output image:nuc_object_mask
+    Select the color format:uint16
+    Select the colormap:Default
+
+SaveImages:[module_num:31|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the type of image to save:Image
+    Select the image to save:save1
+    Select method for constructing file names:From image filename
+    Select image name for file prefix:bf
+    Enter single file name:OrigBlue
+    Number of digits:4
+    Append a suffix to the image file name?:Yes
+    Text to append to the image name:cell_filter_nuc_num
+    Saved file format:tiff
+    Output file location:Default Output Folder\x7C\\\\\\\\\\\\\\\\allen\\\\\\\\aics\\\\\\\\gene-editing\\\\\\\\FISH\\\\\\\\2019\\\\\\\\chaos\\\\\\\\data\\\\\\\\cp_20190827\\\\\\\\napari
+    Image bit depth:8-bit integer
+    Overwrite existing files without warning?:No
+    When to save:Every cycle
+    Record the file and path information to the saved image?:No
+    Create subfolders in the output folder?:No
+    Base image folder:Elsewhere...\x7C
+
+SaveImages:[module_num:32|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the type of image to save:Image
+    Select the image to save:save2
+    Select method for constructing file names:From image filename
+    Select image name for file prefix:bf
+    Enter single file name:OrigBlue
+    Number of digits:4
+    Append a suffix to the image file name?:Yes
+    Text to append to the image name:cell_filter_nuc_centroid_num
+    Saved file format:tiff
+    Output file location:Default Output Folder\x7C\\\\\\\\\\\\\\\\allen\\\\\\\\aics\\\\\\\\gene-editing\\\\\\\\FISH\\\\\\\\2019\\\\\\\\chaos\\\\\\\\data\\\\\\\\cp_20190827\\\\\\\\napari
+    Image bit depth:8-bit integer
+    Overwrite existing files without warning?:No
+    When to save:Every cycle
+    Record the file and path information to the saved image?:No
+    Create subfolders in the output folder?:No
+    Base image folder:Elsewhere...\x7C
+
+SaveImages:[module_num:33|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the type of image to save:Image
+    Select the image to save:saver3
+    Select method for constructing file names:From image filename
+    Select image name for file prefix:bf
+    Enter single file name:OrigBlue
+    Number of digits:4
+    Append a suffix to the image file name?:Yes
+    Text to append to the image name:filter_nuc_centroid_cell_num
+    Saved file format:tiff
+    Output file location:Default Output Folder\x7C\\\\\\\\\\\\\\\\allen\\\\\\\\aics\\\\\\\\gene-editing\\\\\\\\FISH\\\\\\\\2019\\\\\\\\chaos\\\\\\\\data\\\\\\\\cp_20190827\\\\\\\\napari
+    Image bit depth:8-bit integer
+    Overwrite existing files without warning?:No
+    When to save:Every cycle
+    Record the file and path information to the saved image?:No
+    Create subfolders in the output folder?:No
+    Base image folder:Elsewhere...\x7C
+
+SaveImages:[module_num:34|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the type of image to save:Image
+    Select the image to save:nuc_object_mask
+    Select method for constructing file names:From image filename
+    Select image name for file prefix:bf
+    Enter single file name:OrigBlue
+    Number of digits:4
+    Append a suffix to the image file name?:Yes
+    Text to append to the image name:nuc_final_mask
+    Saved file format:tiff
+    Output file location:Default Output Folder\x7C\\\\\\\\\\\\\\\\allen\\\\\\\\aics\\\\\\\\gene-editing\\\\\\\\FISH\\\\\\\\2019\\\\\\\\chaos\\\\\\\\data\\\\\\\\cp_20190827\\\\\\\\napari
+    Image bit depth:8-bit integer
+    Overwrite existing files without warning?:No
+    When to save:Every cycle
+    Record the file and path information to the saved image?:No
+    Create subfolders in the output folder?:No
+    Base image folder:Elsewhere...\x7C
+
+ExportToSpreadsheet:[module_num:35|svn_version:\'Unknown\'|variable_revision_number:12|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
+    Select the column delimiter:Comma (",")
+    Add image metadata columns to your object data file?:No
+    Select the measurements to export:No
+    Calculate the per-image mean values for object measurements?:No
+    Calculate the per-image median values for object measurements?:No
+    Calculate the per-image standard deviation values for object measurements?:No
+    Output file location:Default Output Folder\x7C\\\\\\\\\\\\\\\\\\\\\\\\allen\\\\\\\\\\\\\\\\aics\\\\\\\\\\\\\\\\gene-editing\\\\\\\\\\\\\\\\FISH\\\\\\\\\\\\\\\\2019\\\\\\\\\\\\\\\\chaos\\\\\\\\\\\\\\\\data\\\\\\\\\\\\\\\\cp_20190827\\\\\\\\\\\\\\\\napari
+    Create a GenePattern GCT file?:No
+    Select source of sample row name:Metadata
+    Select the image to use as the identifier:None
+    Select the metadata to use as the identifier:None
+    Export all measurement types?:Yes
+    Press button to select measurements:
+    Representation of Nan/Inf:NaN
+    Add a prefix to file names?:Yes
+    Filename prefix:napari_
+    Overwrite existing files without warning?:No
+    Data to export:Do not use
+    Combine these object measurements with those of the previous object?:No
+    File name:DATA.csv
+    Use the object name for the file name?:Yes
