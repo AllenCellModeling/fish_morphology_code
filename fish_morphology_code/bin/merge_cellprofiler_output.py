@@ -9,7 +9,6 @@ from fish_morphology_code.processing.merge_features.cp_processing_utils import (
     merge_cellprofiler_output,
     add_sample_image_metadata,
     add_cell_structure_scores,
-    cat_structure_scores,
     remove_missing_images,
     DEFAULT_CELLPROFILER_CSVS,
 )
@@ -20,9 +19,8 @@ def run(
     csv_prefix="napari_",
     out_csv="./merged_features.csv",
     normalized_image_manifest="",
-    fov_raw_seg_manifest="",
     fov_metadata="",
-    structure_score_paths="",
+    structure_scores="",
 ):
     """
     Merge cellprofiler output csvs with image metadata and structure scores
@@ -31,15 +29,15 @@ def run(
         csv_prefix (str): optional prefix part of cellprofiler output csv file names
         out_csv (str): path to file where to save merged csv
         normalized_image_manifest (str): location of contrast stretched images that were cellprofiler input
-        fov_raw_seg_manifest (str): location of manifest that matches raw image file names with pre-contrast stretched names
         fov_metadata (str): location of csv file with sample metadata from labkey
-        structure_score_paths (str): location of csv file with manual structure scores per cell
+        structure_scores (str): location of csv file with manual structure scores per cell
     """
 
     image_csv = os.path.join(
         cp_csv_dir, csv_prefix + DEFAULT_CELLPROFILER_CSVS["image"]
     )
 
+    # make list of ImageNumbers that failed to process in cellprofiler
     failed_images = image_processing_errors(image_csv)
 
     # merge cellprofiler output csvs
@@ -65,16 +63,12 @@ def run(
     cp_feature_metadata_df = add_sample_image_metadata(
         cell_feature_df=cp_feature_df,
         norm_image_manifest=normalized_image_manifest,
-        fov_raw_seg=fov_raw_seg_manifest,
         fov_metadata=fov_metadata,
     )
 
-    cell_structure_scores_df = cat_structure_scores(score_files=structure_score_paths)
-
     # add manual structure scores to feature data frame
     feature_df = add_cell_structure_scores(
-        cell_feature_df=cp_feature_metadata_df,
-        structure_score_df=cell_structure_scores_df,
+        cell_feature_df=cp_feature_metadata_df, structure_scores_csv=structure_scores
     )
 
     final_feature_df = remove_missing_images(feature_df)

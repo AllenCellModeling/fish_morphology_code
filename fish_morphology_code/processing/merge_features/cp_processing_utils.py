@@ -249,9 +249,7 @@ def image_object_counts(image_csv):
     return image_df
 
 
-def add_sample_image_metadata(
-    cell_feature_df, norm_image_manifest, fov_raw_seg, fov_metadata
-):
+def add_sample_image_metadata(cell_feature_df, norm_image_manifest, fov_metadata):
     r"""
         Add fish sample and image metadata to cell feature data frame
         Args:
@@ -265,7 +263,6 @@ def add_sample_image_metadata(
 
     sample_metadata_df = pd.read_csv(fov_metadata)
     norm_image_manifest_df = pd.read_csv(norm_image_manifest)
-    raw_seg_image_df = pd.read_csv(fov_raw_seg)
 
     # use normalized image manifest to get un-normalized image paths and merge
     # single cell image paths into cell feature data frame
@@ -273,11 +270,14 @@ def add_sample_image_metadata(
     # rename columns in image manifest to match cell feature df
     norm_image_manifest_df = norm_image_manifest_df.rename(
         columns={
-            "field_image_path": "seg_file_name",
-            "rescaled_field_image_path": "ImagePath",
+            "fov_id": "FOVId",
+            "original_fov_location": "fov_path",
+            "rescaled_2D_fov_tiff_path_cp": "ImagePath",
             "cell_label_value": "napariCell_ObjectNumber",
         }
     )
+
+    # merge 1: add raw fov path to cell_feature_df
     cell_feature_image_df = pd.merge(
         cell_feature_df,
         norm_image_manifest_df,
@@ -285,25 +285,18 @@ def add_sample_image_metadata(
         how="outer",
     )
 
-    # get raw image fov path
-    cell_feature_image_raw_df = pd.merge(
-        cell_feature_image_df, raw_seg_image_df, on=["seg_file_name"], how="outer"
-    )
-
-    # merge sample metadata into cell_feature_df
+    # merge 2: use raw fov path to add sample metadata into cell_feature_df
     cell_feature_image_metadata_df = pd.merge(
-        cell_feature_image_raw_df,
-        sample_metadata_df,
-        on=["fov_path", "FOVId"],
-        how="outer",
+        cell_feature_image_df, sample_metadata_df, on=["fov_path", "FOVId"], how="outer"
     )
     # drop unnecessary columns
     cell_feature_image_metadata_df = cell_feature_image_metadata_df.drop(
-        ["seg_file_name", "FOVId", "ge_wellID", "notes"], axis=1
+        ["FOVId", "ge_wellID", "notes"], axis=1
     )
 
     move_cols = [
-        "single_cell_channel_output_path",
+        "rescaled_2D_fov_tiff_path",
+        "rescaled_2D_single_cell_tiff_path",
         "fov_path",
         "well_position",
         "microscope",
@@ -331,24 +324,25 @@ def add_sample_image_metadata(
 
 
 def add_cell_structure_scores(
-    cell_feature_df, structure_score_df, norm_image_suffix="_rescaled.ome.tiff"
+    cell_feature_df, structure_scores_csv, norm_image_suffix="_rescaled.ome.tiff"
 ):
     """
         Add manual sarcomere structure scores to cell feature data frame
         Args:
             cell_feature_df (pd.DataFrame): cellprofiler cell and nuclei features merged by merge_cellprofiler_output
-            structure_score_df (pd.DataFrame): manual sarcomere structure scores per napari cell; cell_num = napariCell_ObjectNumber
+            structure_scores_csv (str): location of csv file with manual sarcomere structure scores per napari cell; cell_num = napariCell_ObjectNumber
             norm_image_suffix (str): suffix added to normalized tiff image names
         Returns:
             cell_feature_score_df (pd.DataFrame): all cell and nuclei features calculated by cellprofiler with manual structure scores added
     """
 
     # rename columns to match cell feature columns
+    structure_score_df = pd.read_csv(structure_scores_csv, index_col=0)
     structure_score_df = structure_score_df.rename(
         columns={
             "cell_num": "napariCell_ObjectNumber",
-            "mh_score": "mh_structure_org_score",
-            "kg_score": "kg_structure_org_score",
+            "mh score": "mh_structure_org_score",
+            "kg score": "kg_structure_org_score",
         }
     )
     structure_score_df["file_base"] = (
