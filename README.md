@@ -106,7 +106,7 @@ python distribute_autocontrasted_dataset.py
 - [x] manifest of the locations of original image data + segmentations
 - [x] script for taking original images and generating 2D normalized images
 - [x] structure annotations for each segmented cell
-- [ ] text-ish version of cellprofiler workflow to generate single cell segmentations and features from image data + segmentations
+- [x] text-ish version of cellprofiler workflow to generate single cell segmentations and features from image data + segmentations
 
 
 ## Stretch goals
