@@ -31,6 +31,12 @@ pre-commit install
 
 The data for this project lives in a quilt package backed by a private S3 bucket (`s3://allencell-internal-quilt`).
 To download it you need aws credentials to that bucket: ask cdave [@cdw]( https://github.com/cdw ) or someone on software.
+You can access all the data as normal through quilt, but this repo provides convenience functions to download the data from the command line (explained more below):
+
+ - `download_2D_segs [--test=True]`
+ - `download_2D_contrasted [--test=True]`
+ - `download_2D_features [--test=True]`
+
 
 ### Un-normalized 2D tiffs
 The images in this dataset are 16 bits.
