@@ -41,7 +41,7 @@ interactive_requirements = ["altair", "jupyterlab", "matplotlib"]
 
 requirements = [
     "aicsimageio>=3.0.2",
-    "fire>=0.2.1",
+    "anndata>=0.6.22" "fire>=0.2.1",
     "imageio>=2.6.1",
     "numpy>=1.17.2",
     "quilt3distribute>=0.1.1",
