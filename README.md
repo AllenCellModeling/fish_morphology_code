@@ -72,7 +72,7 @@ To get the whole dataset (~4 GB):
 download_scrnaseq
 ```
 This will download the dataset to the `quilt_data_scrnaseq` directory.
-Use `--test=True` to download counts for only 10 cells to the `quilt_data_scrnaseq_test` directory.
+Use `--test=True` to download counts for only 10 cells (~6 MB) to the `quilt_data_scrnaseq_test` directory.
 
 ## Running the auto-contrasting code
 To run the image normalization code, from the main repo dir:
@@ -89,6 +89,7 @@ This will take a while the first time setting up the test environment.
 
 ## Uploading data to quilt
 Uploading to quilt should happen infrequently so all the code has been put in the `data` directory outside of the main `fish_morphology_code` library.
+All uploading can be down in the `data` directory using `python distribute_<your_dataset>.py`
 
 ### Un-normalized 2D tiffs
 To upload a new version of the un-normalized 2D fovs, from the `data` directory:
