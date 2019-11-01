@@ -72,6 +72,25 @@ download_2D_contrasted
 ```
 This will download the dataset and save it to the `2d_autocontrasted_fields_and_single_cells` directory.
 
+
+### Single cell features from normalized (autocontrasted) 2D tiffs
+The features in this dataset are computed on the 8-bit normalized (aurocontrasted) tiff dataset.
+
+#### Test
+To download a test dataset (~500 KB) of features on single cells on just two fields:
+```
+download_2D_features --test=True
+```
+This will download the dataset and save it to the `2d_autocontrasted_fields_and_single_cells_test` directory.
+
+#### Whole dataset
+To get the whole dataset (~100 MB) of features on singles cells from all 478 fields:
+```
+download_2D_features
+```
+This will download the dataset and save it to the `2d_autocontrasted_fields_and_single_cells` directory.
+
+
 ## Running the auto-contrasting code
 To run the image normalization code, from the main repo dir:
 ```
