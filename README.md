@@ -20,7 +20,6 @@ pip install -e .
 ```
 
 ### Developers
-
 After following the "Normal users" installation instructions,
 ```
 pip install -e .[all]
@@ -28,68 +27,40 @@ pre-commit install
 ```
 
 ## Downloading the data
-
 The data for this project lives in a quilt package backed by a private S3 bucket (`s3://allencell-internal-quilt`).
-To download it you need aws credentials to that bucket: ask cdave [@cdw]( https://github.com/cdw ) or someone on software.
+To download it you need aws credentials to that bucket: ask [@cdw]( https://github.com/cdw ) or someone on software.
 You can access all the data as normal through quilt, but this repo provides convenience functions to download the data from the command line (explained more below):
 
  - `download_2D_segs [--test=True]`
  - `download_2D_contrasted [--test=True]`
  - `download_2D_features [--test=True]`
 
-
 ### Un-normalized 2D tiffs
 The images in this dataset are 16 bits.
-
-#### Test
-To download a test dataset (~40 MB) of just two fields:
-```
-download_2D_segs --test=True
-```
-This will download the dataset and save it to the `quilt_data_test` directory.
-
-#### Whole dataset
 To get the whole dataset (~9 GB) of all 478 fields:
 ```
 download_2D_segs
 ```
-This will download the dataset and save it to the `quilt_data` directory.
+This will download the dataset to the `quilt_data` directory.
+Use `--test=True` to download only two sample fields to the `quilt_data_test` directory.
 
 ### Normalized (autocontrasted) 2D tiffs
 The images in this dataset are 8 bits.
-
-#### Test
-To download a test dataset (~20 MB) of just two fields:
-```
-download_2D_contrasted --test=True
-```
-This will download the dataset and save it to the `2d_autocontrasted_fields_and_single_cells_test` directory.
-
-#### Whole dataset
 To get the whole dataset (~7 GB) of all 478 fields:
 ```
 download_2D_contrasted
 ```
-This will download the dataset and save it to the `2d_autocontrasted_fields_and_single_cells` directory.
-
+This will download the dataset to the `2d_autocontrasted_fields_and_single_cells` directory.
+Use `--test=True` to download only two sample fields + single cells to the `2d_autocontrasted_fields_and_single_cells_test` directory.
 
 ### Single cell features from normalized (autocontrasted) 2D tiffs
 The features in this dataset are computed on the 8-bit normalized (aurocontrasted) tiff dataset.
-
-#### Test
-To download a test dataset (~500 KB) of features on single cells on just two fields:
-```
-download_2D_features --test=True
-```
-This will download the dataset and save it to the `2d_autocontrasted_fields_and_single_cells_test` directory.
-
-#### Whole dataset
 To get the whole dataset (~100 MB) of features on singles cells from all 478 fields:
 ```
 download_2D_features
 ```
-This will download the dataset and save it to the `2d_autocontrasted_fields_and_single_cells` directory.
-
+This will download the dataset to the `quilt_data_features` directory.
+Use `--test=True` to download only two sample fields + single cells to the `quilt_data_features_test` directory.
 
 ## Running the auto-contrasting code
 To run the image normalization code, from the main repo dir:
