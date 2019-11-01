@@ -36,6 +36,7 @@ You can access all the data as normal through quilt, but this repo provides conv
  - `download_2D_features [--test=True]`
 
 ### Un-normalized 2D tiffs
+These images are maximum intensity projections of the data as it came off the microscope, plus some segmentations masks.
 The images in this dataset are 16 bits.
 To get the whole dataset (~9 GB) of all 478 fields:
 ```
@@ -45,6 +46,7 @@ This will download the dataset to the `quilt_data` directory.
 Use `--test=True` to download only two sample fields to the `quilt_data_test` directory.
 
 ### Normalized (autocontrasted) 2D tiffs
+These images are autocontrasted versions of the above tiffs, using code in this repo, as well as single cell segmentated images of the fields using their segmentaitons masks.
 The images in this dataset are 8 bits.
 To get the whole dataset (~7 GB) of all 478 fields:
 ```
@@ -54,7 +56,7 @@ This will download the dataset to the `2d_autocontrasted_fields_and_single_cells
 Use `--test=True` to download only two sample fields + single cells to the `2d_autocontrasted_fields_and_single_cells_test` directory.
 
 ### Single cell features from normalized (autocontrasted) 2D tiffs
-The features in this dataset are computed on the 8-bit normalized (aurocontrasted) tiff dataset.
+The features in this dataset are computed on the single cell images in the 8-bit normalized (aurocontrasted) tiff dataset, using the cellprofiler pipeline in this repo.
 To get the whole dataset (~100 MB) of features on singles cells from all 478 fields:
 ```
 download_2D_features
