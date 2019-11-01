@@ -29,12 +29,6 @@ pre-commit install
 This will install the the dev dependencies.
 It will also install the black formatter and flake8 linter, and configure them to run as pre-commit hooks.
 
-### Versions
-**Stable Release:** `pip install fish_morphology_code`<br>
-**Development Head:** `pip install git+https://github.com/AllenCellModeling/fish_morphology_code.git`
-
-## Documentation
-For full package documentation please visit [AllenCellModeling.github.io/fish_morphology_code](https://AllenCellModeling.github.io/fish_morphology_code).
 
 ## Downloading the data
 
@@ -118,16 +112,3 @@ To upload a new version of the normalized (autocontrasted) 2D fovs + single cell
 ```
 python distribute_autocontrasted_dataset.py
 ```
-
-
-## Bare minimum contents:
-
-- [x] manifest of the locations of original image data + segmentations
-- [x] script for taking original images and generating 2D normalized images
-- [x] structure annotations for each segmented cell
-- [x] text-ish version of cellprofiler workflow to generate single cell segmentations and features from image data + segmentations
-
-
-## Stretch goals
-
-- [ ] original image data + annotations into fms/labkey/quilt, or somehow programatically downloadable
