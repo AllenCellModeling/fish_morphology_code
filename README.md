@@ -34,6 +34,7 @@ You can access all the data as normal through quilt, but this repo provides conv
  - `download_2D_segs [--test=True]`
  - `download_2D_contrasted [--test=True]`
  - `download_2D_features [--test=True]`
+ - `download_scrnaseq [--test=True]`
 
 ### Un-normalized 2D tiffs
 These images are maximum intensity projections of the data as it came off the microscope, plus some segmentations masks.
@@ -63,6 +64,15 @@ download_2D_features
 ```
 This will download the dataset to the `quilt_data_features` directory.
 Use `--test=True` to download only two sample fields + single cells to the `quilt_data_features_test` directory.
+
+### Single cell RNA sequencing from cells in related conditions
+Split-seq single cell transcriptomics on 21864 cells, quantifying the abundance of 38216 unique transcipts in the cells.
+To get the whole dataset (~4 GB):
+```
+download_scrnaseq
+```
+This will download the dataset to the `quilt_data_scrnaseq` directory.
+Use `--test=True` to download counts for only 10 cells to the `quilt_data_scrnaseq_test` directory.
 
 ## Running the auto-contrasting code
 To run the image normalization code, from the main repo dir:
