@@ -26,11 +26,11 @@ After following the "Normal users" installation instructions,
 pip install -e .[all]
 pre-commit install
 ```
-This will install the the dev dependencies.
-It will also install the black formatter and flake8 linter, and configure them to run as pre-commit hooks.
-
 
 ## Downloading the data
+
+The data for this project lives in a quilt package backed by a private S3 bucket (`s3://allencell-internal-quilt`).
+To download it you need aws credentials to that bucket: ask cdave [@cdw]( https://github.com/cdw ) or someone on software.
 
 ### Un-normalized 2D tiffs
 The images in this dataset are 16 bits.
