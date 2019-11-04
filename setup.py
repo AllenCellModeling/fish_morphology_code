@@ -85,6 +85,7 @@ setup(
             "download_scrnaseq=fish_morphology_code.bin.download_quilt_data:main_scrnaseq",
             "contrast_and_segment=fish_morphology_code.bin.stretch:main",
             "merge_cellprofiler_output=fish_morphology_code.bin.merge_cellprofiler_output:main",
+            "make_cellprofiler_image_set=fish_morphology_code.bin.make_cellprofiler_image_set:main_make_imageset",
         ]
     },
     install_requires=requirements,
