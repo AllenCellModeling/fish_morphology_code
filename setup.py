@@ -48,6 +48,7 @@ requirements = [
     "quilt3distribute>=0.1.1",
     "pandas>=0.25.1",
     "scikit-image>=0.16.1",
+    "scikit-learn>=0.21.3",
     "tqdm>=4.36.1",
 ]
 

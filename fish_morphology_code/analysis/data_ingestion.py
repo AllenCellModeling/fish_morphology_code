@@ -1,4 +1,3 @@
-import itertools
 
 import numpy as np
 import pandas as pd
@@ -7,77 +6,262 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.preprocessing import StandardScaler
 
-COLUMN_GROUPS = {
-    "struct_score": ["mh_score", "kg_score"],
-    "loc_score": ["probe_561_loc_score", "probe_638_loc_score"],
-    "required_feats": [
-        "nuc_AreaShape_Area",
-        "cell_napari_AreaShape_Area",
-        "nuc_Children_seg_probe_561_Count",
-        "nuc_Children_seg_probe_638_Count",
-        "cell_napari_Children_seg_probe_561_Count",
-        "cell_napari_Children_seg_probe_638_Count",
-    ],
-    "metadata": [
+from anndata import AnnData
+
+
+def _determine_region(feat):
+    if feat.startswith("finalnuc_"):
+        return "nuclear"
+    elif feat.startswith("napariCell_"):
+        return "cell"
+    else:
+        return None
+
+
+def _determine_channel(feat):
+    if "_structure_" in feat:
+        return "structure"
+    elif "_bf_" in feat:
+        return "bright field"
+    elif "_nuc_" in feat:
+        return "DNA"
+    elif "_probe_" in feat:
+        return "FISH"
+    elif "" in feat:
+        return "segmentation"
+    else:
+        return None
+
+
+def _determine_type(feat):
+    if "_Center_" in feat:
+        return "location"
+    elif "_Count" in feat:
+        return "count"
+    elif "_Texture_" in feat:
+        return "texture"
+    elif "_AreaShape_" in feat:
+        return "shape"
+    else:
+        return None
+
+
+def _determine_probe_wavelength(feat):
+    if "probe_638" in feat:
+        return "638"
+    elif "probe_561" in feat:
+        return "561"
+    else:
+        return None
+
+
+def make_anndata_feats(
+    df_feats,
+    obs_cols=[
         "ImageNumber",
-        "FileName_bf",
-        "plate_id",
-        "well_id",
-        "probe_561",
-        "probe_638",
+        "ImagePath",
+        "ImageFailed",
+        "napariCell_ObjectNumber",
+        "rescaled_2D_fov_tiff_path",
+        "rescaled_2D_single_cell_tiff_path",
+        "fov_path",
+        "well_position",
+        "microscope",
+        "image_date",
+        "probe488",
+        "probe546",
+        "probe647",
+        "plate_name",
+        "cell_line",
         "cell_age",
-        "nuc_ImageNumber",
-        "nuc_ObjectNumber",
-        "cell_napari_Number_Object_Number",
-        "cell_napari_Parent_RelabeledNuclei",
-        "nuc_Number_Object_Number",
-        "nuc_Parent_FilterNuc",
-        "nuc_Parent_napari_cell",
-    ],
-}
-
-
-def load_data(csv_loc, index_col=0, low_memory=False, nrows=10067):
-    """loads df from csv with some options"""
-    df = pd.read_csv(csv_loc, index_col=index_col, low_memory=low_memory, nrows=nrows)
-    return df
-
-
-def prune_data(
-    df,
-    drop_cols=[
-        "probe_488",
-        "nuc_AreaShape_Center_Z",
-        "cell_napari_AreaShape_Center_Z",
-        "cell_napari_AreaShape_EulerNumber",
+        "napariCell_nuclei_Count",
+        "finalnuc_border",
+        "finalnuc_ObjectNumber",
+        "finalnuc_Parent_FilterNuc",
+        "nuccentroid_ObjectNumber",
+        "mh_structure_org_score",
+        "kg_structure_org_score",
     ],
 ):
-    """drop some columns that are mostly nans / useless"""
-    return df.drop(drop_cols, axis="columns")
+    """make feature df into anndata: X=feat values, obs=metadata, var=feature annotations"""
 
-
-def drop_rows_with_nans(
-    df,
-    nonan_cols=list(
-        itertools.chain(
-            [e for k, v in COLUMN_GROUPS.items() if k != "loc_score" for e in v]
+    # dice into main feature data (X) and metadata (obs)
+    X_cols = [
+        c
+        for c in df_feats.columns
+        if (
+            any(c.startswith(x) for x in ["napariCell_", "finalnuc_"])
+            and c not in obs_cols
         )
-    ),
-):
-    """drop rows with values missing in those cols"""
-    return df.dropna(subset=nonan_cols, axis="rows").reset_index(drop=True)
+    ]
+    obs = df_feats[obs_cols]
+    X = df_feats[X_cols]
+    assert len(df_feats.columns) == len(obs_cols + X_cols)
+
+    # feature annotations to use for subsetting
+    var = pd.DataFrame({"name": X.columns})
+    var["region"] = var["name"].apply(_determine_region)
+    var["channel"] = var["name"].apply(_determine_channel)
+    var["type"] = var["name"].apply(_determine_type)
+    var["probe_wavelength"] = var["name"].apply(_determine_probe_wavelength)
+    assert var["region"].isnull().sum() == 0
+    assert var["channel"].isnull().sum() == 0
+    assert var["type"].isnull().sum() == 0
+    assert (
+        len(var) - var["probe_wavelength"].isnull().sum()
+        == (var["channel"] == "FISH").sum()
+    )
+
+    return AnnData(X=X, obs=obs, var=var.set_index("name"))
 
 
-def drop_bad_struct_scores(df, exclude_scores=[-1, 0]):
+_OBS_PROBE_MAP = {"488": "probe488", "561": "probe546", "638": "probe647"}
+
+
+def tidy_by_probe(adata, probe_wavelengths=["561", "638"]):
+    """remove probe pairings and treat each probe as individual obs on duplicataed other feats."""
+
+    adata_s = {p: "" for p in probe_wavelengths}
+
+    for pw in probe_wavelengths:
+        feats = (adata.var["probe_wavelength"] == pw) | (
+            adata.var["probe_wavelength"].isnull()
+        )
+        adata_s[pw] = adata[:, feats]
+        adata_s[pw].var.index = adata_s[pw].var.index.str.replace(f"{pw}_", "")
+
+        adata_s[pw].var = adata_s[pw].var.drop("probe_wavelength", axis="columns")
+        adata_s[pw].obs = (
+            adata_s[pw]
+            .obs.drop([v for k, v in _OBS_PROBE_MAP.items() if k != pw], axis="columns")
+            .rename({_OBS_PROBE_MAP[pw]: "FISH_probe"}, axis="columns")
+        )
+
+    adata_c = adata_s[probe_wavelengths[0]]
+    for pw in probe_wavelengths[1:]:
+        adata_c = adata_c.concatenate(adata_s[pw])
+
+    return adata_c
+
+
+def prune_nans(adata_in, thresh=0.1, axis="columns"):
+    """drop row/col if frac of nans in row/col is greater than thresh"""
+    adata = adata_in.copy()
+    if axis == "columns":
+        adata = adata[:, np.isnan(adata.X).mean(axis=0) < thresh]
+    elif axis == "rows":
+        adata = adata[np.isnan(adata.X).mean(axis=1) < thresh, :]
+    else:
+        return ValueError
+    return adata
+
+
+def iteratively_prune(adata, threshs=[0.1, 0.01]):
+    """iterate between dropping rows/cols on sucessively more stringent thresholds"""
+    adata_out = adata.copy()
+    for thresh in threshs:
+        for axis in ["columns", "rows"]:
+            adata_out = prune_nans(adata_out, thresh=thresh, axis=axis)
+    adata_out.obs = adata_out.obs.reset_index(drop=True)
+    return adata_out
+
+
+def drop_bad_struct_scores(adata, exclude_scores=[-1, 0]):
     """-1 is a bad cell and 0 was non expressing i think?"""
-    return df[
-        (~df[COLUMN_GROUPS["struct_score"]].isin(exclude_scores)).all(axis="columns")
-    ].reset_index(drop=True)
+    adata_out = adata[
+        (
+            ~adata.obs[["mh_structure_org_score", "kg_structure_org_score"]].isin(
+                [0, -1]
+            )
+        ).all(axis="columns"),
+        :,
+    ].copy()
+    adata_out.obs = adata_out.obs.reset_index(drop=True)
+    return adata_out
 
 
-def get_probe_pairs(df, probe_name_cols=["probe_561", "probe_638"]):
+def drop_xyz_locs(adata):
+    """xyz positions in field shouldn't matter to single cell stats"""
+    return adata[:, adata.var["type"] != "location"].copy()
+
+
+def remap_struct_scores(
+    adata,
+    struct_score_cols=["mh_structure_org_score", "kg_structure_org_score"],
+    map_dict={1: 1, 2: 1, 3: 2, 4: 3, 5: 3},
+):
+    """remap structure scores from 1:5 to 1:3 or whatever"""
+    adata_out = adata.copy()
+    for col in struct_score_cols:
+        adata_out.obs[col] = adata_out.obs[col].map(map_dict)
+    return adata_out
+
+
+def split_data(
+    adata, stratify_on="kg_structure_org_score", random_state=0, test_size=0.25
+):
+    """splits anndata and returns dict of inds/anndatas for test and train split"""
+    inds = np.arange(len(adata))
+
+    indices = {"train": [], "test": []}
+    indices["train"], indices["test"], _, _ = train_test_split(
+        inds,
+        adata,
+        test_size=test_size,
+        random_state=random_state,
+        stratify=adata.obs[stratify_on],
+    )
+
+    adata = {split: adata[inds, :] for split, inds in indices.items()}
+    for split, ad in adata.items():
+        adata[split].obs = adata[split].obs.reset_index(drop=True)
+
+    return {"adata": adata, "indices": indices}
+
+
+def get_probe_pairs(adata, probe_name_cols=["probe546", "probe647"]):
     """unique probe pairs in dataset"""
-    return list(list(x) for x in df[probe_name_cols].drop_duplicates().values)
+    return list(list(x) for x in adata.obs[probe_name_cols].drop_duplicates().values)
+
+
+def subset_to_probe_pair(adata, probe_pair=["MYH6", "MYH7"]):
+    """subset the anndata to only a certain probe pair"""
+    adata_out = adata[
+        np.all(adata.obs[["probe546", "probe647"]] == probe_pair, axis=1), :
+    ].copy()
+    adata_out.obs = adata_out.obs.reset_index(drop=True)
+    return adata_out
+
+
+def remove_low_var_feat_cols(adatas, threshold=0.0):
+    """
+    checks train anndata for low/zero var feature cols and removes them from both test and train anndatas.
+    each check is done independently for each probe pair, cols with low var in any subset are removed from all.
+    """
+
+    drop_cols = set()
+    probe_pairs = get_probe_pairs(adatas["train"])
+    for probe_pair in probe_pairs:
+        adata_pp = subset_to_probe_pair(adatas["train"], probe_pair)
+
+        selector = VarianceThreshold(threshold=threshold)
+        selector.fit(adata_pp.X)
+        drop_cols |= set(adata_pp.var.index[~selector.get_support()])
+    return {
+        k: v[:, [c for c in v.var.index if c not in drop_cols]].copy()
+        for k, v in adatas.items()
+    }
+
+
+def z_score_feats(adatas):
+    """z-score train and test feat data based on train params, return params as well as scaled anndata"""
+
+    scaler = StandardScaler().fit(adatas["train"].X)
+    adatas_out = {split: ad.copy() for split, ad in adatas.items()}
+    for split in adatas_out.keys():
+        adatas_out[split].X = scaler.transform(adatas_out[split].X)
+
+    return adatas_out, {"means": scaler.mean_, "scales": scaler.scale_}
 
 
 def clean_up_loc_scores(
@@ -107,188 +291,3 @@ def clean_up_loc_scores(
         df_out[col] = df[col].map(d_map)
 
     return df_out
-
-
-def remap_struct_scores(
-    df,
-    struct_score_cols=COLUMN_GROUPS["struct_score"],
-    map_dict={1: 1, 2: 1, 3: 2, 4: 3, 5: 3},
-):
-    """remap structure scores from 1:5 to 1:3 or whatever"""
-    df_out = df.copy()
-    for col in struct_score_cols:
-        df_out[col] = df_out[col].map(map_dict)
-    return df_out
-
-
-def subset_to_probe_pair(df, probe_pair=["MYH6", "MYH7"]):
-    """subset the df to only a certain probe pair"""
-    return df[np.all(df[["probe_561", "probe_638"]] == probe_pair, axis=1)].reset_index(
-        drop=True
-    )
-
-
-def get_feat_col_groups(df, extended_probe_feats=False, prune_loc_feats=True):
-    """get dict of col names corresponding to different types of features"""
-
-    all_non_metadata_cols = [
-        c for c in df.columns if c not in COLUMN_GROUPS["metadata"]
-    ]
-
-    feat_cols = {
-        "nuc_shape": [c for c in all_non_metadata_cols if "nuc_AreaShape" in c],
-        "nuc_texture": [c for c in all_non_metadata_cols if "nuc_Texture" in c],
-        "cell_shape": [
-            c for c in all_non_metadata_cols if "cell_napari_AreaShape" in c
-        ],
-        "cell_texture": [
-            c for c in all_non_metadata_cols if "cell_napari_Texture" in c
-        ],
-    }
-    feat_cols["morphological"] = (
-        feat_cols["nuc_shape"]
-        + feat_cols["nuc_texture"]
-        + feat_cols["cell_shape"]
-        + feat_cols["cell_texture"]
-    )
-
-    if extended_probe_feats:
-        feat_cols = {
-            **feat_cols,
-            "probe_561": [c for c in all_non_metadata_cols if "probe_561" in c],
-            "probe_638": [c for c in all_non_metadata_cols if "probe_638" in c],
-        }
-    else:
-        feat_cols = {
-            **feat_cols,
-            "probe_561": [
-                "nuc_Children_seg_probe_561_Count",
-                "cell_napari_Children_seg_probe_561_Count",
-            ],
-            "probe_638": [
-                "nuc_Children_seg_probe_638_Count",
-                "cell_napari_Children_seg_probe_638_Count",
-            ],
-        }
-
-    if prune_loc_feats:
-        feat_cols = {
-            k: [c for c in v if not any([f"Center_{s}" in c for s in ["X", "Y", "Z"]])]
-            for k, v in feat_cols.items()
-        }
-
-    return feat_cols
-
-
-def split_data(df, stratify_on="kg_score", random_state=0, test_size=0.25):
-    """splits df and returns dict of inds/dfs for test and train split"""
-    inds = np.arange(len(df))
-    inds_train, inds_test, _, _ = train_test_split(
-        inds,
-        df,
-        test_size=test_size,
-        random_state=random_state,
-        stratify=df[stratify_on],
-    )
-    return {
-        "dfs": {
-            "train": df.loc[inds_train, :].reset_index(drop=True),
-            "test": df.loc[inds_test, :].reset_index(drop=True),
-        },
-        "indices": {"train": inds_train, "test": inds_test},
-    }
-
-
-def check_low_var_cols(df_train):
-    """for each probe pair check that no cols are zero variance"""
-    feat_cols = get_feat_col_groups(df_train)
-    my_feats = [
-        e
-        for k, v in feat_cols.items()
-        for e in v
-        if e not in COLUMN_GROUPS["loc_score"]
-    ]
-
-    probe_pairs = get_probe_pairs(df_train)
-    for probe_pair in probe_pairs:
-        df_pp = subset_to_probe_pair(probe_pair)
-
-        selector = VarianceThreshold()
-        selector.fit(df_pp[my_feats])
-        assert np.all(selector.get_support())
-
-
-def drop_xyz_locs(df):
-    """xyz positions in field shouldn't matter to single cell stats"""
-    cols = [
-        c
-        for c in df.columns
-        if any(x in c for x in ["Center_X", "Center_Y", "Center_Z"])
-    ]
-    return df.drop(cols, axis="columns")
-
-
-def drop_zernike_fish_feats(
-    df,
-    feat_patterns=[
-        "seg_probe_561_AreaShape_Zernike",
-        "seg_probe_638_AreaShape_Zernike",
-    ],
-):
-    "these are mostly nans"
-    cols = [f for f in df.columns if any([x in f for x in feat_patterns])]
-    return df.drop(cols, axis="columns")
-
-
-def replace_nans(dfs, replace_with=0):
-    """
-    i think most of these are divide by zero errors for no spots.
-    needed for training classifiers.
-    """
-    return {k: v.fillna(replace_with) for k, v in dfs.items()}
-
-
-def remove_low_var_feat_cols(dfs, threshold=0.0):
-    """
-    checks train df for low/zero var feature cols and removes them from both test and train dfs.
-    each check is done independently for each probe pairs, cols with low var in any subset are removed from all.
-    """
-    feat_cols = [
-        e
-        for g, l in get_feat_col_groups(dfs["train"]).items()
-        for e in l
-        if e not in COLUMN_GROUPS["loc_score"]
-    ]
-
-    drop_cols = set()
-    probe_pairs = get_probe_pairs(dfs["train"])
-    for probe_pair in probe_pairs:
-        df_pp = subset_to_probe_pair(dfs["train"], probe_pair)
-
-        selector = VarianceThreshold(threshold=threshold)
-        selector.fit(df_pp[feat_cols])
-        drop_cols |= set(df_pp[feat_cols].columns[~selector.get_support()])
-
-    return {k: v.drop(drop_cols, axis="columns") for k, v in dfs.items()}
-
-
-def z_score_feats(dfs):
-    """z-score train and test feat data based on train params, return params as well as scaled dfs"""
-    feat_cols = set(
-        [
-            e
-            for g, l in get_feat_col_groups(dfs["train"]).items()
-            for e in l
-            if e not in COLUMN_GROUPS["loc_score"]
-        ]
-    )
-    scaler = StandardScaler().fit(dfs["train"][feat_cols])
-    dfs_s = {
-        k: pd.DataFrame(scaler.transform(v[feat_cols]), columns=feat_cols)
-        for k, v in dfs.items()
-    }
-    dfs_out = {k: v.copy() for k, v in dfs.items()}
-    for k, v in dfs_s.items():
-        dfs_out[k].update(v)
-
-    return dfs_out, {"means": scaler.mean_, "scales": scaler.scale_}
