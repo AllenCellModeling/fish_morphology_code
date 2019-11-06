@@ -47,7 +47,9 @@ requirements = [
     "numpy>=1.17.2",
     "quilt3distribute>=0.1.2",
     "pandas>=0.25.1",
+    "python-dateutil==2.8.0",
     "scikit-image>=0.16.1",
+    "scikit-learn>=0.21.3",
     "tqdm>=4.36.1",
 ]
 
