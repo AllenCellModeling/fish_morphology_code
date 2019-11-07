@@ -98,7 +98,7 @@ def train_classifiers(dsets, classifiers, verbose=False):
             for clf_name, Clf in classifiers.items():
                 if verbose:
                     print(probe, feats, clf_name, dset["X"].shape)
-                    clf = sklearn.clone(Clf)
+                clf = sklearn.clone(Clf)
                 out[probe][feats][clf_name] = clf.fit(dset["X"], dset["y"])
     return out
 
