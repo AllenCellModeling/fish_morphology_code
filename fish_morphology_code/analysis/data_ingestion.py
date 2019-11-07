@@ -140,6 +140,7 @@ def tidy_by_probe(adata, probe_wavelengths=["561", "638"]):
     adata_c = adata_s[probe_wavelengths[0]]
     for pw in probe_wavelengths[1:]:
         adata_c = adata_c.concatenate(adata_s[pw])
+    adata_c.uns = adata.uns.copy()
 
     return adata_c
 
