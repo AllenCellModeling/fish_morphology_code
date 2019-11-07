@@ -215,8 +215,10 @@ def split_data(
     adata = {split: adata[inds, :] for split, inds in indices.items()}
     for split, ad in adata.items():
         adata[split].obs = adata[split].obs.reset_index(drop=True)
+        adata[split].uns["split"] = split
+        adata[split].uns["indices"] = indices[split]
 
-    return {"adata": adata, "indices": indices}
+    return adata
 
 
 def get_probe_pairs(adata, probe_name_cols=["probe546", "probe647"]):
@@ -255,13 +257,15 @@ def remove_low_var_feat_cols(adatas, threshold=0.0):
 
 def z_score_feats(adatas):
     """z-score train and test feat data based on train params, return params as well as scaled anndata"""
-
     scaler = StandardScaler().fit(adatas["train"].X)
     adatas_out = {split: ad.copy() for split, ad in adatas.items()}
-    for split in adatas_out.keys():
-        adatas_out[split].X = scaler.transform(adatas_out[split].X)
-
-    return adatas_out, {"means": scaler.mean_, "scales": scaler.scale_}
+    for split, ad in adatas_out.items():
+        adatas_out[split].layers["z-scored"] = scaler.transform(ad.X)
+        adatas_out[split].uns["z-score params"] = {
+            "means": scaler.mean_,
+            "scales": scaler.scale_,
+        }
+    return adatas_out
 
 
 def clean_up_loc_scores(
@@ -291,3 +295,12 @@ def clean_up_loc_scores(
         df_out[col] = df[col].map(d_map)
 
     return df_out
+
+
+def make_contingency_table(
+    adata, groupby=["FISH_probe", "cell_age", "kg_structure_org_score"]
+):
+    tab = adata.obs.groupby(groupby).count()
+    assert (tab.min(axis="columns") == tab.max(axis="columns")).all()
+    tab = tab.loc[:, ["ImageNumber"]].rename({"ImageNumber": "Count"}, axis="columns")
+    return tab.reset_index()
