@@ -17,10 +17,10 @@ def make_imageset(
     out_loc="image_set.csv",
 ):
     """
-    Create image set listing that can be used as input to cellprofiler in headless mode
+    Create and write to file image set listing (csv) that can be used as input to cellprofiler in headless mode
 
     Args:
-        image_csv (str): location (absolute path) of csv with image locations (absolute paths)
+        image_csv (str): location (absolute path) of csv with image locations; probably quilt metadata.csv but doesn't have to be
         defaults_json (str): location of json with default image set metadata
         path_key (str): column in image_csv with path to images
         local_path (str): path to local directory where images listed in image_csv are saved
