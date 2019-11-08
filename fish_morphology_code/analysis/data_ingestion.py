@@ -256,16 +256,42 @@ def remove_low_var_feat_cols(adatas, threshold=0.0):
     }
 
 
-def z_score_feats(adatas):
-    """z-score train and test feat data based on train params, return params as well as scaled anndata"""
+def z_score_feats(adatas, probe_subsets=True):
+    """z-score train and test feat data based on train params, return params as well as scaled anndata.
+       if probe_subsets=True, z-score the probe features individually for each probe."""
+
     scaler = StandardScaler().fit(adatas["train"].X)
+    if probe_subsets:
+        probes = adatas["train"].obs["FISH_probe"].unique()
+        scalers_probes = {}
+        ad = adatas["train"]
+        for probe in probes:
+            cell_inds = ad.obs["FISH_probe"] == probe
+            feat_inds = ad.var["channel"] == "FISH"
+            x = ad[cell_inds, :][:, feat_inds].X
+            scalers_probes[probe] = StandardScaler().fit(x)
+
     adatas_out = {split: ad.copy() for split, ad in adatas.items()}
     for split, ad in adatas_out.items():
         adatas_out[split].layers["z-scored"] = scaler.transform(ad.X)
         adatas_out[split].uns["z-score params"] = {
-            "means": scaler.mean_,
-            "scales": scaler.scale_,
+            "all": {"means": scaler.mean_, "scales": scaler.scale_}
         }
+        if probe_subsets:
+            for probe in probes:
+                cell_inds = ad.obs["FISH_probe"] == probe
+                feat_inds = ad.var["channel"] == "FISH"
+                x = ad[cell_inds, :][:, feat_inds].X.copy()
+                new_x = scalers_probes[probe].transform(x)
+                feats_int = [i for i, f in enumerate(feat_inds) if f]
+                cells_int = [i for i, c in enumerate(cell_inds) if c]
+                for i, c in enumerate(cells_int):
+                    for j, f in enumerate(feats_int):
+                        adatas_out[split].layers["z-scored"][c, f] = new_x[i, j]
+                adatas_out[split].uns["z-score params"][probe] = {
+                    "means": scalers_probes[probe].mean_,
+                    "scales": scalers_probes[probe].scale_,
+                }
     return adatas_out
 
 
