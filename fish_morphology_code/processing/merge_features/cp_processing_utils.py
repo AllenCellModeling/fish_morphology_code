@@ -249,14 +249,19 @@ def image_object_counts(image_csv):
     return image_df
 
 
-def add_sample_image_metadata(cell_feature_df, norm_image_manifest, fov_metadata):
+def add_sample_image_metadata(
+    cell_feature_df,
+    norm_image_manifest,
+    fov_metadata,
+    norm_image_key="rescaled_2D_fov_tiff_path",
+):
     r"""
         Add fish sample and image metadata to cell feature data frame
         Args:
             cell_feature_df (pd.DataFrame): cellprofiler cell and nuclei features merged by merge_cellprofiler_output
             norm_image_manifest (str): location of csv with paths to fov pre-normalization and normalized tiffs that were analyzed with cellprofiler
-            fov_raw_seg (str): location of csv with paths to fov raw tiffs and processed but pre-normalization tiffs
             fov_metadata (str): location of csv with fov sample metadata
+            norm_image_key (str): column name for column in norm_image_manifest csv that contains path to images that were analyzed with cellprofiler
         Returns:
             final_feature_df (pd.DataFrame): all cell and nuclei features calculated by cellprofiler with columns added for sample and image metadata; each row is one napari cell
     """
@@ -272,7 +277,7 @@ def add_sample_image_metadata(cell_feature_df, norm_image_manifest, fov_metadata
         columns={
             "fov_id": "FOVId",
             "original_fov_location": "fov_path",
-            "rescaled_2D_fov_tiff_path_cp": "ImagePath",
+            norm_image_key: "ImagePath",
             "cell_label_value": "napariCell_ObjectNumber",
         }
     )
@@ -295,7 +300,6 @@ def add_sample_image_metadata(cell_feature_df, norm_image_manifest, fov_metadata
     )
 
     move_cols = [
-        "rescaled_2D_fov_tiff_path",
         "rescaled_2D_single_cell_tiff_path",
         "fov_path",
         "well_position",
@@ -399,3 +403,23 @@ def remove_missing_images(feature_df):
     feature_df_clean = feature_df.loc[~missing_images, :]
 
     return feature_df_clean
+
+
+def prepend_localpath(image_csv, column_list, localpath):
+    r"""
+        Convert relative image paths in image_csv to absolute paths
+        Args:
+            image_csv (str): csv file where one or more columns with relative image paths (ex. quilt metadata.csv)
+            column_list (list): list of column names in csv that contain relative paths to be converted
+            localpath (str): prepend this path to relative image paths to convert to absolute (ex. rescaled_2D_tiff/5500000013_rescaled.ome.tiff -> /home/tanyag/quilt_data_contrasted/rescaled_2D_tiff/5500000013_rescaled.ome.tiff)
+        Returns:
+            image_path_df (pd.DataFrame): image path data frame with absolute image paths
+    """
+
+    image_path_df = pd.read_csv(image_csv)
+
+    # prepend localpath to columns specified in column_list
+    for c in column_list:
+        image_path_df[c] = localpath + "/" + image_path_df[c]
+
+    return image_path_df

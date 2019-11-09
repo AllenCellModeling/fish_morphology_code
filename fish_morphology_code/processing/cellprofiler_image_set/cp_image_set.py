@@ -19,21 +19,22 @@ def image_set_list(quilt_path, index, local_path, **kwargs):
         image_set_df (pd.DataFrame): image set in format accepted by cellprofiler
     """
 
-    image_path = "file:" + os.path.join(local_path, quilt_path)
+    url_image_path = "file:" + os.path.join(local_path, quilt_path)
+    image_path = os.path.join(local_path, quilt_path)
     dir_name = os.path.dirname(image_path)
     file_name = os.path.basename(image_path)
     new_frame = pd.DataFrame(
         {
             "Group_Number": [kwargs["Group_Number"]],
             "Group_Index": index,
-            "URL_bf": image_path,
-            "URL_fore_back": image_path,
-            "URL_nuc": image_path,
-            "URL_probe_561": image_path,
-            "URL_probe_638": image_path,
-            "URL_seg_561": image_path,
-            "URL_seg_638": image_path,
-            "URL_structure": image_path,
+            "URL_bf": url_image_path,
+            "URL_fore_back": url_image_path,
+            "URL_nuc": url_image_path,
+            "URL_probe_561": url_image_path,
+            "URL_probe_638": url_image_path,
+            "URL_seg_561": url_image_path,
+            "URL_seg_638": url_image_path,
+            "URL_structure": url_image_path,
             "PathName_bf": dir_name,
             "PathName_fore_back": dir_name,
             "PathName_nuc": dir_name,
@@ -74,7 +75,7 @@ def image_set_list(quilt_path, index, local_path, **kwargs):
             "Channel_seg_561": [kwargs["Channel_seg_561"]],
             "Channel_seg_638": [kwargs["Channel_seg_638"]],
             "Channel_structure": [kwargs["Channel_structure"]],
-            "ObjectsURL_napari_cell": image_path,
+            "ObjectsURL_napari_cell": url_image_path,
             "ObjectsPathName_napari_cell": dir_name,
             "ObjectsFileName_napari_cell": file_name,
             "ObjectsSeries_napari_cell": [kwargs["ObjectsSeries_napari_cell"]],
@@ -83,7 +84,7 @@ def image_set_list(quilt_path, index, local_path, **kwargs):
             "Metadata_C": [kwargs["Metadata_C"]],
             "Metadata_ChannelName": [kwargs["Metadata_ChannelName"]],
             "Metadata_ColorFormat": [kwargs["Metadata_ColorFormat"]],
-            "Metadata_FileLocation": [kwargs["Metadata_FileLocation"]],
+            "Metadata_FileLocation": url_image_path,
             "Metadata_Frame": [kwargs["Metadata_Frame"]],
             "Metadata_Plate": [kwargs["Metadata_Plate"]],
             "Metadata_Series": [kwargs["Metadata_Series"]],
