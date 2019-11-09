@@ -97,7 +97,7 @@ FilterObjects:[module_num:6|svn_version:\'Unknown\'|variable_revision_number:8|s
     Assign overlapping child to:Both parents
     Select the measurement to filter by:AreaShape_Area
     Filter using a minimum measurement value?:Yes
-    Minimum value:2500
+    Minimum value:5000
     Filter using a maximum measurement value?:No
     Maximum value:1.0
 
@@ -255,6 +255,7 @@ RelateObjects:[module_num:15|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:None
     Parent name:None
     Parent name:None
+    Parent name:None
 
 SplitOrMergeObjects:[module_num:16|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\'Merge centroids by parent napari cell\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the input objects:NucCentroid
@@ -276,6 +277,7 @@ RelateObjects:[module_num:17|svn_version:\'Unknown\'|variable_revision_number:4|
     Calculate child-parent distances?:None
     Calculate per-parent means for all child measurements?:No
     Calculate distances to other parents?:No
+    Parent name:None
     Parent name:None
     Parent name:None
     Parent name:None
@@ -441,6 +443,7 @@ RelateObjects:[module_num:26|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:None
     Parent name:None
     Parent name:None
+    Parent name:None
 
 RelateObjects:[module_num:27|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to napari cells\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Parent objects:napari_cell
@@ -489,6 +492,7 @@ RelateObjects:[module_num:27|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:None
     Parent name:None
     Parent name:None
+    Parent name:None
 
 RelateObjects:[module_num:28|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to nuclei objects\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
     Parent objects:FinalNuc
@@ -497,6 +501,7 @@ RelateObjects:[module_num:28|svn_version:\'Unknown\'|variable_revision_number:4|
     Calculate child-parent distances?:None
     Calculate per-parent means for all child measurements?:Yes
     Calculate distances to other parents?:No
+    Parent name:None
     Parent name:None
     Parent name:None
     Parent name:None
@@ -588,9 +593,10 @@ RelateObjects:[module_num:29|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:None
     Parent name:None
     Parent name:None
+    Parent name:None
 
 ConvertObjectsToImage:[module_num:30|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
-    Select the input objects:FinalNucBorder
+    Select the input objects:FilterNuc
     Name the output image:nuc_object_mask
     Select the color format:uint16
     Select the colormap:Default
