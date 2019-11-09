@@ -36,10 +36,11 @@ def make_imageset(
     image_set_df = pd.DataFrame()
 
     # add images to image_set_df in format expected by cellprofiler
-    for i, row in metadata_df.iterrows():
+    all_images = metadata_df[path_key].unique()
+    for i, image_path in enumerate(all_images):
         image_index = i + 1
         add_df = image_set_list(
-            quilt_path=row[path_key],
+            quilt_path=image_path,
             index=image_index,
             local_path=local_path,
             **DEFAULT_IMAGE_SET_KWARGS,
