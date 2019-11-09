@@ -35,9 +35,14 @@ def run(structure_scores, normalized_image_manifest, fov_metadata, out_csv):
         norm_image_df, structure_score_df, on=["file_base"], how="outer"
     )
 
+    # rename fov_id column to match name in labkey metadata
+    norm_image_structure_df = norm_image_structure_df.rename(
+        columns={"fov_id": "FOVId"}
+    )
+
     # keep only structure columns plus fov id and write structures to file
     final_structure_df = norm_image_structure_df.loc[
-        :, ["fov_id", "cell_num", "file_name", "mh score", "kg score"]
+        :, ["FOVId", "cell_num", "file_name", "mh score", "kg score"]
     ]
 
     final_structure_df.to_csv(out_csv)

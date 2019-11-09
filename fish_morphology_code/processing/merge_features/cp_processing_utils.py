@@ -296,7 +296,7 @@ def add_sample_image_metadata(
     )
     # drop unnecessary columns
     cell_feature_image_metadata_df = cell_feature_image_metadata_df.drop(
-        ["FOVId", "ge_wellID", "notes"], axis=1
+        ["ge_wellID", "notes"], axis=1
     )
 
     move_cols = [
@@ -313,7 +313,13 @@ def add_sample_image_metadata(
         "cell_age",
     ]
 
-    first_cols = ["ImageNumber", "ImagePath", "ImageFailed", "napariCell_ObjectNumber"]
+    first_cols = [
+        "ImageNumber",
+        "FOVId",
+        "ImagePath",
+        "ImageFailed",
+        "napariCell_ObjectNumber",
+    ]
 
     remaining_cols = [
         c
@@ -327,15 +333,12 @@ def add_sample_image_metadata(
     return final_feature_df
 
 
-def add_cell_structure_scores(
-    cell_feature_df, structure_scores_csv, norm_image_suffix="_rescaled.ome.tiff"
-):
+def add_cell_structure_scores(cell_feature_df, structure_scores_csv):
     """
         Add manual sarcomere structure scores to cell feature data frame
         Args:
             cell_feature_df (pd.DataFrame): cellprofiler cell and nuclei features merged by merge_cellprofiler_output
             structure_scores_csv (str): location of csv file with manual sarcomere structure scores per napari cell; cell_num = napariCell_ObjectNumber
-            norm_image_suffix (str): suffix added to normalized tiff image names
         Returns:
             cell_feature_score_df (pd.DataFrame): all cell and nuclei features calculated by cellprofiler with manual structure scores added
     """
@@ -349,25 +352,14 @@ def add_cell_structure_scores(
             "kg score": "kg_structure_org_score",
         }
     )
-    structure_score_df["file_base"] = (
-        structure_score_df["file_name"].str.split(".").str[0]
-    )
-    cell_feature_df["file_base"] = (
-        cell_feature_df["ImagePath"]
-        .str.split("/")
-        .str[-1]
-        .str[0 : -len(norm_image_suffix)]
-    )
 
     cell_feature_score_df = pd.merge(
         cell_feature_df,
         structure_score_df,
-        on=["file_base", "napariCell_ObjectNumber"],
+        on=["FOVId", "napariCell_ObjectNumber"],
         how="outer",
     )
-    cell_feature_score_df = cell_feature_score_df.drop(
-        ["file_base", "file_name"], axis=1
-    )
+    cell_feature_score_df = cell_feature_score_df.drop(["file_name"], axis=1)
 
     return cell_feature_score_df
 
