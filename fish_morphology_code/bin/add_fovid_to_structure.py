@@ -43,7 +43,7 @@ def run(structure_scores, normalized_image_manifest, out_csv):
 
     # keep only structure columns plus fov id and write structures to file
     final_structure_df = norm_image_structure_df.loc[
-        :, ["FOVId", "cell_num", "file_name", "file_base", "mh score", "kg score"]
+        :, ["FOVId", "cell_num", "file_name", "mh score", "kg score"]
     ]
 
     final_structure_df.to_csv(out_csv)
