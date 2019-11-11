@@ -80,11 +80,11 @@ To run the image normalization code, from the main repo dir:
 contrast_and_segment quilt_data/metadata.csv quilt_data/supporting_files/channel_defs.json --out_dir=output_data
 ```
 
-## Running cell profiler to calculate single cell shape and texture features
+## Running cellprofiler to calculate single cell shape and texture features
 
 Before running cellprofiler, download auto-contrasted images from quilt (ex. ```download_2D_contrasted --test=True```) into current working directory. 
 
-Create an image set list in format accepted by cell profiler's LoadData module.
+Create an image set list in format accepted by cellprofiler's LoadData module.
 ```
 make_cellprofiler_image_set \
     --image_csv ./quilt_data_contrasted_test/metadata.csv \
@@ -115,9 +115,9 @@ source activate cellprofiler-3.1.8
 ```
 
 ## Merge single cell features calculated by cellprofiler and image metadata
-To merge features, also need:
+To merge features, also need these files from repo:
 1. **fov metadata:** ```data/input_segs_and_tiffs/labkey_fov_metadata.csv```)
-2. **structure scores:** ```data/structure_scores.csv```
+2. **structure scores with fov id:** ```data/structure_scores_fov.csv```
 ```
 merge_cellprofiler_output \
     --cp_csv_dir cp_out \
@@ -125,7 +125,9 @@ merge_cellprofiler_output \
     --out_csv cp_out/cp_features.csv \
     --normalized_image_manifest quilt_data_contrasted_test/metadata.csv \
     --fov_metadata fish_morphology_code/data/input_segs_and_tiffs/labkey_fov_metadata.csv \
-    --structure_scores fish_morphology_code/data/structure_scores.csv
+    --structure_scores fish_morphology_code/data/structure_scores_fov.csv \
+    --prepend_local ./quilt_data_contrasted \
+    --relative_columns "rescaled_2D_fov_tiff_path,rescaled_2D_single_cell_tiff_path"
 
 ```
 
