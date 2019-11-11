@@ -93,10 +93,6 @@ def run(
             fov_metadata=fov_metadata,
         )
 
-    # only here for troubleshooting
-    cp_feature_metadata_df.to_csv("./cp_out/features_metadata.csv", index=False)
-    cp_feature_df.to_csv("./cp_out/features_df.csv", index=False)
-
     # add manual structure scores to feature data frame
     feature_df = add_cell_structure_scores(
         cell_feature_df=cp_feature_metadata_df, structure_scores_csv=structure_scores
