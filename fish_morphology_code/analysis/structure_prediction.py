@@ -77,7 +77,7 @@ def get_classifiers(test=False):
         for c in iter_logistics
     }
 
-    knns = {f"KNN k={k}": KNeighborsClassifier(n_neighbors=k, p=3) for k in iter_knns}
+    knns = {f"KNN k={k}": KNeighborsClassifier(n_neighbors=k, p=1) for k in iter_knns}
 
     randforests = {
         f"Random Forest depth = {d}": RandomForestClassifier(
@@ -102,15 +102,24 @@ def get_num_classifier_combos(dsets, classifiers):
     return n
 
 
+def get_num_pred_combos(trained_classifiers, dsets):
+    n = 0
+    for split, dset_split in dsets.items():
+        for probe, feat_dset in dsets["train"].items():
+            for feats, dset in feat_dset.items():
+                n += len(trained_classifiers[probe][feats].keys())
+    return n
+
+
 def train_classifiers(dsets, classifiers, verbose=False):
     with tqdm(total=get_num_classifier_combos(dsets, classifiers)) as pbar:
         out = {}
         for probe, feat_dset in dsets["train"].items():
-            pbar.set_description(f"training {probe} classifiers")
             out[probe] = {}
             for feats, dset in feat_dset.items():
                 out[probe][feats] = {}
                 for clf_name, Clf in classifiers.items():
+                    pbar.set_description(f"{probe} {feats} {clf_name}")
                     if verbose:
                         print(probe, feats, clf_name, dset["X"].shape)
                     clf = sklearn.clone(Clf)
@@ -120,21 +129,28 @@ def train_classifiers(dsets, classifiers, verbose=False):
 
 
 def predict_on_all_datasets(trained_classifiers, dsets, verbose=False):
-    out = {}
-    for split, split_dset in dsets.items():
-        out[split] = {}
-        for probe, feat_dset in split_dset.items():
-            out[split][probe] = {}
-            for feats, dset in feat_dset.items():
-                out[split][probe][feats] = {}
-                for clf_name, trained_clf in trained_classifiers[probe][feats].items():
-                    if verbose:
-                        print(split, probe, feats, clf_name)
-                    out[split][probe][feats][clf_name] = {}
-                    out[split][probe][feats][clf_name]["true"] = dset["y"]
-                    out[split][probe][feats][clf_name]["pred"] = trained_clf.predict(
-                        dset["X"]
-                    )
+
+    with tqdm(total=get_num_pred_combos(trained_classifiers, dsets)) as pbar:
+
+        out = {}
+        for split, split_dset in dsets.items():
+            out[split] = {}
+            for probe, feat_dset in split_dset.items():
+                out[split][probe] = {}
+                for feats, dset in feat_dset.items():
+                    out[split][probe][feats] = {}
+                    for clf_name, trained_clf in trained_classifiers[probe][
+                        feats
+                    ].items():
+                        if verbose:
+                            print(split, probe, feats, clf_name)
+                        pbar.set_description(f"{probe} {feats} {clf_name}")
+                        out[split][probe][feats][clf_name] = {}
+                        out[split][probe][feats][clf_name]["true"] = dset["y"]
+                        out[split][probe][feats][clf_name][
+                            "pred"
+                        ] = trained_clf.predict(dset["X"])
+                        pbar.update(1)
     return out
 
 
