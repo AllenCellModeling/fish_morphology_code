@@ -74,6 +74,16 @@ def download_2D_features(test=False):
         )
 
 
+def download_classifier_features():
+    """download structure classifier features"""
+    download_quilt_data(
+        package="matheusv/structure_classifier_features",
+        bucket="s3://allencell-internal-quilt",
+        data_save_loc="quilt_data_structure_classifier_features",
+        ignore_warnings=True,
+    )
+
+
 def download_scrnaseq(test=False):
     """download scrnaseq data. if test=True, only download counts for ten random cells."""
     if test:
@@ -102,6 +112,10 @@ def main_contrasted():
 
 def main_features():
     fire.Fire(download_2D_features)
+
+
+def main_classifier_features():
+    fire.Fire(download_classifier_features)
 
 
 def main_scrnaseq():

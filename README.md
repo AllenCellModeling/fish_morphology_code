@@ -35,6 +35,7 @@ You can access all the data as normal through quilt, but this repo provides conv
  - `download_2D_contrasted [--test=True]`
  - `download_2D_features [--test=True]`
  - `download_scrnaseq [--test=True]`
+ - `download_classifier_features`
 
 ### Un-normalized 2D tiffs
 These images are maximum intensity projections of the data as it came off the microscope, plus some segmentations masks.
