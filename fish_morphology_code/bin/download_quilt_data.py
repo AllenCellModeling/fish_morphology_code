@@ -92,6 +92,16 @@ def download_scrnaseq(test=False):
         )
 
 
+def download_ML_struct_scores():
+    """download automated structure channel scoring."""
+    download_quilt_data(
+        package="matheus/assay_dev_fish_analysis",
+        bucket="s3://allencell-internal-quilt",
+        data_save_loc="quilt_data_matheus_assay_dev_fish_analysis",
+        ignore_warnings=True,
+    )
+
+
 def main_segs():
     fire.Fire(download_2D_segs)
 
@@ -106,3 +116,7 @@ def main_features():
 
 def main_scrnaseq():
     fire.Fire(download_scrnaseq)
+
+
+def main_MLstruct():
+    fire.Fire(download_ML_struct_scores)
