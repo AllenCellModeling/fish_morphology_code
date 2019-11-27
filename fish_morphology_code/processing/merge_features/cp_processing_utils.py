@@ -13,6 +13,7 @@ DEFAULT_CELLPROFILER_CSVS = {
     "image": "Image.csv",
     "merged_nuclei": "FinalNuc.csv",
     "flag_border_nuclei": "FinalNucBorder.csv",
+    "flag_border_cell": "napari_cell_Border.csv",
     "napari_cell": "napari_cell.csv",
     "premerge_nuclei_centroids": "NucCentroid.csv",
 }
@@ -49,6 +50,7 @@ def merge_cellprofiler_output(
     image_csv,
     merged_nuclei_csv,
     flag_border_nuclei_csv,
+    flag_border_cell_csv,
     napari_cell_csv,
     premerge_nuclei_centroids_csv,
     failed_images=None,
@@ -59,6 +61,7 @@ def merge_cellprofiler_output(
             image_csv (str): location of image csv file output by cellprofiler
             merged_nuclei_csv (str): location of csv with final merged nuclei objects output by cellprofiler
             flag_border_nuclei_csv (str): location of csv with final merged nuclei objects that do not touch image border output by cellprofiler
+            flag_border_cell_csv (str): location of csv with napari cell objects that do not touch image border output by cellprofiler
             napari_cell_csv (str): location of csv with napari cell objects output by cellprofiler
             premerge_nuclei_centroids_csv (str): location of csv with nuclei centroid objects (b/f they get merged by napari cell) output by cellprofiler
             failed_images (NoneType or np.ndarray): optional array of failed images to flag
@@ -71,12 +74,14 @@ def merge_cellprofiler_output(
     nuc_centroid_df = pd.read_csv(premerge_nuclei_centroids_csv)
     napari_cell_df = pd.read_csv(napari_cell_csv)
     final_border_filter_df = pd.read_csv(flag_border_nuclei_csv)
+    cell_border_filter_df = pd.read_csv(flag_border_cell_csv)
 
     # add prefix to keep track of where columns are coming from; will rename some later
     nuc_centroid_df = nuc_centroid_df.add_prefix("nuccentroid_")
     final_nuc_df = final_nuc_df.add_prefix("finalnuc_")
     napari_cell_df = napari_cell_df.add_prefix("napariCell_")
     final_border_filter_df = final_border_filter_df.add_prefix("borderfilter_")
+    cell_border_filter_df = cell_border_filter_df.add_prefix("cellborderfilter_")
 
     # filter unnecessary columns
     nuc_centroid_df = nuc_centroid_df.loc[
@@ -94,6 +99,14 @@ def merge_cellprofiler_output(
             "borderfilter_ImageNumber",
             "borderfilter_ObjectNumber",
             "borderfilter_Parent_FinalNuc",
+        ),
+    ]
+    cell_border_filter_df = cell_border_filter_df.loc[
+        :,
+        (
+            "cellborderfilter_ImageNumber",
+            "cellborderfilter_ObjectNumber",
+            "cellborderfilter_Parent_napari_cell",
         ),
     ]
     image_df["ImagePath"] = (
@@ -122,6 +135,13 @@ def merge_cellprofiler_output(
         columns={
             "borderfilter_ImageNumber": "ImageNumber",
             "borderfilter_Parent_FinalNuc": "finalnuc_ObjectNumber",
+        }
+    )
+
+    cell_border_filter_df = cell_border_filter_df.rename(
+        columns={
+            "cellborderfilter_ImageNumber": "ImageNumber",
+            "cellborderfilter_Parent_napari_cell": "napariCell_ObjectNumber",
         }
     )
 
@@ -156,7 +176,22 @@ def merge_cellprofiler_output(
     )
     cell_feature_df["finalnuc_border"] = cell_feature_df["finalnuc_border"].isna()
 
-    # 4th merge: merge input image paths with features data frame
+    # 4th merge: merge with napari cell border filter to flag cells that touch border of image
+    cell_feature_df = pd.merge(
+        cell_feature_df,
+        cell_border_filter_df,
+        on=["ImageNumber", "napariCell_ObjectNumber"],
+        how="outer",
+    )
+    # rename border filter column and convert to boolean
+    cell_feature_df = cell_feature_df.rename(
+        columns={"cellborderfilter_ObjectNumber": "cell_border"}
+    )
+    cell_feature_df["cell_border"] = cell_feature_df["cell_border"].isna()
+    print("here")
+    cell_feature_df.to_csv("/home/tanyag/cp_testing/cell_border_test.csv")
+
+    # 5th merge: merge input image paths with features data frame
     cell_feature_image_df = pd.merge(
         image_df, cell_feature_df, on=["ImageNumber"], how="outer"
     )
@@ -185,6 +220,7 @@ def merge_cellprofiler_output(
     move_cols = [
         "napariCell_nuclei_Count",
         "finalnuc_border",
+        "cell_border",
         "finalnuc_ObjectNumber",
         "finalnuc_Parent_FilterNuc",
         "nuccentroid_ObjectNumber",

@@ -34,6 +34,7 @@ You can access all the data as normal through quilt, but this repo provides conv
  - `download_2D_segs [--test=True]`
  - `download_2D_contrasted [--test=True]`
  - `download_2D_features [--test=True]`
+ - `download_ML_struct_scores`
  - `download_scrnaseq [--test=True]`
  - `download_classifier_features`
 

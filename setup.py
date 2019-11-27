@@ -45,9 +45,11 @@ requirements = [
     "fire>=0.2.1",
     "imageio>=2.6.1",
     "numpy>=1.17.2",
-    "quilt3distribute>=0.1.1",
+    "quilt3distribute>=0.1.2",
     "pandas>=0.25.1",
+    "python-dateutil==2.8.0",
     "scikit-image>=0.16.1",
+    "scikit-learn>=0.21.3",
     "tqdm>=4.36.1",
 ]
 
@@ -83,6 +85,7 @@ setup(
             "download_2D_contrasted=fish_morphology_code.bin.download_quilt_data:main_contrasted",
             "download_2D_features=fish_morphology_code.bin.download_quilt_data:main_features",
             "download_classifier_features=fish_morphology_code.bin.download_quilt_data:main_classifier_features",
+            "download_ML_struct_scores=fish_morphology_code.bin.download_quilt_data:main_MLstruct",
             "download_scrnaseq=fish_morphology_code.bin.download_quilt_data:main_scrnaseq",
             "contrast_and_segment=fish_morphology_code.bin.stretch:main",
             "merge_cellprofiler_output=fish_morphology_code.bin.merge_cellprofiler_output:main",

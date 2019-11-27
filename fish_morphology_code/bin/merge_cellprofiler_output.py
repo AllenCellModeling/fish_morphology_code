@@ -56,6 +56,9 @@ def run(
         flag_border_nuclei_csv=os.path.join(
             cp_csv_dir, csv_prefix + DEFAULT_CELLPROFILER_CSVS["flag_border_nuclei"]
         ),
+        flag_border_cell_csv=os.path.join(
+            cp_csv_dir, csv_prefix + DEFAULT_CELLPROFILER_CSVS["flag_border_cell"]
+        ),
         napari_cell_csv=os.path.join(
             cp_csv_dir, csv_prefix + DEFAULT_CELLPROFILER_CSVS["napari_cell"]
         ),
