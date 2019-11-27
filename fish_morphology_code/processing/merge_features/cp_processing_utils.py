@@ -13,6 +13,7 @@ DEFAULT_CELLPROFILER_CSVS = {
     "image": "Image.csv",
     "merged_nuclei": "FinalNuc.csv",
     "flag_border_nuclei": "FinalNucBorder.csv",
+    "flag_border_cell": "napari_cell_Border.csv",
     "napari_cell": "napari_cell.csv",
     "premerge_nuclei_centroids": "NucCentroid.csv",
 }
@@ -49,6 +50,7 @@ def merge_cellprofiler_output(
     image_csv,
     merged_nuclei_csv,
     flag_border_nuclei_csv,
+    flag_border_cell_csv,
     napari_cell_csv,
     premerge_nuclei_centroids_csv,
     failed_images=None,
@@ -59,6 +61,7 @@ def merge_cellprofiler_output(
             image_csv (str): location of image csv file output by cellprofiler
             merged_nuclei_csv (str): location of csv with final merged nuclei objects output by cellprofiler
             flag_border_nuclei_csv (str): location of csv with final merged nuclei objects that do not touch image border output by cellprofiler
+            flag_border_cell_csv (str): location of csv with napari cell objects that do not touch image border output by cellprofiler
             napari_cell_csv (str): location of csv with napari cell objects output by cellprofiler
             premerge_nuclei_centroids_csv (str): location of csv with nuclei centroid objects (b/f they get merged by napari cell) output by cellprofiler
             failed_images (NoneType or np.ndarray): optional array of failed images to flag
@@ -71,12 +74,14 @@ def merge_cellprofiler_output(
     nuc_centroid_df = pd.read_csv(premerge_nuclei_centroids_csv)
     napari_cell_df = pd.read_csv(napari_cell_csv)
     final_border_filter_df = pd.read_csv(flag_border_nuclei_csv)
+    cell_border_filter_df = pd.read_csv(flag_border_cell_csv)
 
     # add prefix to keep track of where columns are coming from; will rename some later
     nuc_centroid_df = nuc_centroid_df.add_prefix("nuccentroid_")
     final_nuc_df = final_nuc_df.add_prefix("finalnuc_")
     napari_cell_df = napari_cell_df.add_prefix("napariCell_")
     final_border_filter_df = final_border_filter_df.add_prefix("borderfilter_")
+    cell_border_filter_df = cell_border_filter_df.add_prefix("cellborderfilter_")
 
     # filter unnecessary columns
     nuc_centroid_df = nuc_centroid_df.loc[
@@ -94,6 +99,14 @@ def merge_cellprofiler_output(
             "borderfilter_ImageNumber",
             "borderfilter_ObjectNumber",
             "borderfilter_Parent_FinalNuc",
+        ),
+    ]
+    cell_border_filter_df = cell_border_filter_df.loc[
+        :,
+        (
+            "cellborderfilter_ImageNumber",
+            "cellborderfilter_ObjectNumber",
+            "cellborderfilter_Parent_napari_cell",
         ),
     ]
     image_df["ImagePath"] = (
@@ -122,6 +135,13 @@ def merge_cellprofiler_output(
         columns={
             "borderfilter_ImageNumber": "ImageNumber",
             "borderfilter_Parent_FinalNuc": "finalnuc_ObjectNumber",
+        }
+    )
+
+    cell_border_filter_df = cell_border_filter_df.rename(
+        columns={
+            "cellborderfilter_ImageNumber": "ImageNumber",
+            "cellborderfilter_Parent_napari_cell": "napariCell_ObjectNumber",
         }
     )
 
@@ -156,7 +176,22 @@ def merge_cellprofiler_output(
     )
     cell_feature_df["finalnuc_border"] = cell_feature_df["finalnuc_border"].isna()
 
-    # 4th merge: merge input image paths with features data frame
+    # 4th merge: merge with napari cell border filter to flag cells that touch border of image
+    cell_feature_df = pd.merge(
+        cell_feature_df,
+        cell_border_filter_df,
+        on=["ImageNumber", "napariCell_ObjectNumber"],
+        how="outer",
+    )
+    # rename border filter column and convert to boolean
+    cell_feature_df = cell_feature_df.rename(
+        columns={"cellborderfilter_ObjectNumber": "cell_border"}
+    )
+    cell_feature_df["cell_border"] = cell_feature_df["cell_border"].isna()
+    print("here")
+    cell_feature_df.to_csv("/home/tanyag/cp_testing/cell_border_test.csv")
+
+    # 5th merge: merge input image paths with features data frame
     cell_feature_image_df = pd.merge(
         image_df, cell_feature_df, on=["ImageNumber"], how="outer"
     )
@@ -185,6 +220,7 @@ def merge_cellprofiler_output(
     move_cols = [
         "napariCell_nuclei_Count",
         "finalnuc_border",
+        "cell_border",
         "finalnuc_ObjectNumber",
         "finalnuc_Parent_FilterNuc",
         "nuccentroid_ObjectNumber",
@@ -249,14 +285,19 @@ def image_object_counts(image_csv):
     return image_df
 
 
-def add_sample_image_metadata(cell_feature_df, norm_image_manifest, fov_metadata):
+def add_sample_image_metadata(
+    cell_feature_df,
+    norm_image_manifest,
+    fov_metadata,
+    norm_image_key="rescaled_2D_fov_tiff_path",
+):
     r"""
         Add fish sample and image metadata to cell feature data frame
         Args:
             cell_feature_df (pd.DataFrame): cellprofiler cell and nuclei features merged by merge_cellprofiler_output
             norm_image_manifest (str): location of csv with paths to fov pre-normalization and normalized tiffs that were analyzed with cellprofiler
-            fov_raw_seg (str): location of csv with paths to fov raw tiffs and processed but pre-normalization tiffs
             fov_metadata (str): location of csv with fov sample metadata
+            norm_image_key (str): column name for column in norm_image_manifest csv that contains path to images that were analyzed with cellprofiler
         Returns:
             final_feature_df (pd.DataFrame): all cell and nuclei features calculated by cellprofiler with columns added for sample and image metadata; each row is one napari cell
     """
@@ -272,7 +313,7 @@ def add_sample_image_metadata(cell_feature_df, norm_image_manifest, fov_metadata
         columns={
             "fov_id": "FOVId",
             "original_fov_location": "fov_path",
-            "rescaled_2D_fov_tiff_path_cp": "ImagePath",
+            norm_image_key: "ImagePath",
             "cell_label_value": "napariCell_ObjectNumber",
         }
     )
@@ -291,11 +332,10 @@ def add_sample_image_metadata(cell_feature_df, norm_image_manifest, fov_metadata
     )
     # drop unnecessary columns
     cell_feature_image_metadata_df = cell_feature_image_metadata_df.drop(
-        ["FOVId", "ge_wellID", "notes"], axis=1
+        ["ge_wellID", "notes"], axis=1
     )
 
     move_cols = [
-        "rescaled_2D_fov_tiff_path",
         "rescaled_2D_single_cell_tiff_path",
         "fov_path",
         "well_position",
@@ -309,7 +349,13 @@ def add_sample_image_metadata(cell_feature_df, norm_image_manifest, fov_metadata
         "cell_age",
     ]
 
-    first_cols = ["ImageNumber", "ImagePath", "ImageFailed", "napariCell_ObjectNumber"]
+    first_cols = [
+        "ImageNumber",
+        "FOVId",
+        "ImagePath",
+        "ImageFailed",
+        "napariCell_ObjectNumber",
+    ]
 
     remaining_cols = [
         c
@@ -323,15 +369,12 @@ def add_sample_image_metadata(cell_feature_df, norm_image_manifest, fov_metadata
     return final_feature_df
 
 
-def add_cell_structure_scores(
-    cell_feature_df, structure_scores_csv, norm_image_suffix="_rescaled.ome.tiff"
-):
+def add_cell_structure_scores(cell_feature_df, structure_scores_csv):
     """
         Add manual sarcomere structure scores to cell feature data frame
         Args:
             cell_feature_df (pd.DataFrame): cellprofiler cell and nuclei features merged by merge_cellprofiler_output
             structure_scores_csv (str): location of csv file with manual sarcomere structure scores per napari cell; cell_num = napariCell_ObjectNumber
-            norm_image_suffix (str): suffix added to normalized tiff image names
         Returns:
             cell_feature_score_df (pd.DataFrame): all cell and nuclei features calculated by cellprofiler with manual structure scores added
     """
@@ -345,25 +388,14 @@ def add_cell_structure_scores(
             "kg score": "kg_structure_org_score",
         }
     )
-    structure_score_df["file_base"] = (
-        structure_score_df["file_name"].str.split(".").str[0]
-    )
-    cell_feature_df["file_base"] = (
-        cell_feature_df["ImagePath"]
-        .str.split("/")
-        .str[-1]
-        .str[0 : -len(norm_image_suffix)]
-    )
 
     cell_feature_score_df = pd.merge(
         cell_feature_df,
         structure_score_df,
-        on=["file_base", "napariCell_ObjectNumber"],
+        on=["FOVId", "napariCell_ObjectNumber"],
         how="outer",
     )
-    cell_feature_score_df = cell_feature_score_df.drop(
-        ["file_base", "file_name"], axis=1
-    )
+    cell_feature_score_df = cell_feature_score_df.drop(["file_name"], axis=1)
 
     return cell_feature_score_df
 
@@ -399,3 +431,23 @@ def remove_missing_images(feature_df):
     feature_df_clean = feature_df.loc[~missing_images, :]
 
     return feature_df_clean
+
+
+def prepend_localpath(image_csv, column_list, localpath):
+    r"""
+        Convert relative image paths in image_csv to absolute paths
+        Args:
+            image_csv (str): csv file where one or more columns with relative image paths (ex. quilt metadata.csv)
+            column_list (list): list of column names in csv that contain relative paths to be converted
+            localpath (str): prepend this path to relative image paths to convert to absolute (ex. rescaled_2D_tiff/5500000013_rescaled.ome.tiff -> /home/tanyag/quilt_data_contrasted/rescaled_2D_tiff/5500000013_rescaled.ome.tiff)
+        Returns:
+            image_path_df (pd.DataFrame): image path data frame with absolute image paths
+    """
+
+    image_path_df = pd.read_csv(image_csv)
+
+    # prepend localpath to columns specified in column_list
+    for c in column_list:
+        image_path_df[c] = localpath + "/" + image_path_df[c]
+
+    return image_path_df

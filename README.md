@@ -81,6 +81,57 @@ To run the image normalization code, from the main repo dir:
 contrast_and_segment quilt_data/metadata.csv quilt_data/supporting_files/channel_defs.json --out_dir=output_data
 ```
 
+## Running cellprofiler to calculate single cell shape and texture features
+
+Before running cellprofiler, download auto-contrasted images from quilt (ex. ```download_2D_contrasted --test=True```) into current working directory. 
+
+Create an image set list in format accepted by cellprofiler's LoadData module.
+```
+make_cellprofiler_image_set \
+    --image_csv ./quilt_data_contrasted_test/metadata.csv \
+    --defaults_json fish_morphology_code/cellprofiler/cellprofiler_image_set_defaults.json \
+    --path_key rescaled_2D_fov_tiff_path \
+    --local_path ./quilt_data_contrasted_test \
+    --out_loc ./test_image_set_list.csv
+```
+
+Run cellprofiler pipeline in this repository using test image set list as input:
+
+```
+#!/bin/bash
+mkdir cp_out
+
+cellprofiler \
+    -p fish_morphology_code/cellprofiler/cp_3i_image_processing.cppipe \
+    --run-headless \
+    --data-file ./test_image_set_list.csv \
+    -o ./cp_out \
+    -L 10
+```
+
+To run cellprofiler on slurm, first:
+```
+module load anaconda3
+source activate cellprofiler-3.1.8
+```
+
+## Merge single cell features calculated by cellprofiler and image metadata
+To merge features, also need these files from repo:
+1. **fov metadata:** ```data/input_segs_and_tiffs/labkey_fov_metadata.csv```)
+2. **structure scores with fov id:** ```data/structure_scores_fov.csv```
+```
+merge_cellprofiler_output \
+    --cp_csv_dir cp_out \
+    --csv_prefix napari_ \
+    --out_csv cp_out/cp_features.csv \
+    --normalized_image_manifest quilt_data_contrasted_test/metadata.csv \
+    --fov_metadata fish_morphology_code/data/input_segs_and_tiffs/labkey_fov_metadata.csv \
+    --structure_scores fish_morphology_code/data/structure_scores_fov.csv \
+    --prepend_local ./quilt_data_contrasted \
+    --relative_columns "rescaled_2D_fov_tiff_path,rescaled_2D_single_cell_tiff_path"
+
+```
+
 ## Running the tests
 To run the `pytest` tests defined in `fish_morphology_code/tests` via `tox`, use
 ```
@@ -103,3 +154,5 @@ To upload a new version of the normalized (autocontrasted) 2D fovs + single cell
 ```
 python distribute_autocontrasted_dataset.py
 ```
+
+
