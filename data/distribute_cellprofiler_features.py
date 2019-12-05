@@ -29,7 +29,9 @@ def distribute_cellprofiler_features(
     ds.set_metadata_columns(["cell_line", "cellprofiler_id"])
 
     # Optionally rename the columns on the package level
-    ds.set_column_names_map({"feature_file": "features"})
+    ds.set_column_names_map(
+        {"feature_file": "features", "image_object_count_file": "object_counts"}
+    )
 
     # add commit hash to message
     label = (
