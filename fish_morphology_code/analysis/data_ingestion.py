@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 
@@ -61,8 +60,9 @@ def make_anndata_feats(
         "ImageNumber",
         "ImagePath",
         "ImageFailed",
+        "FOVId",
+        "cell_border",
         "napariCell_ObjectNumber",
-        "rescaled_2D_fov_tiff_path",
         "rescaled_2D_single_cell_tiff_path",
         "fov_path",
         "well_position",
@@ -140,6 +140,7 @@ def tidy_by_probe(adata, probe_wavelengths=["561", "638"]):
     adata_c = adata_s[probe_wavelengths[0]]
     for pw in probe_wavelengths[1:]:
         adata_c = adata_c.concatenate(adata_s[pw])
+    adata_c.uns = adata.uns.copy()
 
     return adata_c
 
@@ -255,16 +256,42 @@ def remove_low_var_feat_cols(adatas, threshold=0.0):
     }
 
 
-def z_score_feats(adatas):
-    """z-score train and test feat data based on train params, return params as well as scaled anndata"""
+def z_score_feats(adatas, probe_subsets=True):
+    """z-score train and test feat data based on train params, return params as well as scaled anndata.
+       if probe_subsets=True, z-score the probe features individually for each probe."""
+
     scaler = StandardScaler().fit(adatas["train"].X)
+    if probe_subsets:
+        probes = adatas["train"].obs["FISH_probe"].unique()
+        scalers_probes = {}
+        ad = adatas["train"]
+        for probe in probes:
+            cell_inds = ad.obs["FISH_probe"] == probe
+            feat_inds = ad.var["channel"] == "FISH"
+            x = ad[cell_inds, :][:, feat_inds].X
+            scalers_probes[probe] = StandardScaler().fit(x)
+
     adatas_out = {split: ad.copy() for split, ad in adatas.items()}
     for split, ad in adatas_out.items():
         adatas_out[split].layers["z-scored"] = scaler.transform(ad.X)
         adatas_out[split].uns["z-score params"] = {
-            "means": scaler.mean_,
-            "scales": scaler.scale_,
+            "all": {"means": scaler.mean_, "scales": scaler.scale_}
         }
+        if probe_subsets:
+            for probe in probes:
+                cell_inds = ad.obs["FISH_probe"] == probe
+                feat_inds = ad.var["channel"] == "FISH"
+                x = ad[cell_inds, :][:, feat_inds].X.copy()
+                new_x = scalers_probes[probe].transform(x)
+                feats_int = [i for i, f in enumerate(feat_inds) if f]
+                cells_int = [i for i, c in enumerate(cell_inds) if c]
+                for i, c in enumerate(cells_int):
+                    for j, f in enumerate(feats_int):
+                        adatas_out[split].layers["z-scored"][c, f] = new_x[i, j]
+                adatas_out[split].uns["z-score params"][probe] = {
+                    "means": scalers_probes[probe].mean_,
+                    "scales": scalers_probes[probe].scale_,
+                }
     return adatas_out
 
 
@@ -304,3 +331,71 @@ def make_contingency_table(
     assert (tab.min(axis="columns") == tab.max(axis="columns")).all()
     tab = tab.loc[:, ["ImageNumber"]].rename({"ImageNumber": "Count"}, axis="columns")
     return tab.reset_index()
+
+
+def widen_df(
+    df_in,
+    probes=[
+        "HPRT1-B1",
+        "COL2A1-B4",
+        "H19-B3",
+        "ATP2A2-B1",
+        "MYH6-B1",
+        "MYH7-B4",
+        "BAG3-B4",
+        "TCAP-B3",
+    ],
+    probe_expr_cols=[
+        "napariCell_Children_seg_probe_561_Count",
+        "napariCell_Children_seg_probe_638_Count",
+    ],
+    probe_id_cols=["probe_561", "probe_638"],
+):
+    """Move from paired dense probe data organization to all probes as columns with sparse stucture."""
+    df = df_in.copy()
+
+    for probe in probes:
+        df[f"{probe}_count"] = np.nan
+
+    for i, row in df.iterrows():
+        probe_561 = row["probe_561"]
+        probe_638 = row["probe_638"]
+        df.at[i, f"{probe_561}_count"] = row["napariCell_Children_seg_probe_561_Count"]
+        df.at[i, f"{probe_638}_count"] = row["napariCell_Children_seg_probe_638_Count"]
+
+    df = df.drop(probe_expr_cols + probe_id_cols, axis="columns")
+
+    return df
+
+
+def tidy_df(df):
+    """Move from all probes as columns with sparse stucture to tidy data, with probe as a categorical column."""
+    probe_cols = [
+        f"{probe}_count"
+        for probe in [
+            "HPRT1-B1",
+            "COL2A1-B4",
+            "H19-B3",
+            "ATP2A2-B1",
+            "MYH6-B1",
+            "MYH7-B4",
+            "BAG3-B4",
+            "TCAP-B3",
+        ]
+    ]
+    non_probe_cols = [c for c in df.columns if c not in probe_cols]
+
+    df_tidy = (
+        df.melt(
+            id_vars=non_probe_cols,
+            value_vars=probe_cols,
+            var_name="FISH_probe",
+            value_name="FISH_probe_count",
+        )
+        .dropna(subset=["FISH_probe_count"])
+        .reset_index(drop=True)
+    )
+
+    df_tidy["FISH_probe"] = df_tidy["FISH_probe"].str.replace("FISH_probe", "")
+    df_tidy["FISH_probe"] = df_tidy["FISH_probe"].str.replace("_count", "")
+    return df_tidy
