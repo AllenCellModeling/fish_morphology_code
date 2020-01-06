@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 
@@ -331,3 +330,71 @@ def make_contingency_table(
     assert (tab.min(axis="columns") == tab.max(axis="columns")).all()
     tab = tab.loc[:, ["ImageNumber"]].rename({"ImageNumber": "Count"}, axis="columns")
     return tab.reset_index()
+
+
+def widen_df(
+    df_in,
+    probes=[
+        "HPRT1-B1",
+        "COL2A1-B4",
+        "H19-B3",
+        "ATP2A2-B1",
+        "MYH6-B1",
+        "MYH7-B4",
+        "BAG3-B4",
+        "TCAP-B3",
+    ],
+    probe_expr_cols=[
+        "napariCell_Children_seg_probe_561_Count",
+        "napariCell_Children_seg_probe_638_Count",
+    ],
+    probe_id_cols=["probe_561", "probe_638"],
+):
+    """Move from paired dense probe data organization to all probes as columns with sparse stucture."""
+    df = df_in.copy()
+
+    for probe in probes:
+        df[f"{probe}_count"] = np.nan
+
+    for i, row in df.iterrows():
+        probe_561 = row["probe_561"]
+        probe_638 = row["probe_638"]
+        df.at[i, f"{probe_561}_count"] = row["napariCell_Children_seg_probe_561_Count"]
+        df.at[i, f"{probe_638}_count"] = row["napariCell_Children_seg_probe_638_Count"]
+
+    df = df.drop(probe_expr_cols + probe_id_cols, axis="columns")
+
+    return df
+
+
+def tidy_df(df):
+    """Move from all probes as columns with sparse stucture to tidy data, with probe as a categorical column."""
+    probe_cols = [
+        f"{probe}_count"
+        for probe in [
+            "HPRT1-B1",
+            "COL2A1-B4",
+            "H19-B3",
+            "ATP2A2-B1",
+            "MYH6-B1",
+            "MYH7-B4",
+            "BAG3-B4",
+            "TCAP-B3",
+        ]
+    ]
+    non_probe_cols = [c for c in df.columns if c not in probe_cols]
+
+    df_tidy = (
+        df.melt(
+            id_vars=non_probe_cols,
+            value_vars=probe_cols,
+            var_name="FISH_probe",
+            value_name="FISH_probe_count",
+        )
+        .dropna(subset=["FISH_probe_count"])
+        .reset_index(drop=True)
+    )
+
+    df_tidy["FISH_probe"] = df_tidy["FISH_probe"].str.replace("FISH_probe", "")
+    df_tidy["FISH_probe"] = df_tidy["FISH_probe"].str.replace("_count", "")
+    return df_tidy
