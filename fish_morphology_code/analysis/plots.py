@@ -9,10 +9,11 @@ from fish_morphology_code.analysis.data_ingestion import (
     iteratively_prune,
     drop_bad_struct_scores,
     drop_xyz_locs,
-    remove_low_var_feat_cols,
     widen_df,
     tidy_df,
 )
+
+from fish_morphology_code.analysis.basic_stats import remove_low_var_feat_cols
 
 
 def make_small_dataset(
