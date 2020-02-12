@@ -10,6 +10,7 @@ def compute_probe_loc_feats(
     nuc_folder="/allen/aics/gene-editing/FISH/2019/chaos/data/cp_20191122/cp_out_images",
     nuc_csv_path="/allen/aics/gene-editing/FISH/2019/chaos/data/cp_20191122/absolute_metadata.csv",
     sarc_csv_path="/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/AssayDevFishAnalsysis2019-Handoff.csv",
+    output_folder="/allen/aics/microscopy/Calysta/test/fish_struc_seg",
     channel_dict={
         "bf": 0,
         "488": 1,
@@ -142,5 +143,8 @@ def compute_probe_loc_feats(
                     data.update({seg_id + "_probe_px_nuc": probe_nuc_px})
 
                 output_df = output_df.append(data, ignore_index=True)
+                output_df.to_csv(
+                    os.path.join(output_folder, "sarc_classification_temp.csv")
+                )
 
-    return output_df
+    output_df.to_csv(os.path.join(output_folder, "sarc_classification.csv"))
