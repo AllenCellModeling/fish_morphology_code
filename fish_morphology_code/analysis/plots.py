@@ -1,5 +1,7 @@
 """Functions for prepping data for plots and plot formatting."""
 
+from pathlib import Path
+
 import numpy as np
 import quilt3
 import logging
@@ -97,6 +99,7 @@ def load_data():
         "consensus_structure_org_score": "structure_org_score",
         "napariCell_AreaShape_Area": "cell_area",
         "napariCell_AreaShape_AspectRatio": "cell_aspect_ratio",
+        "FracAreaBackground": "frac_area_background",
         "FracAreaMessy": "frac_area_messy",
         "FracAreaThreads": "frac_area_threads",
         "FracAreaRandom": "frac_area_random",
@@ -109,6 +112,10 @@ def load_data():
         "RadonResponseRatioAvgThreads": "radon_response_threads",
         "RadonDominantAngleEntropyRegStripes": "radon_entropy_stripes",
         "RadonResponseRatioAvgRegStripes": "radon_response_stripes",
+        "MaxCoeffVar": "max_coeff_var",
+        "HPeak": "h_peak",
+        "PeakDistance": "peak_distance",
+        "PeakAngle": "peak_angle",
     }
 
     # load main feature data
@@ -148,18 +155,16 @@ def load_data():
         [
             "CellId",
             "RawPath",
+            "FracAreaBackground",
             "FracAreaMessy",
             "FracAreaThreads",
             "FracAreaRandom",
             "FracAreaRegularDots",
             "FracAreaRegularStripes",
-            "SarcomereWidth",
-            "SarcomereLength",
-            "NRegularStripesVoronoi",
-            "RadonDominantAngleEntropyThreads",
-            "RadonResponseRatioAvgThreads",
-            "RadonDominantAngleEntropyRegStripes",
-            "RadonResponseRatioAvgRegStripes",
+            "MaxCoeffVar",
+            "HPeak",
+            "PeakDistance",
+            "PeakAngle",
         ]
     ].rename(rename_dict, axis="columns")
 
@@ -169,6 +174,7 @@ def load_data():
     df_gs = df_gs.rename(
         columns={"CellId": "napariCell_ObjectNumber", "RawPath": "fov_path"}
     )
+    df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p)))
 
     # merge in the global structure metrics
     df_small = df_small.merge(df_gs)
