@@ -1,16 +1,13 @@
+from pathlib import Path
+
 import numpy as np
 import os
 import pandas as pd
 import tifffile
 
-
+# run this function from the main directory of the fish_morphology_code repo
 def compute_probe_loc_feats(
-    seg_folder="/allen/aics/modeling/data/cardio_fish/normalized_2D_tiffs/output_field_images",
-    class_folder="/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/output",
-    nuc_folder="/allen/aics/gene-editing/FISH/2019/chaos/data/cp_20191122/cp_out_images",
-    nuc_csv_path="/allen/aics/gene-editing/FISH/2019/chaos/data/cp_20191122/absolute_metadata.csv",
-    sarc_csv_path="/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/AssayDevFishAnalsysis2019-Handoff.csv",
-    output_folder="/allen/aics/microscopy/Calysta/test/fish_struc_seg",
+    output_folder="data/probe_sar_loc",
     channel_dict={
         "bf": 0,
         "488": 1,
@@ -26,6 +23,23 @@ def compute_probe_loc_feats(
     probe_segs={6: "seg_561", 7: "seg_638"},
     plates_date={"20190807": "5500000013", "20190816": "5500000014"},
 ):
+
+    # all of this should be read in from quilt ordowloaded locally
+    seg_folder = (Path("quilt_data_contrasted/rescaled_2D_fov_tiff_path"),)
+    class_folder = (Path("quilt_data_mattheusv/structure_classifier_features"),)
+    nuc_folder = (
+        Path("/allen/aics/gene-editing/FISH/2019/chaos/data/cp_20191122/cp_out_images"),
+    )
+    nuc_csv_path = (
+        Path(
+            "/allen/aics/gene-editing/FISH/2019/chaos/data/cp_20191122/absolute_metadata.csv"
+        ),
+    )
+    sarc_csv_path = (
+        Path(
+            "/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/AssayDevFishAnalsysis2019-Handoff.csv"
+        ),
+    )
 
     nuc_csv = pd.read_csv(nuc_csv_path)
     nuc_csv = nuc_csv[
