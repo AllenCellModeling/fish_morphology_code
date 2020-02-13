@@ -3,12 +3,19 @@
 
 ## main files:
 
-- masks
-- manifest.csv
+- Labelled nuclear masks
+- manifest.csv from features table in probe sarcomere classifier 
 
 ## explain manifest:
 ### columns:
-what are my columns
+---------------------------------------------------------------
+COLUMN NAMES								COLUMN DESCRIPTIONS:
+---------------------------------------------------------------
+original_fov_location						Path to raw data truncated to before '_C0.tif'
+nuc_mask_path								Path to nucleus segmentation image
+
+
+
 
 ### rows:
-e.g. how many, each row is a cell? fov?
+Each row is an fov (original_fov_location) corresponding to the labelled nucleus segmentation generated from Cell Profiler
