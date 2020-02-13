@@ -18,13 +18,9 @@ def distribute_nuclear_masks(
     # read in original csv
     df_in = pd.read_csv(csv_loc)
 
-    # make your df that has paths to nuclear masks
-    df = pd.DataFrame(columns=["fov_id", "original_fov_location", "nuclear_mask_path"])
+    # extract original_fov_location and nuc_mask_path from dataframe
+    df = df_in[["original_fov_location", "nuc_mask_path"]]
 
-    # or maybe ??? just an idea
-    df = df_in.merge(df)
-
-    # TODO: fill in this df with the right paths / ids
 
     # drop any cols with missing data
     vds = validate(df, drop_on_error=True)
