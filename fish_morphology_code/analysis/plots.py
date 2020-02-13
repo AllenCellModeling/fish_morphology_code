@@ -153,8 +153,8 @@ def load_data():
     df_gs = p_gs["metadata.csv"]().drop("Unnamed: 0", axis="columns")
     df_gs = df_gs[
         [
-            "CellId",
-            "RawPath",
+            "napariCell_ObjectNumber",
+            "original_fov_location",
             "FracAreaBackground",
             "FracAreaMessy",
             "FracAreaThreads",
@@ -169,11 +169,7 @@ def load_data():
     ].rename(rename_dict, axis="columns")
 
     # clean up some columns to use as ids and merge into main dataframe
-    df_gs["RawPath"] = df_gs["RawPath"].apply(lambda S: S.strip("_C0.tif"))
-    df_gs["CellId"] = df_gs["CellId"].apply(lambda S: S.split("-cell-")[-1]).astype(int)
-    df_gs = df_gs.rename(
-        columns={"CellId": "napariCell_ObjectNumber", "RawPath": "fov_path"}
-    )
+    df_gs = df_gs.rename(columns={"original_fov_location": "fov_path"})
     df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p)))
 
     # merge in the global structure metrics
