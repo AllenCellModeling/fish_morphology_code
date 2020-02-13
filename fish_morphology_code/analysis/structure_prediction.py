@@ -9,9 +9,11 @@ import sklearn
 from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.exceptions import UndefinedMetricWarning
+from sklearn import linear_model
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import scale
 
 
 def make_clf_datasets(adatas, y="kg_structure_org_score", X_layer="z-scored"):
@@ -207,3 +209,51 @@ def evaluate_predictions(predictions):
                             )
                         )
     return df_clf_report_ave
+
+
+def prep_human_score_regression_data(
+    df,
+    all_feats=[
+        "cell_area",
+        "cell_aspect_ratio",
+        "frac_area_background",
+        "frac_area_messy",
+        "frac_area_threads",
+        "frac_area_random",
+        "frac_area_regular_dots",
+        "frac_area_regular_stripes",
+        "max_coeff_var",
+        "h_peak",
+        "peak_distance",
+    ],
+    targ_feats=[
+        "cell_age",
+        "consensus_structure_org_score_grouped",
+        "structure_org_score",
+    ],
+):
+
+    df_reg_feats_X = pd.DataFrame(scale(df[all_feats].copy()), columns=all_feats)
+    df_reg_feats_y = df[targ_feats].copy()
+    df_reg_feats = pd.concat([df_reg_feats_X, df_reg_feats_y], axis="columns")
+
+    return df_reg_feats
+
+
+def regress_human_scores_on_feats(df, X_cols=[], y_col="", weight_col="", alpha=0.001):
+
+    X = df[X_cols]
+    y = df[y_col]
+
+    if weight_col is not None:
+        class_weights = {
+            v: len(y) / c for v, c in zip(*np.unique(y, return_counts=True))
+        }
+        sample_weights = df[y_col].map(class_weights)
+    else:
+        sample_weights = 1
+
+    reg = linear_model.Ridge(alpha=alpha)
+    reg.fit(X, y, sample_weight=sample_weights)
+
+    return reg
