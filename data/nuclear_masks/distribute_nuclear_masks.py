@@ -8,7 +8,7 @@ from quilt3distribute.validation import validate
 
 def distribute_nuclear_masks(
     test=False,
-    csv_loc=Path("my/path/to/input/data/manifest.csv"),
+    csv_loc=Path("/allen/aics/microscopy/Calysta/test/fish_struc_seg/sarc_classification_for_Rory.csv"),
     dataset_name="2d_nuclear_masks",
     package_owner="calystay",
     s3_bucket="s3://allencell-internal-quilt",
@@ -20,7 +20,7 @@ def distribute_nuclear_masks(
 
     # extract original_fov_location and nuc_mask_path from dataframe
     df = df_in[["original_fov_location", "nuc_mask_path"]]
-
+    df = df.drop_duplicates()
 
     # drop any cols with missing data
     vds = validate(df, drop_on_error=True)
