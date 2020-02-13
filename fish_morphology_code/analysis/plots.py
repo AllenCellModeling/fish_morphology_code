@@ -16,6 +16,10 @@ from fish_morphology_code.analysis.data_ingestion import (
 )
 
 from fish_morphology_code.analysis.basic_stats import remove_low_var_feat_cols
+from fish_morphology_code.analysis.structure_prediction import (
+    prep_human_score_regression_data,
+    regress_human_scores_on_feats,
+)
 
 
 def make_small_dataset(
@@ -189,6 +193,33 @@ def load_data():
     # aggregate metric for total fraction of cell covered by "regular" ACTN2 structure
     df["frac_area_regular_sum"] = (
         df["frac_area_regular_dots"] + df["frac_area_regular_stripes"]
+    )
+
+    # clean up feauter/column names on the dataframes
+    df = df.rename(rename_dict, axis="columns")
+
+    # add linear model structure scores
+    X_cols = [
+        "cell_area",
+        "cell_aspect_ratio",
+        "frac_area_background",
+        "frac_area_messy",
+        "frac_area_threads",
+        "frac_area_random",
+        "frac_area_regular_dots",
+        "frac_area_regular_stripes",
+        "max_coeff_var",
+        "h_peak",
+        "peak_distance",
+    ]
+    y_col = "structure_org_score"
+    weight_col = "structure_org_score"
+    my_reg_df = prep_human_score_regression_data(df)
+    regression = regress_human_scores_on_feats(
+        my_reg_df, X_cols=X_cols, y_col=y_col, weight_col=weight_col
+    )
+    df["structure_org_weighted_linear_model_all"] = regression.predict(
+        my_reg_df[X_cols]
     )
 
     # create version of featurte data where FISH probes are unpaired (makes facet plots easier)
