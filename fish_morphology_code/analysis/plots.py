@@ -183,7 +183,7 @@ def load_data():
     df = widen_df(df_small)
 
     # group manual human structure scores into coarser bins
-    df["consensus_structure_org_score_roundup"] = np.rint(
+    df["consensus_structure_org_score_roundup"] = np.ceil(
         df["consensus_structure_org_score"]
     ).astype(int)
     df["consensus_structure_org_score_grouped"] = df[
@@ -222,10 +222,10 @@ def load_data():
         my_reg_df[X_cols]
     )
 
-    # create version of featurte data where FISH probes are unpaired (makes facet plots easier)
+    # create version of feature data where FISH probes are unpaired (makes facet plots easier)
     df_tidy = tidy_df(df)
 
-    # clean up feauter/column names on the dataframes
+    # clean up feature/column names on the dataframes
     df = df.rename(rename_dict, axis="columns")
     df_tidy = df_tidy.rename(rename_dict, axis="columns")
 
