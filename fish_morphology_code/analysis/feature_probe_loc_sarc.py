@@ -25,22 +25,18 @@ def compute_probe_loc_feats(
 ):
 
     # all of this should be read in from quilt ordowloaded locally
-    seg_folder = (Path("quilt_data_contrasted/rescaled_2D_fov_tiff_path"),)
-    class_folder = (Path("quilt_data_mattheusv/structure_classifier_features"),)
-    nuc_folder = (
-        Path("/allen/aics/gene-editing/FISH/2019/chaos/data/cp_20191122/cp_out_images"),
-    )
-    nuc_csv_path = (
-        Path(
-            "/allen/aics/gene-editing/FISH/2019/chaos/data/cp_20191122/absolute_metadata.csv"
-        ),
-    )
-    sarc_csv_path = (
-        Path(
-            "/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/AssayDevFishAnalsysis2019-Handoff.csv"
-        ),
+    seg_folder = Path("quilt_data_contrasted/rescaled_2D_fov_tiff_path")
+    class_folder = Path("quilt_data_mattheusv/structure_classifier_features")
+    nuc_folder = Path(
+        "/allen/aics/gene-editing/FISH/2019/chaos/data/cp_20191122/cp_out_images"
     )
 
+    nuc_csv_path = Path(
+        "/allen/aics/gene-editing/FISH/2019/chaos/data/cp_20191122/absolute_metadata.csv"
+    )
+    sarc_csv_path = Path(
+        "/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/AssayDevFishAnalsysis2019-Handoff.csv"
+    )
     nuc_csv = pd.read_csv(nuc_csv_path)
     nuc_csv = nuc_csv[
         ["original_fov_location", "rescaled_2D_fov_tiff_path"]
@@ -52,7 +48,7 @@ def compute_probe_loc_feats(
     sarc_names = sarc_csv[["ImagePath", "RawPath", "fovid"]]
     sarc_names = sarc_names.drop_duplicates()
 
-    end_string = ("_C0.tif",)
+    end_string = "_C0.tif"
 
     output_df = pd.DataFrame()
     count = 0
@@ -161,12 +157,12 @@ def compute_probe_loc_feats(
                     os.path.join(output_folder, "sarc_classification_temp.csv")
                 )
 
-    output_df.to_csv(os.path.join(output_folder, "sarc_classification.csv"))
+    output_df.to_csv(os.path.join(output_folder, "sarc_classification.csv"), index=False)
 
 
 def merge_final_output_csv():
 
-    output_folder = r"\\allen\aics\microscopy\Calysta\test\fish_struc_seg"
+    output_folder = Path("/allen/aics/microscopy/Calysta/test/fish_struc_seg")
     output_df = pd.read_csv(os.path.join(output_folder, "sarc_classification.csv"))
 
     output_df["cell_num"] = output_df["cell_num"].astype(int)
@@ -225,5 +221,5 @@ def merge_final_output_csv():
 
     # Output to csv
     output_df.to_csv(
-        r"\\allen\aics\microscopy\Calysta\test\fish_struc_seg\sarc_classification_for_Rory_20200210.csv"
+        Path("/allen/aics/microscopy/Calysta/test/fish_struc_seg/sarc_classification_for_Rory_20200210.csv")
     )

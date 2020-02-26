@@ -14,7 +14,7 @@ def distribute_probe_loc_dataset(
     dataset_name="probe_structure_classifier",
     package_owner="calystay",
     s3_bucket="s3://allencell-internal-quilt",
-    readme_path="README.MD",
+    readme_path="README.md",
 ):
 
     df = pd.read_csv(csv_loc)
