@@ -169,6 +169,10 @@ def load_data():
             "HPeak",
             "PeakDistance",
             "PeakAngle",
+            "IntensityMedian",
+            "IntensityIntegrated",
+            "IntensityMedianBkgSub",
+            "IntensityIntegratedBkgSub",
         ]
     ].rename(rename_dict, axis="columns")
 
