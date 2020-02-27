@@ -1,15 +1,35 @@
+########################################################################################################################
+# Calculate probe localization distances from nucleus, cell and segmented structure (ACTN2)                            #
+# This script takes in the segmentation of nucleus, structure and transcripts, and napari cell annotations to quantify #
+# the localization pattern in the cell.                                                                                #
+########################################################################################################################
+
 import numpy as np
 import os
 from pathlib import Path
-from aicsimageio import AICSImage
 import pandas as pd
 from scipy import ndimage
 from scipy.spatial import distance
-from skimage import measure, filters
+from skimage import measure
 from skimage.measure import regionprops
 import tifffile
 
-def generate_per_cell_region (cell_mask, struc_mask, nuc_mask, img, probe_segs):
+
+def generate_per_cell_region(cell_mask, struc_mask, nuc_mask, img, probe_segs):
+    """
+    This function takes in multiple masks (cell, structure, nucleus, probe segmentations) and generate 2 dictionaries,
+    one that joins all masks into one dictionary, another one that creates a dictionary that crops the region of
+    interest determined by the napariCell_ObjectNumber
+    :param cell_mask: A binary mask where in the image, the cell of interest is True, and rest is False
+    :param struc_mask: A binary mask where in the structure segmentation, the cell of interest is True, and rest is False
+    :param nuc_mask: A binary mask where in the nucleus segmentation, the cell of interest is True, and rest is False
+    :param img: The multi-channel tif image
+    :param probe_segs: Probe segmentation dictinoary to indicate which channels in multi-channel tif is for probe
+                       segmetation
+    :return:
+    masks: Combined mask of cell, structure, nucleus, and pobe segmentation
+    box_masks: Combined mask of cell, structure, nucleus and probe segmentation within the cell  +5px boundary
+    """
     masks = {'cell': cell_mask,
              'nuc': nuc_mask,
              'struc': struc_mask}
@@ -17,23 +37,23 @@ def generate_per_cell_region (cell_mask, struc_mask, nuc_mask, img, probe_segs):
     # set bounding box
     for rgn, mask in masks.copy().items():
         mask_reverse = np.zeros(mask.shape)
-        mask_reverse[mask==0] = 1
+        mask_reverse[mask == 0] = 1
         masks[rgn + '_reverse'] = mask_reverse
 
     # Draw bounding box
-    y_lower = np.min(np.where(masks['cell']==1)[0])
-    y_higher = np.max(np.where(masks['cell']==1)[0])
-    x_lower = np.min(np.where(masks['cell']==1)[1])
-    x_higher = np.max(np.where(masks['cell']==1)[1])
+    y_lower = np.min(np.where(masks['cell'] == 1)[0])
+    y_higher = np.max(np.where(masks['cell'] == 1)[0])
+    x_lower = np.min(np.where(masks['cell'] == 1)[1])
+    x_higher = np.max(np.where(masks['cell'] == 1)[1])
 
-    if y_lower-5 > 0:
-        y_lower = y_lower-5
-    if x_lower-5 > 0:
-        x_lower = x_lower-5
-    if y_higher+5 > 0:
-        y_higher = y_higher+5
-    if x_higher+5 > 0:
-        x_higher = x_higher+5
+    if y_lower - 5 > 0:
+        y_lower = y_lower - 5
+    if x_lower - 5 > 0:
+        x_lower = x_lower - 5
+    if y_higher + 5 > 0:
+        y_higher = y_higher + 5
+    if x_higher + 5 > 0:
+        x_higher = x_higher + 5
 
     box_masks = {}
     for rgn, mask in masks.items():
@@ -48,7 +68,18 @@ def generate_per_cell_region (cell_mask, struc_mask, nuc_mask, img, probe_segs):
     return masks, box_masks
 
 
-def calculate_transform_in_cell (metric, array, bin, dist_norm, seg_id, region, mode):
+def calculate_transform_in_cell(metric, array, bin, dist_norm, seg_id, region, mode):
+    """
+    This function calculates the statistics of input array of distances/distance-transform values
+    :param metric: A string of the name of the metric the function is calculating
+    :param array: An array of values of the sample group
+    :param bin: A boolean to choose if user wants to generate the statistics from binning the group to quadrants
+    :param dist_norm: An array of noramlized values of the sample group
+    :param seg_id: A string of the segmentation id
+    :param region: A string of the region of interest, e.g. per-cell, per-nuc, etc.
+    :param mode: A string to desribe the input array if the array was generated from per-object, per-cell, etc.
+    :return:
+    """
     fea_metric = {
 
         seg_id + '_' + region + '_' + metric + '_' + mode + '_median': np.median(array[0 <= array]),
@@ -69,20 +100,33 @@ def calculate_transform_in_cell (metric, array, bin, dist_norm, seg_id, region, 
         if mode == 'per_obj':
             # Calculate per object normalization
             fea_metric.update({
-                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_area_bin25count': ((0<=array) & (array<0.25)).sum() / ((dist_norm>=0) & (dist_norm<0.25)).sum(),
-                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_area_bin50count': ((0.25<=array) & (array<0.5)).sum() / ((dist_norm>=0.25) & (dist_norm<0.5)).sum(),
-                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_area_bin75count': ((0.5<=array) & (array<0.75)).sum() / ((dist_norm>=0.5) & (dist_norm<0.75)).sum(),
-                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_area_bin100count': (0.75 <= array).sum() / (dist_norm>=0.75).sum(),
-                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_count_bin25count': ((0 <= array) & (array < 0.25)).sum() / (array>=0).sum(),
-                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_count_bin50count': ((0.25 <= array) & (array < 0.5)).sum() / (array>=0).sum(),
-                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_count_bin75count': ((0.5 <= array) & (array < 0.75)).sum() / (array>=0).sum(),
-                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_count_bin100count': (0.75 <= array).sum() / (array>0).sum()
+                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_area_bin25count': ((0 <= array) & (
+                        array < 0.25)).sum() / ((dist_norm >= 0) & (dist_norm < 0.25)).sum(),
+                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_area_bin50count': ((0.25 <= array) & (
+                        array < 0.5)).sum() / ((dist_norm >= 0.25) & (dist_norm < 0.5)).sum(),
+                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_area_bin75count': ((0.5 <= array) & (
+                        array < 0.75)).sum() / ((dist_norm >= 0.5) & (dist_norm < 0.75)).sum(),
+                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_area_bin100count': (0.75 <= array).sum() / (
+                        dist_norm >= 0.75).sum(),
+                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_count_bin25count': ((0 <= array) & (
+                        array < 0.25)).sum() / (array >= 0).sum(),
+                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_count_bin50count': ((0.25 <= array) & (
+                        array < 0.5)).sum() / (array >= 0).sum(),
+                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_count_bin75count': ((0.5 <= array) & (
+                        array < 0.75)).sum() / (array >= 0).sum(),
+                seg_id + '_' + region + '_' + metric + '_' + mode + '_norm_count_bin100count': (0.75 <= array).sum() / (
+                        array > 0).sum()
             })
 
     return fea_metric
 
 
 def generate_coordinate_pair(obj):
+    """
+    This function takes an image with binary objects and return a list of tuple pairs of y and x coordinates
+    :param obj: An image with binary objects
+    :return:
+    """
     coordinates = np.where(obj >= 1)
     obj_coor = []
     for px in range(0, len(coordinates[0])):
@@ -92,14 +136,22 @@ def generate_coordinate_pair(obj):
     return obj_coor
 
 
-def calculate_distance_with_obj_seed (obj_seed, obj_ref_reverse, set_coor):
+def calculate_distance_with_obj_seed(obj_seed, obj_ref_reverse, set_coor):
+    """
+    This function calculates the distance between a set of coordinates (probe coordinates) from an object seed
+    (e.g. nucleus) with reference to another object (e.g. cell)
+    :param obj_seed: A binary mask of a seed object
+    :param obj_ref_reverse: A binary mask of a reference object
+    :param set_coor: A list of coordinates pair
+    :return:
+    """
     obj_ref_coor = generate_coordinate_pair(obj_ref_reverse)
     obj_seed_coor = generate_coordinate_pair(obj_seed)
     dist_values = []
     for coor_pair in set_coor:
         dist_ref = distance.cdist(obj_ref_coor, [coor_pair], 'euclidean')
         dist_seed = distance.cdist(obj_seed_coor, [coor_pair], 'euclidean')
-        #print(coor_pair, np.min(dist_ref), np.min(dist_seed))
+        # print(coor_pair, np.min(dist_ref), np.min(dist_seed))
         ratio = np.min(dist_seed) / (np.min(dist_ref) + np.min(dist_seed))
         dist_values.append(ratio)
     return dist_values
@@ -114,29 +166,31 @@ plates_date = {'20190807': '5500000013',
 all_data_folder = Path('/allen/aics/gene-editing/FISH/2019/chaos/data/merged_napari')
 all_seg_folder = Path('/allen/aics/microscopy/Calysta/test/fish_struc_seg/output')
 
+# Create a channel dictionary multi-channel .tif image
 channel_dict = {
-    'bf':0,
-    '488':1,
-    '561':2,
-    '405':3,
-    '638':4,
-    'seg_probe_488':5,
-    'seg_probe_561':6,
-    'seg_probe_638':7,
-    'foreback':8,
-    'cell':9
+    'bf': 0,
+    '488': 1,
+    '561': 2,
+    '405': 3,
+    '638': 4,
+    'seg_probe_488': 5,
+    'seg_probe_561': 6,
+    'seg_probe_638': 7,
+    'foreback': 8,
+    'cell': 9
 }
 
 probe_segs = {
-    6:'seg_561',
-    7:'seg_638'
+    6: 'seg_561',
+    7: 'seg_638'
 }
 
 end_string = '_C5_struct_segmentation.tif'
 
+# Radon transform dictionary. Each radon transform generates 2 image, one for the angle, one fo the organization
 rt_dict = {
-    0:'angle',
-    1:'org'
+    0: 'angle',
+    1: 'org'
 }
 
 df = pd.DataFrame()
@@ -162,7 +216,7 @@ for seg_file in seg_imgs:
     if seg_file.endswith('.tiff'):
         try:
             # Read segmentation image, convert to mip in xy
-            print ('reading ' + str(img_count) + ' image, filename: ' + seg_file)
+            print('reading ' + str(img_count) + ' image, filename: ' + seg_file)
             seg_data = tifffile.imread(os.path.join(all_seg_folder, seg_file))
             seg = seg_data
             seg_xy = np.amax(seg, axis=0)
@@ -177,7 +231,7 @@ for seg_file in seg_imgs:
             plate = str(plates_date[date_of_file])
 
             data_file = str(plate) + '_63X_' + date_of_file + '_S' + session + '_P' + position + '_' + well
-        except:
+        except Exception:
             print('cannot process image ' + seg_file)
             failed_img.append(seg_file)
             seg = None
@@ -186,48 +240,58 @@ for seg_file in seg_imgs:
         if seg is not None:
             # Read annotated image
             try:
-                data_data = tifffile.imread(os.path.join(all_data_folder, plate, data_file + '_annotations_corrected.tiff'))
+                data_data = tifffile.imread(
+                    os.path.join(all_data_folder, plate, data_file + '_annotations_corrected.tiff'))
                 napari = data_data[channel_dict['cell'], :, :]
-                nuc_mask_data = tifffile.imread(os.path.join(nuc_mask_folder, data_file + '_annotations_corrected_rescaled.omenuc_final_mask.tiff'))
+                nuc_mask_data = tifffile.imread(
+                    os.path.join(nuc_mask_folder, data_file + '_annotations_corrected_rescaled.omenuc_final_mask.tiff'))
                 nuc = nuc_mask_data
-                radon_org_data = tifffile.imread(os.path.join(radon_org_folder, 'org_mask_' + data_file + '_annotations_corrected.tiff'))
+                radon_org_data = tifffile.imread(
+                    os.path.join(radon_org_folder, 'org_mask_' + data_file + '_annotations_corrected.tiff'))
                 radon_org = radon_org_data
-                radon_org = radon_org/np.max(radon_org)
-            except:
-                napari=None
+                radon_org = radon_org / np.max(radon_org)
+            except Exception:
+                napari = None
                 print('cannot process image ' + seg_file)
                 failed_img.append(seg_file)
                 pass
 
             if napari is not None:
-                for cell_object in range (1, int(np.max(napari)) + 1):
+                for cell_object in range(1, int(np.max(napari)) + 1):
                     row = {'image_name': data_file,
                            'mask_name': 'napari',
                            'object_number': cell_object}
-                    print (row)
+                    print(row)
                     try:
+                        # Get cell object mask
                         cell_mask = napari == cell_object
-
-                        nuc_num = int(cp_df.loc[((cp_df['file_name'] == (data_file+'_annotations_corrected_rescaled.ome.tiff')) & (cp_df['napariCell_ObjectNumber'] == float(cell_object))),
+                        # Get nucleus object mask
+                        nuc_num = int(cp_df.loc[((cp_df['file_name'] == (
+                                data_file + '_annotations_corrected_rescaled.ome.tiff')) & (
+                                                         cp_df['napariCell_ObjectNumber'] == float(cell_object))),
                                                 'finalnuc_ObjectNumber'])
-
-
                         nuc_mask = nuc == nuc_num
                         label_nuc_mask = measure.label(nuc_mask)
+                        # Calculate the centroid of nucleus
                         props = regionprops(label_nuc_mask)
                         nuc_centroid = props[0].centroid
 
+                        # Get structure segmentation mask
                         struc_mask = seg_xy * cell_mask
 
+                        # Save object masks into dictionaries
                         object_masks, boxed_masks = generate_per_cell_region(cell_mask=cell_mask, nuc_mask=nuc_mask,
                                                                              struc_mask=struc_mask, img=data_data,
                                                                              probe_segs=probe_segs)
 
+                        # Generate distance transform of the cell
                         cell_dist_map = ndimage.distance_transform_edt(cell_mask)
-                        dist_norm = cell_dist_map/np.max(cell_dist_map)
+                        dist_norm = cell_dist_map / np.max(cell_dist_map)
 
-                        radon_org_mask = radon_org*cell_mask
+                        # Generate radon transform mask
+                        radon_org_mask = radon_org * cell_mask
 
+                        # Reverse the distance transforms so that the center is 0, edge is 1
                         struc_rev_dt = ndimage.distance_transform_edt(boxed_masks['struc_reverse'])
                         nuc_rev_dt = ndimage.distance_transform_edt(boxed_masks['nuc_reverse'])
 
@@ -235,11 +299,11 @@ for seg_file in seg_imgs:
                             probe_seg = data_data[probe_channel, :, :]
                             probe_in_mask = (cell_mask * probe_seg) > 0
 
-                            # Calculate centroid locations for probes
+                            # Calculate centroid locations for probes wuth the boundary of the image
                             probe_centers = []
                             label_probe = measure.label(probe_in_mask)
                             props = regionprops(label_probe)
-                            for probe in range (0, len(props)):
+                            for probe in range(0, len(props)):
                                 y = int(props[probe].centroid[0])
                                 x = int(props[probe].centroid[1])
                                 probe_centers.append((y, x))
@@ -249,15 +313,16 @@ for seg_file in seg_imgs:
                             # Map probe on distance transform on cell per probe_area
                             dist_mask = dist_norm * probe_in_mask
                             dist_mask[dist_mask == 0] = -1
-                            row.update(calculate_transform_in_cell(metric='dist', array=dist_mask, bin=False, seg_id=seg_id,
-                                                                   region='cell', mode='total', dist_norm=dist_norm))
+                            row.update(
+                                calculate_transform_in_cell(metric='dist', array=dist_mask, bin=False, seg_id=seg_id,
+                                                            region='cell', mode='total', dist_norm=dist_norm))
 
                             # Calculate distance transform on cell per probe_object
                             dist_per_obj = []
                             for probe in probe_centers:
                                 dist_obj = dist_mask[probe]
                                 dist_per_obj.append(dist_obj)
-                            row.update({seg_id + '_dist_per_obj':dist_per_obj})
+                            row.update({seg_id + '_dist_per_obj': dist_per_obj})
                             dist_per_obj = np.array(dist_per_obj)
                             row.update(calculate_transform_in_cell(metric='dist', array=dist_per_obj, bin=True,
                                                                    dist_norm=dist_norm, seg_id=seg_id, region='cell',
@@ -265,9 +330,10 @@ for seg_file in seg_imgs:
 
                             # Map probe on radon transform on cell per probe_area
                             radon_probe_mask = radon_org_mask * probe_in_mask
-                            radon_probe_mask[radon_probe_mask==0] = -1
+                            radon_probe_mask[radon_probe_mask == 0] = -1
                             row.update(calculate_transform_in_cell(metric='radon', array=radon_probe_mask, bin=False,
-                                                                   seg_id=seg_id, region='cell', mode='total', dist_norm=radon_probe_mask))
+                                                                   seg_id=seg_id, region='cell', mode='total',
+                                                                   dist_norm=radon_probe_mask))
 
                             # Calculate radon transform on cell per probe_object
                             radon_per_obj = []
@@ -277,33 +343,44 @@ for seg_file in seg_imgs:
                             row.update({seg_id + '_radon_per_obj': radon_per_obj})
                             radon_per_obj = np.array(radon_per_obj)
                             row.update(calculate_transform_in_cell(metric='radon', array=radon_per_obj, bin=True,
-                                                                   dist_norm=radon_probe_mask, seg_id=seg_id, region='cell',
+                                                                   dist_norm=radon_probe_mask, seg_id=seg_id,
+                                                                   region='cell',
                                                                    mode='per_obj'))
-                            #print ('radon')
+
+                            # Calculate centroid locations for probes with the boundary of the cell
                             probe_center_box = []
                             label_probe = measure.label(boxed_masks[seg_id])
                             props = regionprops(label_probe)
-                            for probe in range (0, len(props)):
+                            for probe in range(0, len(props)):
                                 y = int(props[probe].centroid[0])
                                 x = int(props[probe].centroid[1])
                                 probe_center_box.append((y, x))
                             row.update({seg_id + '_probe_center_boxed': probe_center_box})
 
-                            #print ('dist')
-                            dist_nuc = calculate_distance_with_obj_seed(obj_seed=boxed_masks['nuc'], obj_ref_reverse=boxed_masks['cell_reverse'],
+                            # Calculate distance transform on cell with reference to the nucleus
+                            dist_nuc = calculate_distance_with_obj_seed(obj_seed=boxed_masks['nuc'],
+                                                                        obj_ref_reverse=boxed_masks['cell_reverse'],
                                                                         set_coor=probe_center_box)
                             row.update({seg_id + '_dist_with_nuc_cell': dist_nuc})
-                            dist_nuc = np.array(dist_nuc)
-                            row.update(calculate_transform_in_cell(metric='dist_nuc', array=dist_nuc, bin=False, seg_id=seg_id,
-                                                                   region='cell', mode='per_obj', dist_norm=dist_nuc))
 
-                            dist_struc = calculate_distance_with_obj_seed(obj_seed=boxed_masks['struc'], obj_ref_reverse=boxed_masks['cell_reverse'],
+                            # Calculate distance of probes from nucleus
+                            dist_nuc = np.array(dist_nuc)
+                            row.update(
+                                calculate_transform_in_cell(metric='dist_nuc', array=dist_nuc, bin=False, seg_id=seg_id,
+                                                            region='cell', mode='per_obj', dist_norm=dist_nuc))
+
+                            # Calculate distance of probes from segmented structure with reference to cell boundary
+                            dist_struc = calculate_distance_with_obj_seed(obj_seed=boxed_masks['struc'],
+                                                                          obj_ref_reverse=boxed_masks['cell_reverse'],
                                                                           set_coor=probe_center_box)
                             row.update({seg_id + '_dist_with_struc_cell': dist_struc})
+
+                            # Calculate distance of probes from segmented structure
                             dist_struc = np.array(dist_struc)
-                            row.update(calculate_transform_in_cell(metric='dist_struc', array=dist_struc, bin=False, seg_id=seg_id,
+                            row.update(calculate_transform_in_cell(metric='dist_struc', array=dist_struc, bin=False,
+                                                                   seg_id=seg_id,
                                                                    region='cell', mode='per_obj', dist_norm=dist_struc))
-                            #print ('abs dist')
+
                             # Calculate distance from nucleus in px
                             abs_dist_nuc = []
                             for probe in probe_center_box:
@@ -311,9 +388,10 @@ for seg_file in seg_imgs:
                                 abs_dist_nuc.append(dist)
                             row.update({seg_id + '_abs_dist_nuc': abs_dist_nuc})
                             abs_dist_nuc = np.array(abs_dist_nuc)
-                            row.update(calculate_transform_in_cell(metric='abs_dist_nuc', array=abs_dist_nuc, bin=False, seg_id=seg_id,
+                            row.update(calculate_transform_in_cell(metric='abs_dist_nuc', array=abs_dist_nuc, bin=False,
+                                                                   seg_id=seg_id,
                                                                    region='cell', mode='total', dist_norm=abs_dist_nuc))
-                            print ('here')
+
                             # Calculate distance from nearest structure in px
                             abs_dist_struc = []
                             for probe in probe_center_box:
@@ -321,33 +399,18 @@ for seg_file in seg_imgs:
                                 abs_dist_struc.append(dist)
                             row.update({seg_id + '_abs_dist_struc': abs_dist_struc})
                             abs_dist_struc = np.array(abs_dist_struc)
-                            row.update(calculate_transform_in_cell(metric='abs_dist_struc', array=abs_dist_struc, bin=False,
-                                                                   seg_id=seg_id, region='cell', mode='total', dist_norm=abs_dist_struc))
+                            row.update(
+                                calculate_transform_in_cell(metric='abs_dist_struc', array=abs_dist_struc, bin=False,
+                                                            seg_id=seg_id, region='cell', mode='total',
+                                                            dist_norm=abs_dist_struc))
 
-                    except:
-                        print ('cannot process cell ' + str(cell_object) + ' in ' + seg_file)
-                        df_failed_cell = df_failed_cell.append({'img': seg_file, 'cell': cell_object}, ignore_index=True)
+                    except Exception:
+                        print('cannot process cell ' + str(cell_object) + ' in ' + seg_file)
+                        df_failed_cell = df_failed_cell.append({'img': seg_file, 'cell': cell_object},
+                                                               ignore_index=True)
                         pass
                     df = df.append(row, ignore_index=True)
 
 failed = pd.DataFrame(failed_img)
 df_failed_cell.to_csv(os.path.join(df_output_folder, 'failed_processing.csv'))
 df.to_csv(os.path.join(df_output_folder, 'dist_radon_transform_all.csv'), ignore_index=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
