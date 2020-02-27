@@ -2,12 +2,12 @@ CellProfiler Pipeline: http://www.cellprofiler.org
 Version:4
 DateRevision:318
 GitHash:
-ModuleCount:39
+ModuleCount:42
 HasImagePlaneDetails:False
 
 LoadData:[module_num:1|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Input data file location:\xff\xfeD\x00e\x00f\x00a\x00u\x00l\x00t\x00 \x00I\x00n\x00p\x00u\x00t\x00 \x00F\x00o\x00l\x00d\x00e\x00r\x00\x7C\x00\\\x00\\\x00a\x00l\x00l\x00e\x00n\x00\\\x00a\x00i\x00c\x00s\x00\\\x00g\x00e\x00n\x00e\x00-\x00e\x00d\x00i\x00t\x00i\x00n\x00g\x00\\\x00F\x00I\x00S\x00H\x00\\\x002\x000\x001\x009\x00\\\x00c\x00h\x00a\x00o\x00s\x00\\\x00d\x00a\x00t\x00a\x00\\\x00c\x00p\x00_\x00t\x00e\x00s\x00t\x00i\x00n\x00g\x00\\\x00t\x00e\x00s\x00t\x00i\x00n\x00g\x00_\x00p\x00i\x00p\x00e\x00l\x00i\x00n\x00e\x00_\x00i\x00m\x00a\x00g\x00e\x00_\x00i\x00n\x00p\x00u\x00t\x00
-    Name of the file:\xff\xfen\x00o\x00n\x00s\x00t\x00r\x00u\x00c\x00t\x00u\x00r\x00e\x00_\x00s\x00e\x00g\x00m\x00e\x00n\x00t\x00e\x00d\x00_\x00i\x00m\x00a\x00g\x00e\x00_\x00s\x00e\x00t\x00_\x00l\x00i\x00s\x00t\x00.\x00c\x00s\x00v\x00
+    Name of the file:\xff\xfen\x00o\x00n\x00s\x00t\x00r\x00u\x00c\x00t\x00u\x00r\x00e\x00_\x00s\x00e\x00g\x00m\x00e\x00n\x00t\x00e\x00d\x00_\x00i\x00m\x00a\x00g\x00e\x00_\x00s\x00e\x00t\x00_\x00l\x00i\x00s\x00t\x00_\x00t\x00e\x00s\x00t\x00_\x00e\x00x\x00p\x00o\x00r\x00t\x00e\x00d\x00.\x00c\x00s\x00v\x00
     Load images based on this data?:\xff\xfeY\x00e\x00s\x00
     Base image location:\xff\xfeN\x00o\x00n\x00e\x00\x7C\x00
     Process just a range of rows?:\xff\xfeN\x00o\x00
@@ -79,11 +79,53 @@ RescaleIntensity:[module_num:4|svn_version:\'Unknown\'|variable_revision_number:
     Divisor value:\xff\xfe1\x00.\x000\x00
     Divisor measurement:\xff\xfeN\x00o\x00n\x00e\x00
 
-MeasureObjectSizeShape:[module_num:5|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\'Measure size of nuclei; use in next step to filter nuclei by area\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+RescaleIntensity:[module_num:5|svn_version:\'Unknown\'|variable_revision_number:3|show_window:False|notes:\x5B\'Zeiss rescale of segmented probe channels; zeiss images are uint16; probe seg channels min,max is 0,255 and when using the LoadData module they are getting rescaled internally by cp to 0,0.0039 (255/65532); LoadData rescale intensities is set to No, but rescaling is happening still?? This is breaking IdentifyPrimaryObjects and no probe objects are identified. To fix adding rescale to divide by max of intensity of probe channel, this will convert them to min,max 0,1\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:\xff\xfes\x00e\x00g\x00_\x004\x008\x008\x00
+    Name the output image:\xff\xfer\x00e\x00s\x00c\x00a\x00l\x00e\x00d\x00_\x00s\x00e\x00g\x00_\x004\x008\x008\x00
+    Rescaling method:\xff\xfeD\x00i\x00v\x00i\x00d\x00e\x00 \x00b\x00y\x00 \x00t\x00h\x00e\x00 \x00i\x00m\x00a\x00g\x00e\x00\'\x00s\x00 \x00m\x00a\x00x\x00i\x00m\x00u\x00m\x00
+    Method to calculate the minimum intensity:\xff\xfeC\x00u\x00s\x00t\x00o\x00m\x00
+    Method to calculate the maximum intensity:\xff\xfeC\x00u\x00s\x00t\x00o\x00m\x00
+    Lower intensity limit for the input image:\xff\xfe0\x00.\x000\x00
+    Upper intensity limit for the input image:\xff\xfe1\x00.\x000\x00
+    Intensity range for the input image:\xff\xfe0\x00.\x000\x00,\x001\x00.\x000\x00
+    Intensity range for the output image:\xff\xfe0\x00.\x000\x00,\x001\x00.\x000\x00
+    Select image to match in maximum intensity:\xff\xfeN\x00o\x00n\x00e\x00
+    Divisor value:\xff\xfe1\x00.\x000\x00
+    Divisor measurement:\xff\xfeN\x00o\x00n\x00e\x00
+
+RescaleIntensity:[module_num:6|svn_version:\'Unknown\'|variable_revision_number:3|show_window:False|notes:\x5B\'Zeiss rescale of segmented probe channels; zeiss images are uint16; probe seg channels min,max is 0,255 and when using the LoadData module they are getting rescaled internally by cp to 0,0.0039 (255/65532); LoadData rescale intensities is set to No, but rescaling is happening still?? This is breaking IdentifyPrimaryObjects and no probe objects are identified. To fix adding rescale to divide by max of intensity of probe channel, this will convert them to min,max 0,1\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:\xff\xfes\x00e\x00g\x00_\x005\x006\x001\x00
+    Name the output image:\xff\xfer\x00e\x00s\x00c\x00a\x00l\x00e\x00d\x00_\x00s\x00e\x00g\x00_\x005\x006\x001\x00
+    Rescaling method:\xff\xfeD\x00i\x00v\x00i\x00d\x00e\x00 \x00b\x00y\x00 \x00t\x00h\x00e\x00 \x00i\x00m\x00a\x00g\x00e\x00\'\x00s\x00 \x00m\x00a\x00x\x00i\x00m\x00u\x00m\x00
+    Method to calculate the minimum intensity:\xff\xfeC\x00u\x00s\x00t\x00o\x00m\x00
+    Method to calculate the maximum intensity:\xff\xfeC\x00u\x00s\x00t\x00o\x00m\x00
+    Lower intensity limit for the input image:\xff\xfe0\x00.\x000\x00
+    Upper intensity limit for the input image:\xff\xfe1\x00.\x000\x00
+    Intensity range for the input image:\xff\xfe0\x00.\x000\x00,\x001\x00.\x000\x00
+    Intensity range for the output image:\xff\xfe0\x00.\x000\x00,\x001\x00.\x000\x00
+    Select image to match in maximum intensity:\xff\xfeN\x00o\x00n\x00e\x00
+    Divisor value:\xff\xfe1\x00.\x000\x00
+    Divisor measurement:\xff\xfeN\x00o\x00n\x00e\x00
+
+RescaleIntensity:[module_num:7|svn_version:\'Unknown\'|variable_revision_number:3|show_window:False|notes:\x5B\'Zeiss rescale of segmented probe channels; zeiss images are uint16; probe seg channels min,max is 0,255 and when using the LoadData module they are getting rescaled internally by cp to 0,0.0039 (255/65532); LoadData rescale intensities is set to No, but rescaling is happening still?? This is breaking IdentifyPrimaryObjects and no probe objects are identified. To fix adding rescale to divide by max of intensity of probe channel, this will convert them to min,max 0,1\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:\xff\xfes\x00e\x00g\x00_\x006\x003\x008\x00
+    Name the output image:\xff\xfer\x00e\x00s\x00c\x00a\x00l\x00e\x00d\x00_\x00s\x00e\x00g\x00_\x006\x003\x008\x00
+    Rescaling method:\xff\xfeD\x00i\x00v\x00i\x00d\x00e\x00 \x00b\x00y\x00 \x00t\x00h\x00e\x00 \x00i\x00m\x00a\x00g\x00e\x00\'\x00s\x00 \x00m\x00a\x00x\x00i\x00m\x00u\x00m\x00
+    Method to calculate the minimum intensity:\xff\xfeC\x00u\x00s\x00t\x00o\x00m\x00
+    Method to calculate the maximum intensity:\xff\xfeC\x00u\x00s\x00t\x00o\x00m\x00
+    Lower intensity limit for the input image:\xff\xfe0\x00.\x000\x00
+    Upper intensity limit for the input image:\xff\xfe1\x00.\x000\x00
+    Intensity range for the input image:\xff\xfe0\x00.\x000\x00,\x001\x00.\x000\x00
+    Intensity range for the output image:\xff\xfe0\x00.\x000\x00,\x001\x00.\x000\x00
+    Select image to match in maximum intensity:\xff\xfeN\x00o\x00n\x00e\x00
+    Divisor value:\xff\xfe1\x00.\x000\x00
+    Divisor measurement:\xff\xfeN\x00o\x00n\x00e\x00
+
+MeasureObjectSizeShape:[module_num:8|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\'Measure size of nuclei; use in next step to filter nuclei by area\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select objects to measure:\xff\xfen\x00u\x00c\x00
     Calculate the Zernike features?:\xff\xfeN\x00o\x00
 
-FilterObjects:[module_num:6|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B\'Create new nuclei objects that pass minimim area threshold (min area = 2500); this threshold is based on looking at the distribution of all nuclei areas\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+FilterObjects:[module_num:9|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B\'Create new nuclei objects that pass minimim area threshold (min area = 2500); this threshold is based on looking at the distribution of all nuclei areas\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the objects to filter:\xff\xfen\x00u\x00c\x00
     Name the output objects:\xff\xfeF\x00i\x00l\x00t\x00e\x00r\x00N\x00u\x00c\x00
     Select the filtering mode:\xff\xfeM\x00e\x00a\x00s\x00u\x00r\x00e\x00m\x00e\x00n\x00t\x00s\x00
@@ -101,7 +143,7 @@ FilterObjects:[module_num:6|svn_version:\'Unknown\'|variable_revision_number:8|s
     Filter using a maximum measurement value?:\xff\xfeN\x00o\x00
     Maximum value:\xff\xfe1\x00.\x000\x00
 
-FilterObjects:[module_num:7|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B\'Create new object for just nuclei objects that fall below the minimum nucleus area; these objects are potential debris\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+FilterObjects:[module_num:10|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B\'Create new object for just nuclei objects that fall below the minimum nucleus area; these objects are potential debris\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the objects to filter:\xff\xfen\x00u\x00c\x00
     Name the output objects:\xff\xfeN\x00u\x00c\x00B\x00u\x00b\x00b\x00l\x00e\x00
     Select the filtering mode:\xff\xfeM\x00e\x00a\x00s\x00u\x00r\x00e\x00m\x00e\x00n\x00t\x00s\x00
@@ -119,7 +161,7 @@ FilterObjects:[module_num:7|svn_version:\'Unknown\'|variable_revision_number:8|s
     Filter using a maximum measurement value?:\xff\xfeY\x00e\x00s\x00
     Maximum value:\xff\xfe5\x000\x000\x00
 
-FilterObjects:[module_num:8|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B"Create new nuclei objects that don\'t touch the border of the cell"\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+FilterObjects:[module_num:11|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B"Create new nuclei objects that don\'t touch the border of the cell"\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the objects to filter:\xff\xfeF\x00i\x00l\x00t\x00e\x00r\x00N\x00u\x00c\x00
     Name the output objects:\xff\xfeF\x00i\x00l\x00t\x00e\x00r\x00N\x00u\x00c\x00B\x00o\x00r\x00d\x00e\x00r\x00
     Select the filtering mode:\xff\xfeI\x00m\x00a\x00g\x00e\x00 \x00o\x00r\x00 \x00m\x00a\x00s\x00k\x00 \x00b\x00o\x00r\x00d\x00e\x00r\x00
@@ -137,7 +179,7 @@ FilterObjects:[module_num:8|svn_version:\'Unknown\'|variable_revision_number:8|s
     Filter using a maximum measurement value?:\xff\xfeY\x00e\x00s\x00
     Maximum value:\xff\xfe1\x00.\x000\x00
 
-OverlayOutlines:[module_num:9|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+OverlayOutlines:[module_num:12|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Display outlines on a blank image?:\xff\xfeN\x00o\x00
     Select image on which to display outlines:\xff\xfeR\x00e\x00s\x00c\x00a\x00l\x00e\x00I\x00n\x00t\x00e\x00n\x00s\x00i\x00t\x00y\x00N\x00u\x00c\x00
     Name the output image:\xff\xfec\x00e\x00l\x00l\x00_\x00f\x00i\x00l\x00t\x00e\x00r\x00_\x00n\x00u\x00c\x00_\x00b\x00o\x00u\x00n\x00d\x00a\x00r\x00i\x00e\x00s\x00
@@ -149,7 +191,7 @@ OverlayOutlines:[module_num:9|svn_version:\'Unknown\'|variable_revision_number:4
     Select outline color:\xff\xfeY\x00e\x00l\x00l\x00o\x00w\x00
     Select objects to display:\xff\xfen\x00a\x00p\x00a\x00r\x00i\x00_\x00c\x00e\x00l\x00l\x00
 
-DisplayDataOnImage:[module_num:10|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+DisplayDataOnImage:[module_num:13|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Display object or image measurements?:\xff\xfeO\x00b\x00j\x00e\x00c\x00t\x00
     Select the input objects:\xff\xfeF\x00i\x00l\x00t\x00e\x00r\x00N\x00u\x00c\x00
     Measurement to display:\xff\xfeN\x00u\x00m\x00b\x00e\x00r\x00_\x00O\x00b\x00j\x00e\x00c\x00t\x00_\x00N\x00u\x00m\x00b\x00e\x00r\x00
@@ -166,8 +208,8 @@ DisplayDataOnImage:[module_num:10|svn_version:\'Unknown\'|variable_revision_numb
     Color map scale:\xff\xfeU\x00s\x00e\x00 \x00t\x00h\x00i\x00s\x00 \x00i\x00m\x00a\x00g\x00e\x00\'\x00s\x00 \x00m\x00e\x00a\x00s\x00u\x00r\x00e\x00m\x00e\x00n\x00t\x00 \x00r\x00a\x00n\x00g\x00e\x00
     Color map range:\xff\xfe0\x00.\x000\x00,\x001\x00.\x000\x00
 
-IdentifyPrimaryObjects:[module_num:11|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\'Segment probe channel 561\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
-    Select the input image:\xff\xfes\x00e\x00g\x00_\x004\x008\x008\x00
+IdentifyPrimaryObjects:[module_num:14|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\'Segment probe channel 561\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:\xff\xfer\x00e\x00s\x00c\x00a\x00l\x00e\x00d\x00_\x00s\x00e\x00g\x00_\x004\x008\x008\x00
     Name the primary objects to be identified:\xff\xfes\x00e\x00g\x00_\x00p\x00r\x00o\x00b\x00e\x00_\x004\x008\x008\x00
     Typical diameter of objects, in pixel units (Min,Max):\xff\xfe1\x00,\x006\x000\x00
     Discard objects outside the diameter range?:\xff\xfeN\x00o\x00
@@ -201,8 +243,8 @@ IdentifyPrimaryObjects:[module_num:11|svn_version:\'Unknown\'|variable_revision_
     # of deviations:\xff\xfe2\x00.\x000\x00
     Thresholding method:\xff\xfeO\x00t\x00s\x00u\x00
 
-IdentifyPrimaryObjects:[module_num:12|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
-    Select the input image:\xff\xfes\x00e\x00g\x00_\x005\x006\x001\x00
+IdentifyPrimaryObjects:[module_num:15|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:\xff\xfer\x00e\x00s\x00c\x00a\x00l\x00e\x00d\x00_\x00s\x00e\x00g\x00_\x005\x006\x001\x00
     Name the primary objects to be identified:\xff\xfes\x00e\x00g\x00_\x00p\x00r\x00o\x00b\x00e\x00_\x005\x006\x001\x00
     Typical diameter of objects, in pixel units (Min,Max):\xff\xfe1\x00,\x006\x000\x00
     Discard objects outside the diameter range?:\xff\xfeN\x00o\x00
@@ -236,8 +278,8 @@ IdentifyPrimaryObjects:[module_num:12|svn_version:\'Unknown\'|variable_revision_
     # of deviations:\xff\xfe2\x00.\x000\x00
     Thresholding method:\xff\xfeO\x00t\x00s\x00u\x00
 
-IdentifyPrimaryObjects:[module_num:13|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\'Segment probe channel 638\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
-    Select the input image:\xff\xfes\x00e\x00g\x00_\x006\x003\x008\x00
+IdentifyPrimaryObjects:[module_num:16|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\'Segment probe channel 638\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+    Select the input image:\xff\xfer\x00e\x00s\x00c\x00a\x00l\x00e\x00d\x00_\x00s\x00e\x00g\x00_\x006\x003\x008\x00
     Name the primary objects to be identified:\xff\xfes\x00e\x00g\x00_\x00p\x00r\x00o\x00b\x00e\x00_\x006\x003\x008\x00
     Typical diameter of objects, in pixel units (Min,Max):\xff\xfe1\x00,\x006\x000\x00
     Discard objects outside the diameter range?:\xff\xfeN\x00o\x00
@@ -271,16 +313,16 @@ IdentifyPrimaryObjects:[module_num:13|svn_version:\'Unknown\'|variable_revision_
     # of deviations:\xff\xfe2\x00.\x000\x00
     Thresholding method:\xff\xfeO\x00t\x00s\x00u\x00
 
-ShrinkToObjectCenters:[module_num:14|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\'Get nuclei centroids\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+ShrinkToObjectCenters:[module_num:17|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\'Get nuclei centroids\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
     Select the input object:\xff\xfeF\x00i\x00l\x00t\x00e\x00r\x00N\x00u\x00c\x00
     Name the output object:\xff\xfeN\x00u\x00c\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00
 
-DilateObjects:[module_num:15|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\'For display purposes only; dilate centroids so that they are visible on image\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+DilateObjects:[module_num:18|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\'For display purposes only; dilate centroids so that they are visible on image\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the input object:\xff\xfeN\x00u\x00c\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00
     Name the output object:\xff\xfeD\x00i\x00l\x00a\x00t\x00e\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00
     Structuring element:\xff\xfed\x00i\x00s\x00k\x00,\x001\x000\x00
 
-RelateObjects:[module_num:16|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign each nucleus centroid to a cell (centroid is single pixel)\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+RelateObjects:[module_num:19|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign each nucleus centroid to a cell (centroid is single pixel)\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Parent objects:\xff\xfen\x00a\x00p\x00a\x00r\x00i\x00_\x00c\x00e\x00l\x00l\x00
     Child objects:\xff\xfeN\x00u\x00c\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00
     Name the output object:\xff\xfeR\x00e\x00l\x00a\x00t\x00e\x00N\x00a\x00p\x00a\x00r\x00i\x00N\x00u\x00c\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00
@@ -295,8 +337,9 @@ RelateObjects:[module_num:16|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
+    Parent name:\xff\xfeN\x00o\x00n\x00e\x00
 
-SplitOrMergeObjects:[module_num:17|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\'Merge centroids by parent napari cell\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+SplitOrMergeObjects:[module_num:20|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\'Merge centroids by parent napari cell\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the input objects:\xff\xfeN\x00u\x00c\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00
     Name the new objects:\xff\xfeM\x00e\x00r\x00g\x00e\x00d\x00N\x00u\x00c\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00B\x00y\x00C\x00e\x00l\x00l\x00
     Operation:\xff\xfeM\x00e\x00r\x00g\x00e\x00
@@ -309,7 +352,7 @@ SplitOrMergeObjects:[module_num:17|svn_version:\'Unknown\'|variable_revision_num
     Select the parent object:\xff\xfen\x00a\x00p\x00a\x00r\x00i\x00_\x00c\x00e\x00l\x00l\x00
     Output object type:\xff\xfeD\x00i\x00s\x00c\x00o\x00n\x00n\x00e\x00c\x00t\x00e\x00d\x00
 
-RelateObjects:[module_num:18|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Relate size filtered nuclei objects to new object composed of all nuclei centroids that are in one cell; each parent merged centroid object can have multiple FilterNuc children\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+RelateObjects:[module_num:21|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Relate size filtered nuclei objects to new object composed of all nuclei centroids that are in one cell; each parent merged centroid object can have multiple FilterNuc children\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Parent objects:\xff\xfeM\x00e\x00r\x00g\x00e\x00d\x00N\x00u\x00c\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00B\x00y\x00C\x00e\x00l\x00l\x00
     Child objects:\xff\xfeF\x00i\x00l\x00t\x00e\x00r\x00N\x00u\x00c\x00
     Name the output object:\xff\xfeN\x00u\x00c\x00T\x00o\x00N\x00u\x00c\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00
@@ -324,8 +367,9 @@ RelateObjects:[module_num:18|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
+    Parent name:\xff\xfeN\x00o\x00n\x00e\x00
 
-SplitOrMergeObjects:[module_num:19|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\'Get final merged nuclei object (actual nuclei that will be used for calculating features, not just centroids) by merging FilterNuc objects by parent merged centroid object => FilterNuc with centroids in a cell will have same mergednuccentroidbycell parent\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+SplitOrMergeObjects:[module_num:22|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\'Get final merged nuclei object (actual nuclei that will be used for calculating features, not just centroids) by merging FilterNuc objects by parent merged centroid object => FilterNuc with centroids in a cell will have same mergednuccentroidbycell parent\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the input objects:\xff\xfeF\x00i\x00l\x00t\x00e\x00r\x00N\x00u\x00c\x00
     Name the new objects:\xff\xfeF\x00i\x00n\x00a\x00l\x00N\x00u\x00c\x00
     Operation:\xff\xfeM\x00e\x00r\x00g\x00e\x00
@@ -338,7 +382,7 @@ SplitOrMergeObjects:[module_num:19|svn_version:\'Unknown\'|variable_revision_num
     Select the parent object:\xff\xfeM\x00e\x00r\x00g\x00e\x00d\x00N\x00u\x00c\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00B\x00y\x00C\x00e\x00l\x00l\x00
     Output object type:\xff\xfeD\x00i\x00s\x00c\x00o\x00n\x00n\x00e\x00c\x00t\x00e\x00d\x00
 
-MeasureObjectSizeShape:[module_num:20|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+MeasureObjectSizeShape:[module_num:23|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select objects to measure:\xff\xfeF\x00i\x00l\x00t\x00e\x00r\x00N\x00u\x00c\x00
     Select objects to measure:\xff\xfes\x00e\x00g\x00_\x00p\x00r\x00o\x00b\x00e\x00_\x004\x008\x008\x00
     Select objects to measure:\xff\xfes\x00e\x00g\x00_\x00p\x00r\x00o\x00b\x00e\x00_\x005\x006\x001\x00
@@ -347,7 +391,7 @@ MeasureObjectSizeShape:[module_num:20|svn_version:\'Unknown\'|variable_revision_
     Select objects to measure:\xff\xfeF\x00i\x00n\x00a\x00l\x00N\x00u\x00c\x00
     Calculate the Zernike features?:\xff\xfeY\x00e\x00s\x00
 
-MeasureTexture:[module_num:21|svn_version:\'Unknown\'|variable_revision_number:5|show_window:False|notes:\x5B\'Measure textures for cell and nuclei objects from the brightfield, and nuclear channels at 3 different scales\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+MeasureTexture:[module_num:24|svn_version:\'Unknown\'|variable_revision_number:5|show_window:False|notes:\x5B\'Measure textures for cell and nuclei objects from the brightfield, and nuclear channels at 3 different scales\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Hidden:\xff\xfe2\x00
     Hidden:\xff\xfe2\x00
     Hidden:\xff\xfe3\x00
@@ -360,7 +404,7 @@ MeasureTexture:[module_num:21|svn_version:\'Unknown\'|variable_revision_number:5
     Texture scale to measure:\xff\xfe1\x000\x00
     Measure images or objects?:\xff\xfeO\x00b\x00j\x00e\x00c\x00t\x00s\x00
 
-FilterObjects:[module_num:22|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+FilterObjects:[module_num:25|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the objects to filter:\xff\xfeF\x00i\x00n\x00a\x00l\x00N\x00u\x00c\x00
     Name the output objects:\xff\xfeF\x00i\x00n\x00a\x00l\x00N\x00u\x00c\x00B\x00o\x00r\x00d\x00e\x00r\x00
     Select the filtering mode:\xff\xfeI\x00m\x00a\x00g\x00e\x00 \x00o\x00r\x00 \x00m\x00a\x00s\x00k\x00 \x00b\x00o\x00r\x00d\x00e\x00r\x00
@@ -378,7 +422,7 @@ FilterObjects:[module_num:22|svn_version:\'Unknown\'|variable_revision_number:8|
     Filter using a maximum measurement value?:\xff\xfeY\x00e\x00s\x00
     Maximum value:\xff\xfe1\x00.\x000\x00
 
-FilterObjects:[module_num:23|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+FilterObjects:[module_num:26|svn_version:\'Unknown\'|variable_revision_number:8|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the objects to filter:\xff\xfen\x00a\x00p\x00a\x00r\x00i\x00_\x00c\x00e\x00l\x00l\x00
     Name the output objects:\xff\xfen\x00a\x00p\x00a\x00r\x00i\x00_\x00c\x00e\x00l\x00l\x00_\x00B\x00o\x00r\x00d\x00e\x00r\x00
     Select the filtering mode:\xff\xfeI\x00m\x00a\x00g\x00e\x00 \x00o\x00r\x00 \x00m\x00a\x00s\x00k\x00 \x00b\x00o\x00r\x00d\x00e\x00r\x00
@@ -396,7 +440,7 @@ FilterObjects:[module_num:23|svn_version:\'Unknown\'|variable_revision_number:8|
     Filter using a maximum measurement value?:\xff\xfeY\x00e\x00s\x00
     Maximum value:\xff\xfe1\x00.\x000\x00
 
-OverlayOutlines:[module_num:24|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+OverlayOutlines:[module_num:27|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Display outlines on a blank image?:\xff\xfeN\x00o\x00
     Select image on which to display outlines:\xff\xfeR\x00e\x00s\x00c\x00a\x00l\x00e\x00I\x00n\x00t\x00e\x00n\x00s\x00i\x00t\x00y\x00N\x00u\x00c\x00
     Name the output image:\xff\xfec\x00e\x00l\x00l\x00_\x00f\x00i\x00l\x00t\x00e\x00r\x00_\x00n\x00u\x00c\x00_\x00c\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00_\x00b\x00o\x00u\x00n\x00d\x00a\x00r\x00i\x00e\x00s\x00
@@ -410,7 +454,7 @@ OverlayOutlines:[module_num:24|svn_version:\'Unknown\'|variable_revision_number:
     Select outline color:\xff\xfer\x00e\x00d\x00
     Select objects to display:\xff\xfeD\x00i\x00l\x00a\x00t\x00e\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00
 
-DisplayDataOnImage:[module_num:25|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+DisplayDataOnImage:[module_num:28|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Display object or image measurements?:\xff\xfeO\x00b\x00j\x00e\x00c\x00t\x00
     Select the input objects:\xff\xfeF\x00i\x00n\x00a\x00l\x00N\x00u\x00c\x00
     Measurement to display:\xff\xfeN\x00u\x00m\x00b\x00e\x00r\x00_\x00O\x00b\x00j\x00e\x00c\x00t\x00_\x00N\x00u\x00m\x00b\x00e\x00r\x00
@@ -427,7 +471,7 @@ DisplayDataOnImage:[module_num:25|svn_version:\'Unknown\'|variable_revision_numb
     Color map scale:\xff\xfeU\x00s\x00e\x00 \x00t\x00h\x00i\x00s\x00 \x00i\x00m\x00a\x00g\x00e\x00\'\x00s\x00 \x00m\x00e\x00a\x00s\x00u\x00r\x00e\x00m\x00e\x00n\x00t\x00 \x00r\x00a\x00n\x00g\x00e\x00
     Color map range:\xff\xfe0\x00.\x000\x00,\x001\x00.\x000\x00
 
-OverlayOutlines:[module_num:26|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+OverlayOutlines:[module_num:29|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Display outlines on a blank image?:\xff\xfeN\x00o\x00
     Select image on which to display outlines:\xff\xfeR\x00e\x00s\x00c\x00a\x00l\x00e\x00I\x00n\x00t\x00e\x00n\x00s\x00i\x00t\x00y\x00
     Name the output image:\xff\xfec\x00e\x00l\x00l\x00_\x00n\x00u\x00m\x00b\x00e\x00r\x00_\x00f\x00i\x00l\x00t\x00e\x00r\x00_\x00n\x00u\x00c\x00_\x00c\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00_\x00b\x00o\x00u\x00n\x00d\x00a\x00r\x00i\x00e\x00s\x00
@@ -441,7 +485,7 @@ OverlayOutlines:[module_num:26|svn_version:\'Unknown\'|variable_revision_number:
     Select outline color:\xff\xfer\x00e\x00d\x00
     Select objects to display:\xff\xfeD\x00i\x00l\x00a\x00t\x00e\x00C\x00e\x00n\x00t\x00r\x00o\x00i\x00d\x00
 
-DisplayDataOnImage:[module_num:27|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+DisplayDataOnImage:[module_num:30|svn_version:\'Unknown\'|variable_revision_number:6|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Display object or image measurements?:\xff\xfeO\x00b\x00j\x00e\x00c\x00t\x00
     Select the input objects:\xff\xfen\x00a\x00p\x00a\x00r\x00i\x00_\x00c\x00e\x00l\x00l\x00
     Measurement to display:\xff\xfeN\x00u\x00m\x00b\x00e\x00r\x00_\x00O\x00b\x00j\x00e\x00c\x00t\x00_\x00N\x00u\x00m\x00b\x00e\x00r\x00
@@ -458,7 +502,7 @@ DisplayDataOnImage:[module_num:27|svn_version:\'Unknown\'|variable_revision_numb
     Color map scale:\xff\xfeU\x00s\x00e\x00 \x00t\x00h\x00i\x00s\x00 \x00i\x00m\x00a\x00g\x00e\x00\'\x00s\x00 \x00m\x00e\x00a\x00s\x00u\x00r\x00e\x00m\x00e\x00n\x00t\x00 \x00r\x00a\x00n\x00g\x00e\x00
     Color map range:\xff\xfe0\x00.\x000\x00,\x001\x00.\x000\x00
 
-RelateObjects:[module_num:28|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to napari cells\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
+RelateObjects:[module_num:31|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to napari cells\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
     Parent objects:\xff\xfen\x00a\x00p\x00a\x00r\x00i\x00_\x00c\x00e\x00l\x00l\x00
     Child objects:\xff\xfes\x00e\x00g\x00_\x00p\x00r\x00o\x00b\x00e\x00_\x004\x008\x008\x00
     Name the output object:\xff\xfep\x00r\x00o\x00b\x00e\x004\x008\x008\x00R\x00e\x00l\x00a\x00t\x00e\x00N\x00a\x00p\x00a\x00r\x00i\x00
@@ -509,8 +553,9 @@ RelateObjects:[module_num:28|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
+    Parent name:\xff\xfeN\x00o\x00n\x00e\x00
 
-RelateObjects:[module_num:29|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+RelateObjects:[module_num:32|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Parent objects:\xff\xfen\x00a\x00p\x00a\x00r\x00i\x00_\x00c\x00e\x00l\x00l\x00
     Child objects:\xff\xfes\x00e\x00g\x00_\x00p\x00r\x00o\x00b\x00e\x00_\x005\x006\x001\x00
     Name the output object:\xff\xfep\x00r\x00o\x00b\x00e\x005\x006\x001\x00R\x00e\x00l\x00a\x00t\x00e\x00N\x00a\x00p\x00a\x00r\x00i\x00
@@ -562,8 +607,9 @@ RelateObjects:[module_num:29|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
+    Parent name:\xff\xfeN\x00o\x00n\x00e\x00
 
-RelateObjects:[module_num:30|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to napari cells\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+RelateObjects:[module_num:33|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to napari cells\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Parent objects:\xff\xfen\x00a\x00p\x00a\x00r\x00i\x00_\x00c\x00e\x00l\x00l\x00
     Child objects:\xff\xfes\x00e\x00g\x00_\x00p\x00r\x00o\x00b\x00e\x00_\x006\x003\x008\x00
     Name the output object:\xff\xfep\x00r\x00o\x00b\x00e\x006\x003\x008\x00R\x00e\x00l\x00a\x00t\x00e\x00N\x00a\x00p\x00a\x00r\x00i\x00
@@ -615,8 +661,9 @@ RelateObjects:[module_num:30|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
+    Parent name:\xff\xfeN\x00o\x00n\x00e\x00
 
-RelateObjects:[module_num:31|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to nuclei objects\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
+RelateObjects:[module_num:34|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to nuclei objects\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
     Parent objects:\xff\xfeF\x00i\x00n\x00a\x00l\x00N\x00u\x00c\x00
     Child objects:\xff\xfes\x00e\x00g\x00_\x00p\x00r\x00o\x00b\x00e\x00_\x004\x008\x008\x00
     Name the output object:\xff\xfep\x00r\x00o\x00b\x00e\x004\x008\x008\x00R\x00e\x00l\x00a\x00t\x00e\x00N\x00u\x00c\x00
@@ -669,8 +716,9 @@ RelateObjects:[module_num:31|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
+    Parent name:\xff\xfeN\x00o\x00n\x00e\x00
 
-RelateObjects:[module_num:32|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+RelateObjects:[module_num:35|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Parent objects:\xff\xfeF\x00i\x00n\x00a\x00l\x00N\x00u\x00c\x00
     Child objects:\xff\xfes\x00e\x00g\x00_\x00p\x00r\x00o\x00b\x00e\x00_\x005\x006\x001\x00
     Name the output object:\xff\xfep\x00r\x00o\x00b\x00e\x005\x006\x001\x00R\x00e\x00l\x00a\x00t\x00e\x00N\x00u\x00c\x00
@@ -724,8 +772,9 @@ RelateObjects:[module_num:32|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
+    Parent name:\xff\xfeN\x00o\x00n\x00e\x00
 
-RelateObjects:[module_num:33|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to nuclei objects\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+RelateObjects:[module_num:36|svn_version:\'Unknown\'|variable_revision_number:4|show_window:False|notes:\x5B\'Assign probe objects to nuclei objects\'\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Parent objects:\xff\xfeF\x00i\x00n\x00a\x00l\x00N\x00u\x00c\x00
     Child objects:\xff\xfes\x00e\x00g\x00_\x00p\x00r\x00o\x00b\x00e\x00_\x006\x003\x008\x00
     Name the output object:\xff\xfep\x00r\x00o\x00b\x00e\x006\x003\x008\x00R\x00e\x00l\x00a\x00t\x00e\x00N\x00u\x00c\x00
@@ -779,14 +828,15 @@ RelateObjects:[module_num:33|svn_version:\'Unknown\'|variable_revision_number:4|
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
     Parent name:\xff\xfeN\x00o\x00n\x00e\x00
+    Parent name:\xff\xfeN\x00o\x00n\x00e\x00
 
-ConvertObjectsToImage:[module_num:34|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+ConvertObjectsToImage:[module_num:37|svn_version:\'Unknown\'|variable_revision_number:1|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the input objects:\xff\xfeF\x00i\x00l\x00t\x00e\x00r\x00N\x00u\x00c\x00
     Name the output image:\xff\xfen\x00u\x00c\x00_\x00o\x00b\x00j\x00e\x00c\x00t\x00_\x00m\x00a\x00s\x00k\x00
     Select the color format:\xff\xfeu\x00i\x00n\x00t\x001\x006\x00
     Select the colormap:\xff\xfeD\x00e\x00f\x00a\x00u\x00l\x00t\x00
 
-SaveImages:[module_num:35|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+SaveImages:[module_num:38|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the type of image to save:\xff\xfeI\x00m\x00a\x00g\x00e\x00
     Select the image to save:\xff\xfes\x00a\x00v\x00e\x001\x00
     Select method for constructing file names:\xff\xfeF\x00r\x00o\x00m\x00 \x00i\x00m\x00a\x00g\x00e\x00 \x00f\x00i\x00l\x00e\x00n\x00a\x00m\x00e\x00
@@ -804,7 +854,7 @@ SaveImages:[module_num:35|svn_version:\'Unknown\'|variable_revision_number:13|sh
     Create subfolders in the output folder?:\xff\xfeN\x00o\x00
     Base image folder:\xff\xfeE\x00l\x00s\x00e\x00w\x00h\x00e\x00r\x00e\x00.\x00.\x00.\x00\x7C\x00
 
-SaveImages:[module_num:36|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+SaveImages:[module_num:39|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the type of image to save:\xff\xfeI\x00m\x00a\x00g\x00e\x00
     Select the image to save:\xff\xfes\x00a\x00v\x00e\x002\x00
     Select method for constructing file names:\xff\xfeF\x00r\x00o\x00m\x00 \x00i\x00m\x00a\x00g\x00e\x00 \x00f\x00i\x00l\x00e\x00n\x00a\x00m\x00e\x00
@@ -822,7 +872,7 @@ SaveImages:[module_num:36|svn_version:\'Unknown\'|variable_revision_number:13|sh
     Create subfolders in the output folder?:\xff\xfeN\x00o\x00
     Base image folder:\xff\xfeE\x00l\x00s\x00e\x00w\x00h\x00e\x00r\x00e\x00.\x00.\x00.\x00\x7C\x00
 
-SaveImages:[module_num:37|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+SaveImages:[module_num:40|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the type of image to save:\xff\xfeI\x00m\x00a\x00g\x00e\x00
     Select the image to save:\xff\xfes\x00a\x00v\x00e\x00r\x003\x00
     Select method for constructing file names:\xff\xfeF\x00r\x00o\x00m\x00 \x00i\x00m\x00a\x00g\x00e\x00 \x00f\x00i\x00l\x00e\x00n\x00a\x00m\x00e\x00
@@ -840,7 +890,7 @@ SaveImages:[module_num:37|svn_version:\'Unknown\'|variable_revision_number:13|sh
     Create subfolders in the output folder?:\xff\xfeN\x00o\x00
     Base image folder:\xff\xfeE\x00l\x00s\x00e\x00w\x00h\x00e\x00r\x00e\x00.\x00.\x00.\x00\x7C\x00
 
-SaveImages:[module_num:38|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
+SaveImages:[module_num:41|svn_version:\'Unknown\'|variable_revision_number:13|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:False]
     Select the type of image to save:\xff\xfeI\x00m\x00a\x00g\x00e\x00
     Select the image to save:\xff\xfen\x00u\x00c\x00_\x00o\x00b\x00j\x00e\x00c\x00t\x00_\x00m\x00a\x00s\x00k\x00
     Select method for constructing file names:\xff\xfeF\x00r\x00o\x00m\x00 \x00i\x00m\x00a\x00g\x00e\x00 \x00f\x00i\x00l\x00e\x00n\x00a\x00m\x00e\x00
@@ -858,7 +908,7 @@ SaveImages:[module_num:38|svn_version:\'Unknown\'|variable_revision_number:13|sh
     Create subfolders in the output folder?:\xff\xfeN\x00o\x00
     Base image folder:\xff\xfeE\x00l\x00s\x00e\x00w\x00h\x00e\x00r\x00e\x00.\x00.\x00.\x00\x7C\x00
 
-ExportToSpreadsheet:[module_num:39|svn_version:\'Unknown\'|variable_revision_number:12|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
+ExportToSpreadsheet:[module_num:42|svn_version:\'Unknown\'|variable_revision_number:12|show_window:False|notes:\x5B\x5D|batch_state:array(\x5B\x5D, dtype=uint8)|enabled:True|wants_pause:True]
     Select the column delimiter:\xff\xfeC\x00o\x00m\x00m\x00a\x00 \x00(\x00"\x00,\x00"\x00)\x00
     Add image metadata columns to your object data file?:\xff\xfeN\x00o\x00
     Select the measurements to export:\xff\xfeN\x00o\x00
