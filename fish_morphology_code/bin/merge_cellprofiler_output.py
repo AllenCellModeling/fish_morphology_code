@@ -10,6 +10,7 @@ from fish_morphology_code.processing.merge_features.cp_processing_utils import (
     merge_cellprofiler_output,
     add_sample_image_metadata,
     add_cell_structure_scores,
+    add_cell_probe_localization_scores,
     remove_missing_images,
     prepend_localpath,
     add_cell_border_filter,
@@ -26,6 +27,7 @@ def run(
     norm_image_key="rescaled_2D_fov_tiff_path",
     fov_metadata="",
     structure_scores="",
+    probe_localization_scores="",
     prepend_local=None,
     relative_columns=None,
     flag_border_cell_csv=None,
@@ -41,6 +43,7 @@ def run(
         norm_image_key (str): column name for column in normalized image csv that contains paths to images analyzed by cellprofiler
         fov_metadata (str): location of csv file with sample metadata from labkey
         structure_scores (str): location of csv file with manual structure scores per cell
+        probe_localization_scores (str): location of csv file with manual probe localization scores per cell
         prepend_local (NoneType or str): optional local path to prepend to relative image paths in normalized_image_manifest, so they match absolute paths in cellprofiler output
         relative_columns (NoneType or str: optional list of comma separated column names in normalized_image_manifest with relative image paths that need to be converted to absolute
         flag_border_cell_csv (NoneType or str): optional path to csv with napari cells that DO touch the border of the image
@@ -105,6 +108,12 @@ def run(
     # add manual structure scores to feature data frame
     feature_df = add_cell_structure_scores(
         cell_feature_df=cp_feature_metadata_df, structure_scores_csv=structure_scores
+    )
+
+    # add manual probe localization scores to feature data frame
+    feature_df = add_cell_probe_localization_scores(
+        cell_feature_df=feature_df,
+        probe_localization_scores_csv=probe_localization_scores,
     )
 
     # optional merge: merge with napari cell border filter to flag cells that touch border of image
