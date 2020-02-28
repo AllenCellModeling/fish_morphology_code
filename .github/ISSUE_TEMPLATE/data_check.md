@@ -8,14 +8,14 @@ assignees: ''
 ---
 
 Big picture:
-[ ] this dataset is on quilt with a readme
-[ ] there is a "test" version of the dataset (i.e. a couple of rows/samples) that's small / quick to download
-[ ] code to put dataset+readme is on quilt is in `/data` in a well named subdirectory 
-[ ] code to genereate data is in `fish_morphology_code/processing` in a well named subdirectory
-[ ] upstream data needed to generate this data is in quilt
-[ ] data/manifest can get merged into the main feature dataset on `["fov_path", "napariCell_ObjectNumber"]` and not lose any/too many cells (ignore if on different cells e.g. scRNAseq)
-[ ] there is a function to download the dataset in `fish_morphology_code/fish_morphology_code/bin/download_quilt_data.py`
-[ ] there is a test to test downloading the (test/small version) of the dataset in `fish_morphology_code/fish_morphology_code/tests/`
+- [ ] this dataset is on quilt with a readme
+- [ ] there is a "test" version of the dataset (i.e. a couple of rows/samples) that's small / quick to download
+- [ ] code to put dataset+readme is on quilt is in `/data` in a well named subdirectory 
+- [ ] code to genereate data is in `fish_morphology_code/processing` in a well named subdirectory
+- [ ] upstream data needed to generate this data is in quilt
+- [ ] data/manifest can get merged into the main feature dataset on `["fov_path", "napariCell_ObjectNumber"]` and not lose any/too many cells (ignore if on different cells e.g. scRNAseq)
+- [ ] there is a function to download the dataset in `fish_morphology_code/fish_morphology_code/bin/download_quilt_data.py`
+- [ ] there is a test to test downloading the (test/small version) of the dataset in `fish_morphology_code/fish_morphology_code/tests/`
 
 
 You can grab the feature dataset to test merging with
