@@ -19,11 +19,11 @@ Big picture:
 
 
 You can grab the feature dataset to test merging with
-```
+```python
 p_feats = quilt3.Package.browse(
-        "tanyasg/2d_autocontrasted_single_cell_features",
-        "s3://allencell-internal-quilt",
-    )
+    "tanyasg/2d_autocontrasted_single_cell_features",
+    "s3://allencell-internal-quilt",
+)
 df_feats = p_feats["features"]["a749d0e2_cp_features.csv"]()
 ```
 
