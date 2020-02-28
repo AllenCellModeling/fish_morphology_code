@@ -1,9 +1,9 @@
 ---
 name: Dataset checklist
 about: '"dataset audit tracking"'
-title: ''
-labels: ''
-assignees: ''
+title: 'dataset check: '
+labels: 'data release'
+assignees: 'donovanr'
 
 ---
 
