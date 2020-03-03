@@ -10,7 +10,7 @@ def distribute_nonstructure_dataset(
     csv_loc="/allen/aics/gene-editing/FISH/2019/chaos/data/cp_testing_zeiss_nonstructure/zeiss_image_set/nonstructure_fov_manifest_for_quilt.csv",
     col_name_map={"FOVId": "fov_id", "fov_path": "original_fov_location"},
     dataset_name="2d_nonstructure_fields",
-    package_owner="tanyag",
+    package_owner="tanyasg",
     s3_bucket="s3://allencell-internal-quilt",
 ):
 
