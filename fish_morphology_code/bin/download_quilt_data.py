@@ -102,6 +102,24 @@ def download_ML_struct_scores():
     )
 
 
+def download_nonstructure_2D_segs(test=False):
+    """download non-structure maxporject/seg data. if test=True, only download two randomly sampled images."""
+    if test:
+        download_quilt_data(
+            package="tanyasg/2d_nonstructure_fields_test",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_nonstructure_test",
+            ignore_warnings=True,
+        )
+    else:
+        download_quilt_data(
+            package="tanyasg/2d_nonstructure_fields",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_nonstructure",
+            ignore_warnings=True,
+        )
+
+
 def main_segs():
     fire.Fire(download_2D_segs)
 
@@ -120,3 +138,7 @@ def main_scrnaseq():
 
 def main_MLstruct():
     fire.Fire(download_ML_struct_scores)
+
+
+def main_nonstructure_segs():
+    fire.Fire(download_nonstructure_2D_segs)
