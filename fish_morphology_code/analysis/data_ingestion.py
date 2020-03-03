@@ -81,6 +81,8 @@ def make_anndata_feats(
         "nuccentroid_ObjectNumber",
         "mh_structure_org_score",
         "kg_structure_org_score",
+        "probe_561_loc_score",
+        "probe_638_loc_score",
     ],
 ):
     """make feature df into anndata: X=feat values, obs=metadata, var=feature annotations"""
