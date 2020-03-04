@@ -18,6 +18,7 @@ def flag_border_cells(
     prepend_local=None,
     relative_columns=None,
     out_csv="./border_cells.csv",
+    structure_data=True,
 ):
     """
     Flag napari annotated cells that touch the border of the image
@@ -27,6 +28,7 @@ def flag_border_cells(
         prepend_local (NoneType or str): optional local path to prepend to relative image paths in normalized_image_manifest, so they match absolute paths in cellprofiler output
         relative_columns (NoneType or str: optional list of comma separated column names in normalized_image_manifest with relative image paths that need to be converted to absolute
         out_csv (str): path to file where to save merged csv
+        structure_data (bool): True indicates that this is structure data set with shape (1, 1, 10, 1, 1736, 1776); False indicates non-structure data set with shape (1, 1, 1, 10, 624, 924)
     """
 
     # if normalized_image_manifest has relative image paths, convert to absolute
@@ -73,7 +75,14 @@ def flag_border_cells(
         image = row["ImagePath"]
 
         napari_annotation = AICSImage(image)
-        napari_annotation_image = napari_annotation.data[0, 0, 9, 0]
+
+        # structure and non-structure data have different shapes
+        napari_annotation_image = None
+        if structure_data:
+            napari_annotation_image = napari_annotation.data[0, 0, 9, 0]
+        else:
+            napari_annotation_image = napari_annotation.data[0, 0, 0, 9]
+
         border_adj_cells = find_border_cells(napari_annotation_image, 2)
         # print(border_adj_cells)
         border_only_df = pd.DataFrame(
