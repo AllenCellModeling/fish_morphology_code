@@ -88,10 +88,11 @@ setup(
             "download_ML_struct_scores=fish_morphology_code.bin.download_quilt_data:main_MLstruct",
             "download_scrnaseq=fish_morphology_code.bin.download_quilt_data:main_scrnaseq",
             "contrast_and_segment=fish_morphology_code.bin.stretch:main",
-            "merge_cellprofiler_output=fish_morphology_code.bin.merge_cellprofiler_output:main",
             "make_cellprofiler_image_set=fish_morphology_code.bin.make_cellprofiler_image_set:main_make_imageset",
             "add_fovid_to_structure=fish_morphology_code.bin.add_fovid_to_structure:main",
             "find_border_cells=fish_morphology_code.bin.find_border_cells:main_flag_border_cells",
+            "merge_cellprofiler_output_nonstructure=fish_morphology_code.bin.merge_cellprofiler_output_nonstructure:main",
+            "merge_cellprofiler_output_structure=fish_morphology_code.bin.merge_cellprofiler_output_structure:main",
         ]
     },
     install_requires=requirements,
