@@ -366,6 +366,35 @@ def add_cell_structure_scores(cell_feature_df, structure_scores_csv):
     return cell_feature_score_df
 
 
+def add_cell_probe_localization_scores(cell_feature_df, probe_localization_scores_csv):
+    """
+        Add manual probe localization scores to cell feature data frame
+        Args:
+            cell_feature_df (pd.DataFrame): cellprofiler cell and nuclei features merged by merge_cellprofiler_output
+            probe_localization_scores_csv (str): location of csv file with manual probe localization scores per napari cell; cell_num = napariCell_ObjectNumber
+        Returns:
+            cell_feature_score_df (pd.DataFrame): all cell and nuclei features calculated by cellprofiler with manual probe localization scores added
+    """
+
+    # rename columns to match cell feature columns
+    localization_score_df = pd.read_csv(probe_localization_scores_csv, index_col=0)
+    localization_score_df = localization_score_df.rename(
+        columns={"cell_num": "napariCell_ObjectNumber"}
+    )
+
+    cell_feature_score_df = pd.merge(
+        cell_feature_df,
+        localization_score_df,
+        on=["FOVId", "napariCell_ObjectNumber"],
+        how="outer",
+    )
+    cell_feature_score_df = cell_feature_score_df.drop(
+        ["file_name", "file_base"], axis=1
+    )
+
+    return cell_feature_score_df
+
+
 def cat_structure_scores(score_files):
     """
         Concatenate scores when they are split by plate into multiple csvs
