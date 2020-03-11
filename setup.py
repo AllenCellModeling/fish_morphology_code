@@ -85,6 +85,7 @@ setup(
             "download_2D_segs=fish_morphology_code.bin.download_quilt_data:main_segs",
             "download_2D_contrasted=fish_morphology_code.bin.download_quilt_data:main_contrasted",
             "download_2D_features=fish_morphology_code.bin.download_quilt_data:main_features",
+            "download_2D_nonstructure_features=fish_morphology_code.bin.download_quilt_data:main_nonstructure_features",
             "download_ML_struct_scores=fish_morphology_code.bin.download_quilt_data:main_MLstruct",
             "download_scrnaseq=fish_morphology_code.bin.download_quilt_data:main_scrnaseq",
             "contrast_and_segment=fish_morphology_code.bin.stretch:main",
