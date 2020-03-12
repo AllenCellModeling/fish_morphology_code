@@ -6,4 +6,4 @@ from fish_morphology_code.analysis.plots import load_data
 
 def test_load_data():
     "test loading the data"
-    df, df_tidy = load_data()
+    df, df_tidy, df_regression = load_data()
