@@ -102,40 +102,71 @@ def fetch_df(csv_qloc, quilt_package, dest_dir=Path("tmp_quilt_data")):
     return pd.read_csv(dest_dir / csv_qloc)
 
 
-def load_data():
-    """Monster function for loading and munging data for plots."""
+rename_dict = {
+    "napariCell_nuclei_Count": "nuclei_count",
+    "consensus_structure_org_score": "structure_org_score",
+    "napariCell_AreaShape_Area": "cell_area",
+    "napariCell_AreaShape_AspectRatio": "cell_aspect_ratio",
+    "FracAreaBackground": "frac_area_background",
+    "FracAreaMessy": "frac_area_messy",
+    "FracAreaThreads": "frac_area_threads",
+    "FracAreaRandom": "frac_area_random",
+    "FracAreaRegularDots": "frac_area_regular_dots",
+    "FracAreaRegularStripes": "frac_area_regular_stripes",
+    "SarcomereWidth": "sarcomere_width",
+    "SarcomereLength": "sarcomere_length",
+    "NRegularStripesVoronoi": "n_regular_stripes_voronoi",
+    "RadonDominantAngleEntropyThreads": "radon_entropy_threads",
+    "RadonResponseRatioAvgThreads": "radon_response_threads",
+    "RadonDominantAngleEntropyRegStripes": "radon_entropy_stripes",
+    "RadonResponseRatioAvgRegStripes": "radon_response_stripes",
+    "MaxCoeffVar": "max_coeff_var",
+    "HPeak": "h_peak",
+    "PeakDistance": "peak_distance",
+    "PeakAngle": "peak_angle",
+}
 
-    # clean up some feature/column names
-    rename_dict = {
-        "napariCell_nuclei_Count": "nuclei_count",
-        "consensus_structure_org_score": "structure_org_score",
-        "napariCell_AreaShape_Area": "cell_area",
-        "napariCell_AreaShape_AspectRatio": "cell_aspect_ratio",
-        "FracAreaBackground": "frac_area_background",
-        "FracAreaMessy": "frac_area_messy",
-        "FracAreaThreads": "frac_area_threads",
-        "FracAreaRandom": "frac_area_random",
-        "FracAreaRegularDots": "frac_area_regular_dots",
-        "FracAreaRegularStripes": "frac_area_regular_stripes",
-        "SarcomereWidth": "sarcomere_width",
-        "SarcomereLength": "sarcomere_length",
-        "NRegularStripesVoronoi": "n_regular_stripes_voronoi",
-        "RadonDominantAngleEntropyThreads": "radon_entropy_threads",
-        "RadonResponseRatioAvgThreads": "radon_response_threads",
-        "RadonDominantAngleEntropyRegStripes": "radon_entropy_stripes",
-        "RadonResponseRatioAvgRegStripes": "radon_response_stripes",
-        "MaxCoeffVar": "max_coeff_var",
-        "HPeak": "h_peak",
-        "PeakDistance": "peak_distance",
-        "PeakAngle": "peak_angle",
-    }
 
+def load_main_feat_data(rename_dict=rename_dict):
     # load main feature data
     p_feats = quilt3.Package.browse(
         "tanyasg/2d_autocontrasted_single_cell_features",
         "s3://allencell-internal-quilt",
     )
     df_feats = fetch_df("features/a749d0e2_cp_features.csv", p_feats)
+    assert len(df_feats) > 0
+    return df_feats
+
+
+def adata_manipulations(rename_dict=rename_dict):
+    pass
+
+
+def merge_global_structure(rename_dict=rename_dict):
+    pass
+
+
+def group_human_scores(rename_dict=rename_dict):
+    pass
+
+
+def make_regression_df(rename_dict=rename_dict):
+    pass
+
+
+def make_and_clean_tidy_df(rename_dict=rename_dict):
+    pass
+
+
+def add_densities(rename_dict=rename_dict):
+    pass
+
+
+def load_data():
+    """Monster function for loading and munging data for plots."""
+
+    # load main feature data
+    df_feats = load_main_feat_data()
 
     # make anndata from feature data
     # anndata as intermediate because our general purpose cleaning functions are written for anndata rather than pandas objects

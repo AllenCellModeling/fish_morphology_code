@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from fish_morphology_code.analysis.plots import load_data
+from fish_morphology_code.analysis.plots import load_data, load_main_feat_data
+
+
+def test_load_main_feat_data():
+    _ = load_main_feat_data()
 
 
 def test_load_data():
