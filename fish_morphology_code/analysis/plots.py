@@ -95,6 +95,13 @@ def pretty_chart(
     )
 
 
+def fetch_df(csv_qloc, quilt_package, dest_dir=Path("tmp_quilt_data")):
+    """get a df from quilt csv using intermediate fetch to disk -- windows bug"""
+    qloc = quilt_package[csv_qloc]
+    qloc.fetch(dest=dest_dir / csv_qloc)
+    return pd.read_csv(dest_dir / csv_qloc)
+
+
 def load_data():
     """Monster function for loading and munging data for plots."""
 
@@ -128,7 +135,7 @@ def load_data():
         "tanyasg/2d_autocontrasted_single_cell_features",
         "s3://allencell-internal-quilt",
     )
-    df_feats = p_feats["features"]["a749d0e2_cp_features.csv"]()
+    df_feats = fetch_df("features/a749d0e2_cp_features.csv", p_feats)
 
     # make anndata from feature data
     # anndata as intermediate because our general purpose cleaning functions are written for anndata rather than pandas objects
@@ -155,7 +162,7 @@ def load_data():
     p_gs = quilt3.Package.browse(
         "matheus/assay_dev_fish_analysis", "s3://allencell-internal-quilt"
     )
-    df_gs = p_gs["metadata.csv"]().drop("Unnamed: 0", axis="columns")
+    df_gs = fetch_df("metadata.csv", p_gs).drop("Unnamed: 0", axis="columns")
     df_gs = df_gs[
         [
             "napariCell_ObjectNumber",
