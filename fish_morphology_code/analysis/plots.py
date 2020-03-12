@@ -138,8 +138,23 @@ def load_main_feat_data(rename_dict=rename_dict):
     return df_feats
 
 
-def adata_manipulations(rename_dict=rename_dict):
-    pass
+def adata_manipulations(df_feats, rename_dict=rename_dict):
+    anndata_logger = logging.getLogger("anndata")
+    anndata_logger.setLevel(logging.CRITICAL)
+    adata = make_anndata_feats(df_feats)
+
+    # clean up adata
+    adata = iteratively_prune(adata)
+    adata = drop_bad_struct_scores(adata)
+    adata = drop_xyz_locs(adata)
+
+    # check to make sure we have all the cells/feautes we expect
+    assert np.isnan(adata.X).sum() == 0
+    assert adata.X.shape == (4785, 1065)
+
+    # drop uninformative features
+    adata = remove_low_var_feat_cols(adata)
+    return adata
 
 
 def merge_global_structure(rename_dict=rename_dict):
@@ -170,21 +185,7 @@ def load_data():
 
     # make anndata from feature data
     # anndata as intermediate because our general purpose cleaning functions are written for anndata rather than pandas objects
-    anndata_logger = logging.getLogger("anndata")
-    anndata_logger.setLevel(logging.CRITICAL)
-    adata = make_anndata_feats(df_feats)
-
-    # clean up adata
-    adata = iteratively_prune(adata)
-    adata = drop_bad_struct_scores(adata)
-    adata = drop_xyz_locs(adata)
-
-    # check to make sure we have all the cells/feautes we expect
-    assert np.isnan(adata.X).sum() == 0
-    assert adata.X.shape == (4785, 1065)
-
-    # drop uninformative features
-    adata = remove_low_var_feat_cols(adata)
+    adata = adata_manipulations(df_feats)
 
     # make a df version of the feature data that only has a handful of simple features
     df_small = make_small_dataset(adata)
