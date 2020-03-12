@@ -8,12 +8,13 @@ def run(structure_scores, normalized_image_manifest, out_csv):
     r"""
         Write strucutre score csv that include image fovID
         Args:
-            structure_scores (str): location (absolute path) to manual structure scores
+            structure_scores (str): location (absolute path) to manual structure scores; score is actn2 organization score or myh6/7 localization score
             normalized_image_manifest (str): location (absolute path) to image manifest (ex. metadata.csv from quilt)
             structure_scores_updated (str): location (absolute path) where to save structure csv with fov id
     """
 
     structure_score_df = pd.read_csv(structure_scores, index_col=0)
+    structure_score_df = structure_score_df.reset_index(drop=True)
     norm_image_df = pd.read_csv(normalized_image_manifest)
 
     # rename cell number column so it matches name in structure_score_df
@@ -42,11 +43,30 @@ def run(structure_scores, normalized_image_manifest, out_csv):
     )
 
     # keep only structure columns plus fov id and write structures to file
-    final_structure_df = norm_image_structure_df.loc[
-        :, ["FOVId", "cell_num", "file_name", "mh score", "kg score"]
-    ]
+    # use only columns that exist in data frame to accomodate both structure and localization scoring
+    keep_col_options = set(
+        [
+            "FOVId",
+            "cell_num",
+            "file_name",
+            "file_base",
+            "mh score",
+            "kg score",
+            "probe_561_loc_score",
+            "probe_638_loc_score",
+        ]
+    )
 
-    final_structure_df.to_csv(out_csv)
+    keep_cols = list(keep_col_options & set(norm_image_structure_df.columns))
+
+    # put columns in preferred order
+    first_cols = ["FOVId", "cell_num", "file_name", "file_base"]
+
+    remaining_cols = [c for c in keep_cols if c not in first_cols]
+
+    final_structure_df = norm_image_structure_df.loc[:, first_cols + remaining_cols]
+
+    final_structure_df.to_csv(out_csv, index=False)
 
 
 def main():

@@ -171,18 +171,26 @@ def merge_cellprofiler_output(
     )
 
     # remove unnecessary columns
-    cell_feature_image_df = cell_feature_image_df.drop(
+
+    # this is a list of possible columns to remove; b/c not every channel is used for FISH probe, check which columns \
+    # exist first and then remove only columns that exist in the feature data frame; add warning when some dropped columns don't exist??
+    remove_col_options = set(
         [
             "finalnuc_Children_FinalNucBorder_Count",
             "finalnuc_Number_Object_Number",
+            "finalnuc_Mean_seg_probe_488_Number_Object_Number",
             "finalnuc_Mean_seg_probe_561_Number_Object_Number",
             "finalnuc_Mean_seg_probe_638_Number_Object_Number",
+            "napariCell_Mean_seg_probe_488_Number_Object_Number",
             "napariCell_Mean_seg_probe_561_Number_Object_Number",
             "napariCell_Mean_seg_probe_638_Number_Object_Number",
             "napariCell_Number_Object_Number",
-        ],
-        axis=1,
+        ]
     )
+
+    remove_cols = list(remove_col_options & set(cell_feature_image_df.columns))
+
+    cell_feature_image_df = cell_feature_image_df.drop(remove_cols, axis=1)
     # keep feature columns at the end and metadata up front
     move_cols = [
         "napariCell_nuclei_Count",
@@ -230,9 +238,10 @@ def image_object_counts(image_csv):
         + "/"
         + image_df["ObjectsFileName_napari_cell"]
     )
-    image_df = image_df.loc[
-        :,
-        (
+
+    # to accomodate structure and non-structure data sets, check if count columns exists first
+    col_options = set(
+        [
             "ImageNumber",
             "ImagePath",
             "Count_FilterNuc",
@@ -242,10 +251,15 @@ def image_object_counts(image_csv):
             "Count_NucBubble",
             "Count_napari_cell",
             "Count_nuc",
+            "Count_seg_probe_488",
             "Count_seg_probe_561",
             "Count_seg_probe_638",
-        ),
-    ]
+        ]
+    )
+
+    col_counts = list(col_options & set(image_df.columns))
+
+    image_df = image_df.loc[:, col_counts]
     return image_df
 
 
@@ -254,6 +268,7 @@ def add_sample_image_metadata(
     norm_image_manifest,
     fov_metadata,
     norm_image_key="rescaled_2D_fov_tiff_path",
+    single_cell_tiff=True,
 ):
     r"""
         Add fish sample and image metadata to cell feature data frame
@@ -272,23 +287,48 @@ def add_sample_image_metadata(
     # use normalized image manifest to get un-normalized image paths and merge
     # single cell image paths into cell feature data frame
 
-    # rename columns in image manifest to match cell feature df
-    norm_image_manifest_df = norm_image_manifest_df.rename(
-        columns={
-            "fov_id": "FOVId",
-            "original_fov_location": "fov_path",
-            norm_image_key: "ImagePath",
-            "cell_label_value": "napariCell_ObjectNumber",
-        }
-    )
-
+    # rename columns in image manifest to match cell feature df; cell_label_value only exists for structure data rn
+    # define columns that should be at front of data frame (first_cols)
     # merge 1: add raw fov path to cell_feature_df
-    cell_feature_image_df = pd.merge(
-        cell_feature_df,
-        norm_image_manifest_df,
-        on=["ImagePath", "napariCell_ObjectNumber"],
-        how="outer",
-    )
+    if single_cell_tiff:  # for structure data
+        norm_image_manifest_df = norm_image_manifest_df.rename(
+            columns={
+                "fov_id": "FOVId",
+                "original_fov_location": "fov_path",
+                norm_image_key: "ImagePath",
+                "cell_label_value": "napariCell_ObjectNumber",
+            }
+        )
+
+        first_cols = [
+            "ImageNumber",
+            "FOVId",
+            "ImagePath",
+            "ImageFailed",
+            "napariCell_ObjectNumber",
+        ]
+
+        cell_feature_image_df = pd.merge(
+            cell_feature_df,
+            norm_image_manifest_df,
+            on=["ImagePath", "napariCell_ObjectNumber"],
+            how="outer",
+        )
+
+    else:  # for non-structure data
+        norm_image_manifest_df = norm_image_manifest_df.rename(
+            columns={
+                "fov_id": "FOVId",
+                "original_fov_location": "fov_path",
+                norm_image_key: "ImagePath",
+            }
+        )
+
+        first_cols = ["ImageNumber", "FOVId", "ImagePath", "ImageFailed"]
+
+        cell_feature_image_df = pd.merge(
+            cell_feature_df, norm_image_manifest_df, on=["ImagePath"], how="outer"
+        )
 
     # merge 2: use raw fov path to add sample metadata into cell_feature_df
     cell_feature_image_metadata_df = pd.merge(
@@ -299,27 +339,24 @@ def add_sample_image_metadata(
         ["ge_wellID", "notes"], axis=1
     )
 
-    move_cols = [
-        "rescaled_2D_single_cell_tiff_path",
-        "fov_path",
-        "well_position",
-        "microscope",
-        "image_date",
-        "probe488",
-        "probe546",
-        "probe647",
-        "plate_name",
-        "cell_line",
-        "cell_age",
-    ]
+    # re-arrange columns, but to accomodate structure/non-structure data sets, use only columns that exist in data frame
+    move_col_options = set(
+        [
+            "rescaled_2D_single_cell_tiff_path",
+            "fov_path",
+            "well_position",
+            "microscope",
+            "image_date",
+            "probe488",
+            "probe546",
+            "probe647",
+            "plate_name",
+            "cell_line",
+            "cell_age",
+        ]
+    )
 
-    first_cols = [
-        "ImageNumber",
-        "FOVId",
-        "ImagePath",
-        "ImageFailed",
-        "napariCell_ObjectNumber",
-    ]
+    move_cols = list(move_col_options & set(cell_feature_image_metadata_df))
 
     remaining_cols = [
         c
@@ -356,6 +393,35 @@ def add_cell_structure_scores(cell_feature_df, structure_scores_csv):
     cell_feature_score_df = pd.merge(
         cell_feature_df,
         structure_score_df,
+        on=["FOVId", "napariCell_ObjectNumber"],
+        how="outer",
+    )
+    cell_feature_score_df = cell_feature_score_df.drop(
+        ["file_name", "file_base"], axis=1
+    )
+
+    return cell_feature_score_df
+
+
+def add_cell_probe_localization_scores(cell_feature_df, probe_localization_scores_csv):
+    """
+        Add manual probe localization scores to cell feature data frame
+        Args:
+            cell_feature_df (pd.DataFrame): cellprofiler cell and nuclei features merged by merge_cellprofiler_output
+            probe_localization_scores_csv (str): location of csv file with manual probe localization scores per napari cell; cell_num = napariCell_ObjectNumber
+        Returns:
+            cell_feature_score_df (pd.DataFrame): all cell and nuclei features calculated by cellprofiler with manual probe localization scores added
+    """
+
+    # rename columns to match cell feature columns
+    localization_score_df = pd.read_csv(probe_localization_scores_csv, index_col=0)
+    localization_score_df = localization_score_df.rename(
+        columns={"cell_num": "napariCell_ObjectNumber"}
+    )
+
+    cell_feature_score_df = pd.merge(
+        cell_feature_df,
+        localization_score_df,
         on=["FOVId", "napariCell_ObjectNumber"],
         how="outer",
     )
