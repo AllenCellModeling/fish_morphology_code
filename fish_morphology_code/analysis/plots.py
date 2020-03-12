@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import quilt3
 import logging
 
@@ -226,6 +227,8 @@ def load_data():
         my_reg_df[X_cols]
     )
 
+    regression_df = pd.DataFrame({"feature": X_cols, "coef": regression.coef_})
+
     # create version of feature data where FISH probes are unpaired (makes facet plots easier)
     df_tidy = tidy_df(df)
 
@@ -256,4 +259,4 @@ def load_data():
         df[col.replace("count", "density")] = df[col] / df["cell_area"]
     df_tidy["FISH_probe_density"] = df_tidy["FISH_probe_count"] / df_tidy["cell_area"]
 
-    return df, df_tidy
+    return df, df_tidy, regression_df
