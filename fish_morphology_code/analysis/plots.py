@@ -188,8 +188,13 @@ def get_global_structure(rename_dict=rename_dict):
     df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p)))
 
 
-def group_human_scores(rename_dict=rename_dict):
-    pass
+def group_human_scores(df, rename_dict=rename_dict):
+    df["consensus_structure_org_score_roundup"] = np.ceil(
+        df["consensus_structure_org_score"]
+    ).astype(int)
+    df["consensus_structure_org_score_grouped"] = df[
+        "consensus_structure_org_score_roundup"
+    ].map({1: "1-2", 2: "1-2", 3: "3", 4: "4-5", 5: "4-5"})
 
 
 def make_regression_df(rename_dict=rename_dict):
@@ -227,12 +232,7 @@ def load_data():
     df = widen_df(df_small)
 
     # group manual human structure scores into coarser bins
-    df["consensus_structure_org_score_roundup"] = np.ceil(
-        df["consensus_structure_org_score"]
-    ).astype(int)
-    df["consensus_structure_org_score_grouped"] = df[
-        "consensus_structure_org_score_roundup"
-    ].map({1: "1-2", 2: "1-2", 3: "3", 4: "4-5", 5: "4-5"})
+    df = group_human_scores(df)
 
     # aggregate metric for total fraction of cell covered by "regular" ACTN2 structure
     df["frac_area_regular_sum"] = (
