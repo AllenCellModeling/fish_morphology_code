@@ -5,6 +5,7 @@ from fish_morphology_code.analysis.plots import (
     load_data,
     load_main_feat_data,
     adata_manipulations,
+    get_global_structure,
 )
 
 
@@ -15,6 +16,10 @@ def test_load_main_feat_data():
 def test_adata_manipulations():
     df_feats = load_main_feat_data()
     _ = adata_manipulations(df_feats)
+
+
+def test_get_global_structure():
+    _ = get_global_structure()
 
 
 def test_load_data():

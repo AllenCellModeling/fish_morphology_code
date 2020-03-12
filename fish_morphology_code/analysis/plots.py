@@ -157,8 +157,35 @@ def adata_manipulations(df_feats, rename_dict=rename_dict):
     return adata
 
 
-def merge_global_structure(rename_dict=rename_dict):
-    pass
+def get_global_structure(rename_dict=rename_dict):
+    p_gs = quilt3.Package.browse(
+        "matheus/assay_dev_fish_analysis", "s3://allencell-internal-quilt"
+    )
+    df_gs = fetch_df("metadata.csv", p_gs).drop("Unnamed: 0", axis="columns")
+    df_gs = df_gs[
+        [
+            "napariCell_ObjectNumber",
+            "original_fov_location",
+            "FracAreaBackground",
+            "FracAreaMessy",
+            "FracAreaThreads",
+            "FracAreaRandom",
+            "FracAreaRegularDots",
+            "FracAreaRegularStripes",
+            "MaxCoeffVar",
+            "HPeak",
+            "PeakDistance",
+            "PeakAngle",
+            "IntensityMedian",
+            "IntensityIntegrated",
+            "IntensityMedianBkgSub",
+            "IntensityIntegratedBkgSub",
+        ]
+    ].rename(rename_dict, axis="columns")
+
+    # clean up some columns to use as ids and merge into main dataframe
+    df_gs = df_gs.rename(columns={"original_fov_location": "fov_path"})
+    df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p)))
 
 
 def group_human_scores(rename_dict=rename_dict):
@@ -191,34 +218,7 @@ def load_data():
     df_small = make_small_dataset(adata)
 
     # load in global structure features (DNN area classifier + radon transform stuff)
-    p_gs = quilt3.Package.browse(
-        "matheus/assay_dev_fish_analysis", "s3://allencell-internal-quilt"
-    )
-    df_gs = fetch_df("metadata.csv", p_gs).drop("Unnamed: 0", axis="columns")
-    df_gs = df_gs[
-        [
-            "napariCell_ObjectNumber",
-            "original_fov_location",
-            "FracAreaBackground",
-            "FracAreaMessy",
-            "FracAreaThreads",
-            "FracAreaRandom",
-            "FracAreaRegularDots",
-            "FracAreaRegularStripes",
-            "MaxCoeffVar",
-            "HPeak",
-            "PeakDistance",
-            "PeakAngle",
-            "IntensityMedian",
-            "IntensityIntegrated",
-            "IntensityMedianBkgSub",
-            "IntensityIntegratedBkgSub",
-        ]
-    ].rename(rename_dict, axis="columns")
-
-    # clean up some columns to use as ids and merge into main dataframe
-    df_gs = df_gs.rename(columns={"original_fov_location": "fov_path"})
-    df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p)))
+    df_gs = get_global_structure()
 
     # merge in the global structure metrics
     df_small = df_small.merge(df_gs)
