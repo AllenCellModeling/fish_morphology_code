@@ -17,7 +17,7 @@ from fish_morphology_code.analysis.plots import (
 
 @pytest.fixture
 def df_feats():
-    return load_main_feat_data()
+    return load_main_feat_data(use_cached=True)
 
 
 def test_load_main_feat_data(df_feats):

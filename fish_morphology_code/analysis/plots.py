@@ -95,11 +95,17 @@ def pretty_chart(
     )
 
 
-def fetch_df(csv_qloc, quilt_package, dest_dir=Path("tmp_quilt_data"), dtype={}):
+def fetch_df(
+    csv_qloc, quilt_package, dest_dir=Path("tmp_quilt_data"), dtype={}, use_cached=False
+):
     """get a df from quilt csv using intermediate fetch to disk -- windows bug"""
     qloc = quilt_package[csv_qloc]
-    qloc.fetch(dest=dest_dir / csv_qloc)
-    return pd.read_csv(dest_dir / csv_qloc, dtype=dtype)
+    csv_path = dest_dir / csv_qloc
+    if use_cached and csv_path.is_file():
+        pass
+    else:
+        qloc.fetch(dest=dest_dir / csv_qloc)
+    return pd.read_csv(csv_path, dtype=dtype)
 
 
 rename_dict = {

@@ -1,5 +1,6 @@
 quilt_data*/
 output_data*/
+tmp_quilt_data/
 
 .nfs*
 .DS_Store
