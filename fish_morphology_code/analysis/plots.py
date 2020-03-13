@@ -186,6 +186,7 @@ def get_global_structure(rename_dict=rename_dict):
     # clean up some columns to use as ids and merge into main dataframe
     df_gs = df_gs.rename(columns={"original_fov_location": "fov_path"})
     df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p)))
+    return df_gs
 
 
 def group_human_scores(df, rename_dict=rename_dict):
@@ -195,6 +196,7 @@ def group_human_scores(df, rename_dict=rename_dict):
     df["consensus_structure_org_score_grouped"] = df[
         "consensus_structure_org_score_roundup"
     ].map({1: "1-2", 2: "1-2", 3: "3", 4: "4-5", 5: "4-5"})
+    return df
 
 
 def make_regression_df(rename_dict=rename_dict):
