@@ -40,7 +40,7 @@ def distribute_scrnaseq_raw(
 
     # Distribute
     ds.distribute(
-        push_uri="", message=f"git commit hash of fish_morphology_code = {label}"
+        push_uri=s3_bucket, message=f"git commit hash of fish_morphology_code = {label}"
     )
 
 
