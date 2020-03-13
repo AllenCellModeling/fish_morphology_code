@@ -25,20 +25,20 @@ def test_load_main_feat_data(df_feats):
     assert df_feats.shape[1] > 10
 
 
-def test_adata_manipulations():
+def test_adata_manipulations(df_feats):
     _ = adata_manipulations(df_feats)
 
 
-def test_make_small_dataset():
+def test_make_small_dataset(df_feats):
     adata = adata_manipulations(df_feats)
     _ = make_small_dataset(adata)
 
 
-def test_get_global_structure():
+def test_get_global_structure(df_feats):
     _ = get_global_structure()
 
 
-def test_group_human_scores():
+def test_group_human_scores(df_feats):
     adata = adata_manipulations(df_feats)
     df_small = make_small_dataset(adata)
     df_gs = get_global_structure()
