@@ -126,7 +126,9 @@ def load_main_feat_data(rename_dict=rename_dict, use_cached=False):
         "tanyasg/2d_autocontrasted_single_cell_features",
         "s3://allencell-internal-quilt",
     )
-    df_feats = p_feats["features/a749d0e2_cp_features.csv"]()
+    df_feats = p_feats["features/a749d0e2_cp_features.csv"](
+        dtype={"probe_561_loc_score": object, "probe_638_loc_score": object}
+    )
     return df_feats
 
 
