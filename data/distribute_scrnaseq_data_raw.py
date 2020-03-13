@@ -20,6 +20,11 @@ def distribute_scrnaseq_raw(
         readme_path="/allen/aics/gene-editing/Manuscripts/Transcriptomics_2019/scrnaseq_supplement/data_package/scrnaseq_quilt/README.md",
     )
 
+    # Rename the columns on the package level
+    ds.set_column_names_map(
+        {"fastq_files": "fastq", "read_assignment_files": "read_assignment"}
+    )
+
     # add raw count matrix, cell metadata, and Seurat object (Robj) and anndata object (h5ad) as supplementary files
     ds.set_extra_files(
         [
