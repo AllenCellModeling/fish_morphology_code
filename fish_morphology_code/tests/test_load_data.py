@@ -26,25 +26,25 @@ def test_load_main_feat_data(df_feats):
 
 
 def test_adata_manipulations(df_feats):
-    _ = adata_manipulations(df_feats)
+    _ = adata_manipulations(df_feats, use_cached=True)
 
 
 def test_make_small_dataset(df_feats):
     adata = adata_manipulations(df_feats)
-    _ = make_small_dataset(adata)
+    _ = make_small_dataset(adata, use_cached=True)
 
 
 def test_get_global_structure(df_feats):
-    _ = get_global_structure()
+    _ = get_global_structure(use_cached=True)
 
 
 def test_group_human_scores(df_feats):
-    adata = adata_manipulations(df_feats)
-    df_small = make_small_dataset(adata)
-    df_gs = get_global_structure()
-    df_small = df_small.merge(df_gs)
-    df = widen_df(df_small)
-    _ = group_human_scores(df)
+    adata = adata_manipulations(df_feats, use_cached=True)
+    df_small = make_small_dataset(adata, use_cached=True)
+    df_gs = get_global_structure(use_cached=True)
+    df_small = df_small.merge(df_gs, use_cached=True)
+    df = widen_df(use_cached=True)
+    _ = group_human_scores(df, use_cached=True)
 
 
 # def test_load_data():

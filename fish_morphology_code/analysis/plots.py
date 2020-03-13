@@ -133,7 +133,7 @@ rename_dict = {
 }
 
 
-def load_main_feat_data(rename_dict=rename_dict):
+def load_main_feat_data(rename_dict=rename_dict, use_cached=False):
     # load main feature data
     p_feats = quilt3.Package.browse(
         "tanyasg/2d_autocontrasted_single_cell_features",
@@ -143,12 +143,13 @@ def load_main_feat_data(rename_dict=rename_dict):
         "features/a749d0e2_cp_features.csv",
         p_feats,
         dtype={"probe_561_loc_score": object, "probe_638_loc_score": object},
+        use_cached=use_cached,
     )
     assert len(df_feats) > 0
     return df_feats
 
 
-def adata_manipulations(df_feats, rename_dict=rename_dict):
+def adata_manipulations(df_feats, rename_dict=rename_dict, use_cached=False):
     anndata_logger = logging.getLogger("anndata")
     anndata_logger.setLevel(logging.CRITICAL)
     adata = make_anndata_feats(df_feats)
@@ -167,11 +168,13 @@ def adata_manipulations(df_feats, rename_dict=rename_dict):
     return adata
 
 
-def get_global_structure(rename_dict=rename_dict):
+def get_global_structure(rename_dict=rename_dict, use_cached=False):
     p_gs = quilt3.Package.browse(
         "matheus/assay_dev_fish_analysis", "s3://allencell-internal-quilt"
     )
-    df_gs = fetch_df("metadata.csv", p_gs).drop("Unnamed: 0", axis="columns")
+    df_gs = fetch_df("metadata.csv", p_gs, use_cached=use_cached).drop(
+        "Unnamed: 0", axis="columns"
+    )
     df_gs = df_gs[
         [
             "napariCell_ObjectNumber",
@@ -199,7 +202,7 @@ def get_global_structure(rename_dict=rename_dict):
     return df_gs
 
 
-def group_human_scores(df, rename_dict=rename_dict):
+def group_human_scores(df, rename_dict=rename_dict, use_cached=False):
     df["consensus_structure_org_score_roundup"] = np.ceil(
         df["consensus_structure_org_score"]
     ).astype(int)
