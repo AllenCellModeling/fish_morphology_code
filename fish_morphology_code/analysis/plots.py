@@ -95,19 +95,6 @@ def pretty_chart(
     )
 
 
-def fetch_df(
-    csv_qloc, quilt_package, dest_dir=Path("tmp_quilt_data"), dtype={}, use_cached=False
-):
-    """get a df from quilt csv using intermediate fetch to disk -- windows bug"""
-    qloc = quilt_package[csv_qloc]
-    csv_path = dest_dir / csv_qloc
-    if use_cached and csv_path.is_file():
-        pass
-    else:
-        qloc.fetch(dest=dest_dir / csv_qloc)
-    return pd.read_csv(csv_path, dtype=dtype)
-
-
 rename_dict = {
     "napariCell_nuclei_Count": "nuclei_count",
     "consensus_structure_org_score": "structure_org_score",
@@ -139,13 +126,7 @@ def load_main_feat_data(rename_dict=rename_dict, use_cached=False):
         "tanyasg/2d_autocontrasted_single_cell_features",
         "s3://allencell-internal-quilt",
     )
-    df_feats = fetch_df(
-        "features/a749d0e2_cp_features.csv",
-        p_feats,
-        dtype={"probe_561_loc_score": object, "probe_638_loc_score": object},
-        use_cached=use_cached,
-    )
-    assert len(df_feats) > 0
+    df_feats = p_feats["features/a749d0e2_cp_features.csv"]()
     return df_feats
 
 
@@ -172,9 +153,7 @@ def get_global_structure(rename_dict=rename_dict, use_cached=False):
     p_gs = quilt3.Package.browse(
         "matheus/assay_dev_fish_analysis", "s3://allencell-internal-quilt"
     )
-    df_gs = fetch_df("metadata.csv", p_gs, use_cached=use_cached).drop(
-        "Unnamed: 0", axis="columns"
-    )
+    df_gs = p_gs["metadata.csv"]()
     df_gs = df_gs[
         [
             "napariCell_ObjectNumber",
