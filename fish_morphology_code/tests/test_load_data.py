@@ -44,7 +44,7 @@ def test_group_human_scores(df_feats):
     df_gs = get_global_structure(use_cached=True)
     df_small = df_small.merge(df_gs)
     df = widen_df(df_small)
-    _ = group_human_scores(df, use_cached=True)
+    _ = group_human_scores(df)
 
 
 # def test_load_data():
