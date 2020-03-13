@@ -20,8 +20,9 @@ def df_feats():
     return load_main_feat_data()
 
 
-# def test_load_main_feat_data():
-#     _ = load_main_feat_data()
+def test_load_main_feat_data(df_feats):
+    assert df_feats.shape[0] > 1000
+    assert df_feats.shape[1] > 10
 
 
 def test_adata_manipulations():
