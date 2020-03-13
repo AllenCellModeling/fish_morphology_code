@@ -149,7 +149,7 @@ def load_main_feat_data(rename_dict=rename_dict, use_cached=False):
     return df_feats
 
 
-def adata_manipulations(df_feats, rename_dict=rename_dict, use_cached=False):
+def adata_manipulations(df_feats, rename_dict=rename_dict):
     anndata_logger = logging.getLogger("anndata")
     anndata_logger.setLevel(logging.CRITICAL)
     adata = make_anndata_feats(df_feats)
@@ -202,7 +202,7 @@ def get_global_structure(rename_dict=rename_dict, use_cached=False):
     return df_gs
 
 
-def group_human_scores(df, rename_dict=rename_dict, use_cached=False):
+def group_human_scores(df, rename_dict=rename_dict):
     df["consensus_structure_org_score_roundup"] = np.ceil(
         df["consensus_structure_org_score"]
     ).astype(int)
