@@ -95,11 +95,11 @@ def pretty_chart(
     )
 
 
-def fetch_df(csv_qloc, quilt_package, dest_dir=Path("tmp_quilt_data")):
+def fetch_df(csv_qloc, quilt_package, dest_dir=Path("tmp_quilt_data"), dtype={}):
     """get a df from quilt csv using intermediate fetch to disk -- windows bug"""
     qloc = quilt_package[csv_qloc]
     qloc.fetch(dest=dest_dir / csv_qloc)
-    return pd.read_csv(dest_dir / csv_qloc)
+    return pd.read_csv(dest_dir / csv_qloc, dtype=dtype)
 
 
 rename_dict = {
@@ -133,7 +133,11 @@ def load_main_feat_data(rename_dict=rename_dict):
         "tanyasg/2d_autocontrasted_single_cell_features",
         "s3://allencell-internal-quilt",
     )
-    df_feats = fetch_df("features/a749d0e2_cp_features.csv", p_feats)
+    df_feats = fetch_df(
+        "features/a749d0e2_cp_features.csv",
+        p_feats,
+        dtype={"probe_561_loc_score": object, "probe_638_loc_score": object},
+    )
     assert len(df_feats) > 0
     return df_feats
 
