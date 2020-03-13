@@ -23,6 +23,19 @@ from fish_morphology_code.analysis.structure_prediction import (
 )
 
 
+def fetch_df(
+    csv_qloc, quilt_package, dest_dir=Path("tmp_quilt_data"), dtype={}, use_cached=False
+):
+    """get a df from quilt csv using intermediate fetch to disk -- windows bug"""
+    qloc = quilt_package[csv_qloc]
+    csv_path = dest_dir / csv_qloc
+    if use_cached and csv_path.is_file():
+        pass
+    else:
+        qloc.fetch(dest=dest_dir / csv_qloc)
+    return pd.read_csv(csv_path, dtype=dtype)
+
+
 def make_small_dataset(
     adata,
     feats_X=[
@@ -126,7 +139,12 @@ def load_main_feat_data(rename_dict=rename_dict, use_cached=False):
         "tanyasg/2d_autocontrasted_single_cell_features",
         "s3://allencell-internal-quilt",
     )
-    df_feats = p_feats["features/a749d0e2_cp_features.csv"]()
+    df_feats = fetch_df(
+        "features/a749d0e2_cp_features.csv",
+        p_feats,
+        dtype={"probe_561_loc_score": object, "probe_638_loc_score": object},
+        use_cached=use_cached,
+    )
     return df_feats
 
 
@@ -153,7 +171,9 @@ def get_global_structure(rename_dict=rename_dict, use_cached=False):
     p_gs = quilt3.Package.browse(
         "matheus/assay_dev_fish_analysis", "s3://allencell-internal-quilt"
     )
-    df_gs = p_gs["metadata.csv"]()
+    df_gs = df_gs = fetch_df("metadata.csv", p_gs, use_cached=use_cached).drop(
+        "Unnamed: 0", axis="columns"
+    )
     df_gs = df_gs[
         [
             "napariCell_ObjectNumber",
