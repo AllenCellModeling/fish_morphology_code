@@ -92,6 +92,16 @@ def download_scrnaseq(test=False):
         )
 
 
+def download_scrnaseq_raw(test=False):
+    """download scrnaseq raw data"""
+    download_quilt_data(
+        package="tanyasg/scrnaseq_data_raw",
+        bucket="s3://allencell-internal-quilt",
+        data_save_loc="quilt_data_scrnaseq_raw",
+        ignore_warnings=True,
+    )
+
+
 def download_ML_struct_scores():
     """download automated structure channel scoring."""
     download_quilt_data(
@@ -152,6 +162,10 @@ def main_features():
 
 def main_scrnaseq():
     fire.Fire(download_scrnaseq)
+
+
+def main_scrnaseq_raw():
+    fire.Fire(download_scrnaseq_raw)
 
 
 def main_MLstruct():
