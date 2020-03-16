@@ -244,12 +244,31 @@ def make_regression_df(
     return df, regression_info_df
 
 
-def make_and_clean_tidy_df(rename_dict=rename_dict):
-    pass
+def clean_probe_names(df, df_tidy):
+    df = df.rename(
+        columns={
+            c: c.replace("-B1", "").replace("-B3", "").replace("-B4", "")
+            for c in df.columns
+        }
+    )
+    df_tidy = df_tidy.rename(
+        columns={
+            c: c.replace("-B1", "").replace("-B3", "").replace("-B4", "")
+            for c in df.columns
+        }
+    )
+    df_tidy.FISH_probe = df_tidy.FISH_probe.map(
+        {c: c.split("-")[0] for c in df_tidy.FISH_probe.unique()}
+    )
+    return df, df_tidy
 
 
-def add_densities(rename_dict=rename_dict):
-    pass
+def add_densities(df, df_tidy):
+    count_cols = [c for c in df.columns if ("_count" in c) & ("nuclei" not in c)]
+    for col in count_cols:
+        df[col.replace("count", "density")] = df[col] / df["cell_area"]
+    df_tidy["FISH_probe_density"] = df_tidy["FISH_probe_count"] / df_tidy["cell_area"]
+    return df, df_tidy
 
 
 def load_data():
@@ -291,26 +310,9 @@ def load_data():
     df_tidy = df_tidy.rename(rename_dict, axis="columns")
 
     # clean up FISH probe names to drop amplifier ID
-    df = df.rename(
-        columns={
-            c: c.replace("-B1", "").replace("-B3", "").replace("-B4", "")
-            for c in df.columns
-        }
-    )
-    df_tidy = df_tidy.rename(
-        columns={
-            c: c.replace("-B1", "").replace("-B3", "").replace("-B4", "")
-            for c in df.columns
-        }
-    )
-    df_tidy.FISH_probe = df_tidy.FISH_probe.map(
-        {c: c.split("-")[0] for c in df_tidy.FISH_probe.unique()}
-    )
+    df, df_tidy = clean_probe_names(df, df_tidy)
 
     # move from counts to count densities (normalize to cell area)
-    count_cols = [c for c in df.columns if ("_count" in c) & ("nuclei" not in c)]
-    for col in count_cols:
-        df[col.replace("count", "density")] = df[col] / df["cell_area"]
-    df_tidy["FISH_probe_density"] = df_tidy["FISH_probe_count"] / df_tidy["cell_area"]
+    df, df_tidy = add_densities(df, df_tidy)
 
     return df, df_tidy, df_regression
