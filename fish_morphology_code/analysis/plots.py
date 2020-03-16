@@ -211,8 +211,37 @@ def group_human_scores(df, rename_dict=rename_dict):
     return df
 
 
-def make_regression_df(rename_dict=rename_dict):
-    pass
+def make_regression_df(
+    df,
+    X_cols=[
+        "cell_area",
+        "cell_aspect_ratio",
+        "frac_area_background",
+        "frac_area_messy",
+        "frac_area_threads",
+        "frac_area_random",
+        "frac_area_regular_dots",
+        "frac_area_regular_stripes",
+        "max_coeff_var",
+        "h_peak",
+        "peak_distance",
+    ],
+    y_col="structure_org_score",
+    weight_col="structure_org_score",
+):
+    # add linear model structure scores
+
+    my_reg_df = prep_human_score_regression_data(df)
+    regression = regress_human_scores_on_feats(
+        my_reg_df, X_cols=X_cols, y_col=y_col, weight_col=weight_col
+    )
+    df["structure_org_weighted_linear_model_all"] = regression.predict(
+        my_reg_df[X_cols]
+    )
+
+    regression_info_df = pd.DataFrame({"feature": X_cols, "coef": regression.coef_})
+
+    return df, regression_info_df
 
 
 def make_and_clean_tidy_df(rename_dict=rename_dict):
@@ -248,39 +277,11 @@ def load_data():
     # group manual human structure scores into coarser bins
     df = group_human_scores(df)
 
-    # aggregate metric for total fraction of cell covered by "regular" ACTN2 structure
-    df["frac_area_regular_sum"] = (
-        df["frac_area_regular_dots"] + df["frac_area_regular_stripes"]
-    )
-
     # clean up feauter/column names on the dataframes
     df = df.rename(rename_dict, axis="columns")
 
-    # add linear model structure scores
-    X_cols = [
-        "cell_area",
-        "cell_aspect_ratio",
-        "frac_area_background",
-        "frac_area_messy",
-        "frac_area_threads",
-        "frac_area_random",
-        "frac_area_regular_dots",
-        "frac_area_regular_stripes",
-        "max_coeff_var",
-        "h_peak",
-        "peak_distance",
-    ]
-    y_col = "structure_org_score"
-    weight_col = "structure_org_score"
-    my_reg_df = prep_human_score_regression_data(df)
-    regression = regress_human_scores_on_feats(
-        my_reg_df, X_cols=X_cols, y_col=y_col, weight_col=weight_col
-    )
-    df["structure_org_weighted_linear_model_all"] = regression.predict(
-        my_reg_df[X_cols]
-    )
-
-    regression_df = pd.DataFrame({"feature": X_cols, "coef": regression.coef_})
+    # add regressed organizational score and grab regression info
+    df, df_regression = make_regression_df(df)
 
     # create version of feature data where FISH probes are unpaired (makes facet plots easier)
     df_tidy = tidy_df(df)
@@ -312,4 +313,4 @@ def load_data():
         df[col.replace("count", "density")] = df[col] / df["cell_area"]
     df_tidy["FISH_probe_density"] = df_tidy["FISH_probe_count"] / df_tidy["cell_area"]
 
-    return df, df_tidy, regression_df
+    return df, df_tidy, df_regression
