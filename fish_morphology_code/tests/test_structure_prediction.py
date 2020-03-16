@@ -26,11 +26,18 @@ def df_feats():
 
 def test_prep_human_score_regression_data(df_feats):
     adata = adata_manipulations(df_feats)
+    assert len(adata) > 0
     df_small = make_small_dataset(adata)
+    assert len(df_small) > 0
     df_gs = get_global_structure(use_cached=True)
+    assert len(df_gs) > 0
     df_small = df_small.merge(df_gs)
+    assert len(df_small) > 0
     df = widen_df(df_small)
+    assert len(df) > 0
     df = group_human_scores(df)
+    assert len(df) > 0
     df = df.rename(rename_dict, axis="columns")
+    assert len(df) > 0
     df_reg = prep_human_score_regression_data(df)
     assert len(df_reg) > 0
