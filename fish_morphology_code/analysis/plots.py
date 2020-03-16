@@ -197,7 +197,7 @@ def get_global_structure(rename_dict=rename_dict, use_cached=False):
 
     # clean up some columns to use as ids and merge into main dataframe
     df_gs = df_gs.rename(columns={"original_fov_location": "fov_path"})
-    df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p)))
+    df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p).as_posix()))
     return df_gs
 
 
