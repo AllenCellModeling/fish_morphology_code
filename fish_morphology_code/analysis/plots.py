@@ -55,6 +55,8 @@ def make_small_dataset(
         "fov_path",
         "probe546",
         "probe647",
+        "probe_561_loc_score",
+        "probe_638_loc_score",
     ],
     loc_obs=["rescaled_2D_single_cell_tiff_path"],
 ):
