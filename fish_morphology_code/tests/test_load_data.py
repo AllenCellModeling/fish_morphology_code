@@ -15,6 +15,7 @@ from fish_morphology_code.analysis.plots import (
     make_regression_df,
     clean_probe_names,
     add_densities,
+    load_data,
     rename_dict,
 )
 
@@ -103,6 +104,10 @@ def test_add_densities(df_feats):
     assert len(df_tidy) > 0
 
 
-# def test_load_data():
-#     "test loading the data"
-#     df, df_tidy, df_regression = load_data()
+def test_load_data():
+    "test loading the data"
+    df, df_tidy, df_regression = load_data()
+    assert df.shape == (4775, 44)
+    assert df_tidy.shape == (9550, 31)
+    assert 2 * df.shape[0] == df_tidy.shape[0]
+    assert df.shape[1] - 16 + 3 == df_tidy.shape[1]
