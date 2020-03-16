@@ -63,7 +63,7 @@ def test_make_regression_df(df_feats):
     df = widen_df(df_small)
     df = group_human_scores(df)
     df = df.rename(rename_dict, axis="columns")
-    df, df_regression_info = make_regression_df
+    df, df_regression_info = make_regression_df(df)
     assert len(df) > 0
     assert len(df_regression_info) > 0
 
