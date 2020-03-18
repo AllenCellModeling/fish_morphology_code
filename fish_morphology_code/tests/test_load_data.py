@@ -107,7 +107,7 @@ def test_add_densities(df_feats):
 def test_load_data():
     "test loading the data"
     df, df_tidy, df_regression = load_data()
-    assert df.shape == (4775, 44)
-    assert df_tidy.shape == (9550, 31)
+    assert df.shape == (4775, 46)
+    assert df_tidy.shape == (9550, 33)
     assert 2 * df.shape[0] == df_tidy.shape[0]
     assert df.shape[1] - 16 + 3 == df_tidy.shape[1]
