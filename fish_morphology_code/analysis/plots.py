@@ -55,6 +55,8 @@ def make_small_dataset(
         "fov_path",
         "probe546",
         "probe647",
+        "probe_561_loc_score",
+        "probe_638_loc_score",
     ],
     loc_obs=["rescaled_2D_single_cell_tiff_path"],
 ):
@@ -197,7 +199,7 @@ def get_global_structure(rename_dict=rename_dict, use_cached=False):
 
     # clean up some columns to use as ids and merge into main dataframe
     df_gs = df_gs.rename(columns={"original_fov_location": "fov_path"})
-    df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p)))
+    df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p).as_posix()))
     return df_gs
 
 
@@ -211,16 +213,64 @@ def group_human_scores(df, rename_dict=rename_dict):
     return df
 
 
-def make_regression_df(rename_dict=rename_dict):
-    pass
+def make_regression_df(
+    df,
+    X_cols=[
+        "cell_area",
+        "cell_aspect_ratio",
+        "frac_area_background",
+        "frac_area_messy",
+        "frac_area_threads",
+        "frac_area_random",
+        "frac_area_regular_dots",
+        "frac_area_regular_stripes",
+        "max_coeff_var",
+        "h_peak",
+        "peak_distance",
+    ],
+    y_col="structure_org_score",
+    weight_col="structure_org_score",
+):
+    # add linear model structure scores
+
+    my_reg_df = prep_human_score_regression_data(df)
+    regression = regress_human_scores_on_feats(
+        my_reg_df, X_cols=X_cols, y_col=y_col, weight_col=weight_col
+    )
+    df["structure_org_weighted_linear_model_all"] = regression.predict(
+        my_reg_df[X_cols]
+    )
+
+    regression_info_df = pd.DataFrame({"feature": X_cols, "coef": regression.coef_})
+
+    return df, regression_info_df
 
 
-def make_and_clean_tidy_df(rename_dict=rename_dict):
-    pass
+def clean_probe_names(df, df_tidy):
+    df = df.rename(
+        columns={
+            c: c.replace("-B1", "").replace("-B3", "").replace("-B4", "")
+            for c in df.columns
+        }
+    )
+    df_tidy = df_tidy.rename(
+        columns={
+            c: c.replace("-B1", "").replace("-B3", "").replace("-B4", "")
+            for c in df.columns
+        }
+    )
+    df_tidy.FISH_probe = df_tidy.FISH_probe.map(
+        {c: c.split("-")[0] for c in df_tidy.FISH_probe.unique()}
+    )
+    return df, df_tidy
 
 
-def add_densities(rename_dict=rename_dict):
-    pass
+def add_densities(df, df_tidy):
+    count_cols = [c for c in df.columns if ("_count" in c) & ("nuclei" not in c)]
+    for col in count_cols:
+        df[col.replace("count", "density")] = df[col] / df["cell_area"]
+    df_tidy["FISH_probe_density"] = df_tidy["FISH_probe_count"] / df_tidy["cell_area"]
+    return df, df_tidy
 
 
 def load_data():
@@ -248,39 +298,11 @@ def load_data():
     # group manual human structure scores into coarser bins
     df = group_human_scores(df)
 
-    # aggregate metric for total fraction of cell covered by "regular" ACTN2 structure
-    df["frac_area_regular_sum"] = (
-        df["frac_area_regular_dots"] + df["frac_area_regular_stripes"]
-    )
-
     # clean up feauter/column names on the dataframes
     df = df.rename(rename_dict, axis="columns")
 
-    # add linear model structure scores
-    X_cols = [
-        "cell_area",
-        "cell_aspect_ratio",
-        "frac_area_background",
-        "frac_area_messy",
-        "frac_area_threads",
-        "frac_area_random",
-        "frac_area_regular_dots",
-        "frac_area_regular_stripes",
-        "max_coeff_var",
-        "h_peak",
-        "peak_distance",
-    ]
-    y_col = "structure_org_score"
-    weight_col = "structure_org_score"
-    my_reg_df = prep_human_score_regression_data(df)
-    regression = regress_human_scores_on_feats(
-        my_reg_df, X_cols=X_cols, y_col=y_col, weight_col=weight_col
-    )
-    df["structure_org_weighted_linear_model_all"] = regression.predict(
-        my_reg_df[X_cols]
-    )
-
-    regression_df = pd.DataFrame({"feature": X_cols, "coef": regression.coef_})
+    # add regressed organizational score and grab regression info
+    df, df_regression = make_regression_df(df)
 
     # create version of feature data where FISH probes are unpaired (makes facet plots easier)
     df_tidy = tidy_df(df)
@@ -290,26 +312,9 @@ def load_data():
     df_tidy = df_tidy.rename(rename_dict, axis="columns")
 
     # clean up FISH probe names to drop amplifier ID
-    df = df.rename(
-        columns={
-            c: c.replace("-B1", "").replace("-B3", "").replace("-B4", "")
-            for c in df.columns
-        }
-    )
-    df_tidy = df_tidy.rename(
-        columns={
-            c: c.replace("-B1", "").replace("-B3", "").replace("-B4", "")
-            for c in df.columns
-        }
-    )
-    df_tidy.FISH_probe = df_tidy.FISH_probe.map(
-        {c: c.split("-")[0] for c in df_tidy.FISH_probe.unique()}
-    )
+    df, df_tidy = clean_probe_names(df, df_tidy)
 
     # move from counts to count densities (normalize to cell area)
-    count_cols = [c for c in df.columns if ("_count" in c) & ("nuclei" not in c)]
-    for col in count_cols:
-        df[col.replace("count", "density")] = df[col] / df["cell_area"]
-    df_tidy["FISH_probe_density"] = df_tidy["FISH_probe_count"] / df_tidy["cell_area"]
+    df, df_tidy = add_densities(df, df_tidy)
 
-    return df, df_tidy, regression_df
+    return df, df_tidy, df_regression
