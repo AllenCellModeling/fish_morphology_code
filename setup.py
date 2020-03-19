@@ -88,6 +88,7 @@ setup(
             "download_2D_nonstructure_features=fish_morphology_code.bin.download_quilt_data:main_nonstructure_features",
             "download_ML_struct_scores=fish_morphology_code.bin.download_quilt_data:main_MLstruct",
             "download_scrnaseq=fish_morphology_code.bin.download_quilt_data:main_scrnaseq",
+            "download_scrnaseq_raw=fish_morphology_code.bin.download_quilt_data:main_scrnaseq_raw",
             "download_nonstructure_2D_segs=fish_morphology_code.bin.download_quilt_data:main_nonstructure_segs",
             "contrast_and_segment=fish_morphology_code.bin.stretch:main",
             "make_cellprofiler_image_set=fish_morphology_code.bin.make_cellprofiler_image_set:main_make_imageset",
