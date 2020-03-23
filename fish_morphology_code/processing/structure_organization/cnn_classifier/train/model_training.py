@@ -24,11 +24,11 @@ save_model_path = "./models/"  # save Pytorch models
 #set model parameters
 data_path = './data/data.tif'
 label_lists = (
-    './data/reg_stripes.gz',
-    './data/messy.gz',
-    './data/reg_dots.gz',
-    './data/threads.gz',
-    './data/random_dots.gz'
+    './data/diffuse_other.gz',
+    './data/fibers.gz',
+    './data/disorganized_puncta.gz',
+    './data/organized_puncta.gz',
+    './data/organized_z_disks.gz'
 )
 window_size = 96
 kernel_size = 5

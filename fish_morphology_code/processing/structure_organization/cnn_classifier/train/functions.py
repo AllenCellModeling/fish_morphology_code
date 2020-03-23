@@ -39,6 +39,9 @@ def load_data(data_path, label_lists, window_size):
     for i in range(len(labels)):
         cropped_images[i,:,:] = get_crop(image_set, locations[i,:], window_size)
 
+    if not os.path.exists('.patches/'):
+        os.makedirs('patches/')
+
     for i in range(len(label_lists)):
         in_class = np.squeeze(labels==i)
         class_patches = cropped_images[in_class,:,:]
