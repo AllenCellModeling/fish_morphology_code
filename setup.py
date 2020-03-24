@@ -37,7 +37,7 @@ dev_requirements = [
     "wheel>=0.33.1",
 ]
 
-interactive_requirements = ["altair", "jupyterlab", "matplotlib"]
+interactive_requirements = ["altair", "altair-data-server", "jupyterlab", "matplotlib"]
 
 requirements = [
     "aicsimageio>=3.0.2",
