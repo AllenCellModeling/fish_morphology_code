@@ -18,7 +18,7 @@ Pillow==6.2.0
 torch==1.3.0
 torchvision==0.4.1
 
-Bew aware that both training and inference process can be considerably slow if you don't have GPU available.
+Be aware that both training and inference process can be considerably slow if you don't have GPU available.
 
 ### How to train a new model
 
@@ -37,27 +37,29 @@ As the model is training, training and validation losses and accuracies are save
 
 The `.pth` file corresponding to the best model should be manually copied to the folder `local_organization/best_model/` for further use.
 
-### Inference on new data
+### Inference on the data used in the paper
 
 The script `inference/inference.py` uses the best model selected by the user to perform classification on new images. In addition, this script also uses the Allen Cell Structure Segmenter [1] to identify background regions in the input data and mask them out from the final classification maps. The input data is organized in the CSV file `database/database.csv`. Each row in this file corresponds to an input z-stack for which the inference will be performed on. Results are saved in the folder `structure_organization/output/` as the z-stacks are processed one at the time. An additional CSV file `database/database_cell.csv` is used to load the single cell manual segmentation. For each input z-stack an output z-stack is produced. The slices of the output z-stack are:
 
-1 - Highest mean intensity slice form the original input z-stack.
-2 - Probaility map for class Diffuse/others
-3 - Probaility map for class Fibers
-4 - Probaility map for class Disorganized puncta
-5 - Probaility map for class Organized Puncta
-6 - Probaility map for class Organized Z-disks
-7 - Final classification map based on the highest probability
-8 - Single cell manual segmentation 
+1. Highest mean intensity slice form the original input z-stack.
+2. Probaility map for class Diffuse/others
+3. Probaility map for class Fibers
+4. Probaility map for class Disorganized puncta
+5. Probaility map for class Organized Puncta
+6. Probaility map for class Organized Z-disks
+7. Final classification map based on the highest probability
+8. Single cell manual segmentation 
 
 The classes in the 7th slice are encoded as follow:
 
-0 - Background
-1 - Diffuse/others
-2 - Fibers
-3 - Disorganized puncta
-4 - Organized Puncta
-5 - Organized Z-disks
+0. Background
+1. Diffuse/others
+2. Fibers
+3. Disorganized puncta
+4. Organized Puncta
+5. Organized Z-disks
+
+** Disclaimer on intensity issues.
 
 # 2 - Global structural alignment
 
@@ -65,7 +67,7 @@ We implemented the method describe in [2] to quantify the global alignment of EG
 
 ## How to run the calculation for a particular FOV
 
-The folder `global_alignment` contains the script `slignment.py` that is used to compute the global alignment metrics for aall cells in a given FOV. This scripts uses the CSVs files `database/database.csv` and `database/database_cell.csv` to relate full z-stack with the single segmentation. To run the script on FOV 0, one can do
+The folder `global_alignment` contains the script `alignment.py` that is used to compute the global alignment metrics for aall cells in a given FOV. This scripts uses the CSVs files `database/database.csv` and `database/database_cell.csv` to relate full z-stack with the single segmentation. To run the script on FOV 0, one can do
 
 ```
 python alignment.py --fov 0
