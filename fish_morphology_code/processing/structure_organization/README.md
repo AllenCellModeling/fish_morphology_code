@@ -59,7 +59,7 @@ The classes in the 7th slice are encoded as follow:
 4. Organized Puncta
 5. Organized Z-disks
 
-** Disclaimer on intensity issues.
+If you want to apply the trained model to perform inference on your own images of EGFP-alpha-actinin-2, be aware that the results can be affected if the signal-to-noise ratio (SNR) is very different from the training data. Our tests suggest that the model performs well even when the SNR is reduced by 60% compared to the average the average in the training data. The model becomes biased to some classes if SNR drops below this value.
 
 # 2 - Global structural alignment
 
