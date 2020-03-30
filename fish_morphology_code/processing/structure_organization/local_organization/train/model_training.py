@@ -17,18 +17,28 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn.metrics import accuracy_score
 import pickle
+from quilt3 import Package
+import pandas as pd
+
+#
+# Load data from quilt
+#
+
+p = Package.browse("matheus/assay_dev_classifier_train", "s3://allencell-internal-quilt").fetch('data/')
+
+manifest = pd.read_csv('data/metadata.csv', index_col=0)
 
 #model save path
 save_model_path = "./models/"  # save Pytorch models
 
 #set model parameters
-data_path = './data/data.tif'
+data_path = f'data/{manifest.DataPath[0]}'
 label_lists = (
-    './data/diffuse_other.gz',
-    './data/fibers.gz',
-    './data/disorganized_puncta.gz',
-    './data/organized_puncta.gz',
-    './data/organized_z_disks.gz'
+    f'data/{manifest.AnnotationDiffusePath[0]}',
+    f'data/{manifest.AnnotationFibersPath[0]}',
+    f'data/{manifest.AnnotationDisorganizedPunctaPath[0]}',
+    f'data/{manifest.AnnotationOrganizedPunctaPath[0]}',
+    f'data/{manifest.AnnotationOrganizedZDisks[0]}'
 )
 window_size = 96
 kernel_size = 5

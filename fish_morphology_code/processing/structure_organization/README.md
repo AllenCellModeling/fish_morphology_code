@@ -2,9 +2,8 @@
 
 ## Training of CNN-based classififier for EGFP-alpha-actinin-2 patterns
 
-The folder `local_organization` contains the data and code to train the ResNet18 convolutional neural network used to classify images of EGFP-alpha-actinin-2 into six classes:
+The folder `local_organization` contains the data and code to train the ResNet18 convolutional neural network used to classify images of EGFP-alpha-actinin-2 into these classes:
 
-* Background
 * Diffuse/others
 * Fibers
 * Disorganized puncta
@@ -39,7 +38,7 @@ The `.pth` file corresponding to the best model should be manually copied to the
 
 ### Inference on the data used in the paper
 
-The script `inference/inference.py` uses the best model selected by the user to perform classification on new images. In addition, this script also uses the Allen Cell Structure Segmenter [1] to identify background regions in the input data and mask them out from the final classification maps. The input data is organized in the CSV file `database/database.csv`. Each row in this file corresponds to an input z-stack for which the inference will be performed on. Results are saved in the folder `structure_organization/output/` as the z-stacks are processed one at the time. An additional CSV file `database/database_cell.csv` is used to load the single cell manual segmentation. For each input z-stack an output z-stack is produced. The slices of the output z-stack are:
+The script `inference/inference.py` uses the best model selected by the user to perform classification on new images. The classification is done by using a sliding window through the image. The patch represented in the sliding window is classified 4 times. Once raw and three times with randomizaed rotation and image flipping. The probabilities of each class are averaged together between the 4 outputs. In addition, this script also uses the Allen Cell Structure Segmenter [1] to identify background regions in the input data and mask them out from the final classification maps. The input data is organized in the CSV file `database/database.csv`. Each row in this file corresponds to an input z-stack for which the inference will be performed on. Results are saved in the folder `structure_organization/output/` as the z-stacks are processed one at the time. An additional CSV file `database/database_cell.csv` is used to load the single cell manual segmentation. For each input z-stack an output z-stack is produced. The slices of the output z-stack are:
 
 1. Highest mean intensity slice form the original input z-stack.
 2. Probaility map for class Diffuse/others
