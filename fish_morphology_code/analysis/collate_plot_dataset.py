@@ -292,12 +292,7 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
     df = df.merge(df_myh67, how="left")
 
     # drop columns not used in plots
-    dropcols_all = [
-        "IntensityMedianBkgSub",
-        "IntensityIntegratedBkgSub",
-        "frac_area_regular_sum",
-        "cell_area",
-    ]
+    dropcols_all = ["IntensityMedianBkgSub", "IntensityIntegratedBkgSub", "cell_area"]
     df = df.drop(columns=dropcols_all).drop(
         columns=[
             "HPRT1_density",
