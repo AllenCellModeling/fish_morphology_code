@@ -12,7 +12,7 @@ def replace_cnn_class_map(string, dicitonary):
     return string
 
 
-def collate_manuscript_dataset(pixel_size_xy_in_micrometers=0.12):
+def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
 
     # load main feature data
     df, df_tidy, df_regression = load_data()
