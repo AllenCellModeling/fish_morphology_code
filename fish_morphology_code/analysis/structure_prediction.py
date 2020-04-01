@@ -232,7 +232,7 @@ def prep_human_score_regression_data(
         "structure_org_score",
     ],
 ):
-
+    assert np.all(df[all_feats].isnull().sum() == 0)
     df_reg_feats_X = pd.DataFrame(scale(df[all_feats].copy()), columns=all_feats)
     df_reg_feats_y = df[targ_feats].copy()
     df_reg_feats = pd.concat([df_reg_feats_X, df_reg_feats_y], axis="columns")
