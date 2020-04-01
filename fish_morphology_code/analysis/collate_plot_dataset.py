@@ -15,7 +15,7 @@ def replace_cnn_class_map(string, dicitonary):
 def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
 
     # load main feature data
-    df, df_tidy, df_regression = load_data()
+    df, _, _ = load_data()
 
     # load datasets
     p_feats = quilt3.Package.browse(
@@ -181,9 +181,6 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
     ]
 
     # convert area and density cols to real units
-    df_tidy["FISH_probe_density_count_per_micrometer_squared"] = (
-        df_tidy["FISH_probe_density"] / (pixel_size_xy_in_micrometers) ** 2
-    )
     density_cols_orig_no_units = [
         "HPRT1_density",
         "COL2A1_density",
@@ -201,9 +198,6 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
     df["cell_area_micrometers_squared"] = (
         df["cell_area"] * pixel_size_xy_in_micrometers ** 2
     )
-    df_tidy["cell_area_micrometers_squared"] = (
-        df_tidy["cell_area"] * pixel_size_xy_in_micrometers ** 2
-    )
 
     # normalize alpha-actinin intensity independently per day
     df["IntensityMedianNoUnits"] = 0
@@ -218,12 +212,6 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
     )
     df["structure_org_weighted_linear_model_all_rounded"] = np.clip(
         df["structure_org_weighted_linear_model_all_rounded"], 1, 5
-    ).astype(int)
-    df_tidy["structure_org_weighted_linear_model_all_rounded"] = np.rint(
-        df_tidy["structure_org_weighted_linear_model_all"]
-    )
-    df_tidy["structure_org_weighted_linear_model_all_rounded"] = np.clip(
-        df_tidy["structure_org_weighted_linear_model_all_rounded"], 1, 5
     ).astype(int)
 
     # name map for plot-appropriate column names
@@ -302,7 +290,6 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
 
     # merge in MYH6 & MYH7 specific stuff
     df = df.merge(df_myh67, how="left")
-    df_tidy = df_tidy.merge(df_myh67, how="left")
 
     # drop columns not used in plots
     dropcols_all = [
@@ -323,11 +310,9 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
             "TCAP_density",
         ]
     )
-    df_tidy = df_tidy.drop(columns=dropcols_all).drop(columns=["FISH_probe_density"])
 
     # rename cols in dfs
     df = df.rename(columns=pretty_name_map)
-    df_tidy = df_tidy.rename(columns=pretty_name_map)
 
     # enforce int dtype in some cols
     int_cols = [
@@ -339,7 +324,6 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
     ]
     for c in int_cols:
         df[c] = df[c].astype(int)
-        df_tidy[c] = df_tidy[c].astype(int)
 
     # done
-    return df, df_tidy
+    return df

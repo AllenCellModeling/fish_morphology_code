@@ -14,7 +14,7 @@ def manuscript_plots_dataset(
     s3_bucket="s3://allencell-internal-quilt",
 ):
 
-    df, _ = collate_plot_dataset()
+    df = collate_plot_dataset()
 
     # subsample df for a test dataset
     if test:
