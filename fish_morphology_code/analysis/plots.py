@@ -318,3 +318,7 @@ def load_data():
     df, df_tidy = add_densities(df, df_tidy)
 
     return df, df_tidy, df_regression
+
+
+def collate_manuscript_dataset():
+    pass
