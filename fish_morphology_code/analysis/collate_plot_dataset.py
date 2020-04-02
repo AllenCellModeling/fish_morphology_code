@@ -6,6 +6,82 @@ import quilt3
 from fish_morphology_code.analysis.plots import load_data
 
 
+# name map for plot-appropriate column names
+PRETTY_NAME_MAP = {
+    "cell_age": "Cell age",
+    "nuclei_count": "Nuclei count",
+    "finalnuc_border": "Nucleus touches FOV border",
+    "mh_structure_org_score": "Expert structural annotation score (annotator 1)",
+    "kg_structure_org_score": "Expert structural annotation score (annotator 2)",
+    "napariCell_ObjectNumber": "Cell number",
+    "fov_path": "FOV path",
+    "rescaled_2D_single_cell_tiff_path": "Rescaled 2D single cell tiff path",
+    "structure_org_score": "Expert structural annotation score (mean)",
+    "cell_area": "Cell area",
+    "cell_area_micrometers_squared": "Cell area (μm^2)",
+    "cell_aspect_ratio": "Cell aspect ratio",
+    "frac_area_background": "Fraction cell area background",
+    "frac_area_messy": "Fraction cell area diffuse/other",
+    "frac_area_threads": "Fraction cell area fibers",
+    "frac_area_random": "Fraction cell area disorganized puncta",
+    "frac_area_regular_dots": "Fraction cell area organized puncta",
+    "frac_area_regular_stripes": "Fraction cell area organized z-disks",
+    "max_coeff_var": "Max coefficient var",
+    "h_peak": "Peak height",
+    "peak_distance": "Peak distance",
+    "peak_distance_micrometers": "Peak distance (μm^2)",
+    "peak_angle": "Peak angle",
+    "IntensityMedian": "Alpha-actinin intensity (median)",
+    "IntensityMedianNoUnits": "Alpha-actinin intensity (median, normalized per day)",
+    "IntensityIntegrated": "Alpha-actinin intensity (integrated)",
+    "HPRT1_count": "HPRT1 count",
+    "COL2A1_count": "COL2A1 count",
+    "H19_count": "H19 count",
+    "ATP2A2_count": "ATP2A2 count",
+    "MYH6_count": "MYH6 count",
+    "MYH7_count": "MYH7 count",
+    "BAG3_count": "BAG3 count",
+    "TCAP_count": "TCAP count",
+    "consensus_structure_org_score_roundup": "Expert structural annotation score (round-up)",
+    "consensus_structure_org_score_grouped": "Expert structural annotation score (grouped)",
+    "structure_org_weighted_linear_model_all": "Combined organizational score",
+    "structure_org_weighted_linear_model_all_rounded": "Combined organizational score (rounded)",
+    "HPRT1_density": "HPRT1 density",
+    "COL2A1_density": "COL2A1 density",
+    "H19_density": "H19 density",
+    "ATP2A2_density": "ATP2A2 density",
+    "MYH6_density": "MYH6 density",
+    "MYH7_density": "MYH7 density",
+    "BAG3_density": "BAG3 density",
+    "TCAP_density": "TCAP density",
+    "HPRT1_count_per_micrometer_squared": "HPRT1 (count/μm^2)",
+    "COL2A1_count_per_micrometer_squared": "COL2A1 (count/μm^2)",
+    "H19_count_per_micrometer_squared": "H19 (count/μm^2)",
+    "ATP2A2_count_per_micrometer_squared": "ATP2A2 (count/μm^2)",
+    "MYH6_count_per_micrometer_squared": "MYH6 (count/μm^2)",
+    "MYH7_count_per_micrometer_squared": "MYH7 (count/μm^2)",
+    "BAG3_count_per_micrometer_squared": "BAG3 (count/μm^2)",
+    "TCAP_count_per_micrometer_squared": "TCAP (count/μm^2)",
+    "FISH_probe": "FISH probe",
+    "FISH_probe_count": "FISH probe count",
+    "FISH_probe_density": "FISH probe density",
+    "FISH_probe_density_count_per_micrometer_squared": "FISH probe (count/μm^2)",
+    "MYH7-MYH6_normalized_difference": "MYH7-MYH6 relative transcript abundance (normalized)",
+    "MYH6_localization": "MYH6 localization",
+    "MYH7_localization": "MYH7 localization",
+    "MYH6_probe_frac_regular_dots_gain_over_random": "Enrichment of MYH6 transcript localization to organized puncta",
+    "MYH7_probe_frac_regular_dots_gain_over_random": "Enrichment of MYH7 transcript localization to organized puncta",
+    "MYH6_probe_frac_regular_stripes_gain_over_random": "Enrichment of MYH6 transcript localization to organized z-disks",
+    "MYH7_probe_frac_regular_stripes_gain_over_random": "Enrichment of MYH7 transcript localization to organized z-disks",
+    "MYH6_probe_frac_threads_gain_over_random": "Enrichment of MYH6 transcript localization to fibers",
+    "MYH7_probe_frac_threads_gain_over_random": "Enrichment of MYH7 transcript localization to fibers",
+    "MYH6_probe_frac_threads_regular_dots_regular_stripes_gain_over_random": "Enrichment of MYH6 transcript localization to fibers, organized puncta, and organized z-disks",
+    "MYH7_probe_frac_threads_regular_dots_regular_stripes_gain_over_random": "Enrichment of MYH7 transcript localization to fibers, organized puncta, and organized z-disks",
+    "MYH6_dist_to_alpha-actinin_segmentation": "MYH6 probe distance to alpha-actinin segmentation (mean)",
+    "MYH7_dist_to_alpha-actinin_segmentation": "MYH7 probe distance to alpha-actinin segmentation (mean)",
+}
+
+
 def replace_cnn_class_map(string, dicitonary):
     for k, v in dicitonary.items():
         string = string.replace(k, v)
@@ -199,6 +275,9 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
         df["cell_area"] * pixel_size_xy_in_micrometers ** 2
     )
 
+    # get peak distance too
+    df["peak_distance_micrometers"] = df["peak_distance"] * pixel_size_xy_in_micrometers
+
     # normalize alpha-actinin intensity independently per day
     df["IntensityMedianNoUnits"] = 0
     for i, cell_age in enumerate(sorted(df["cell_age"].unique())):
@@ -214,80 +293,6 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
         df["structure_org_weighted_linear_model_all_rounded"], 1, 5
     ).astype(int)
 
-    # name map for plot-appropriate column names
-    pretty_name_map = {
-        "cell_age": "Cell age",
-        "nuclei_count": "Nuclei count",
-        "finalnuc_border": "Nucleus touches FOV border",
-        "mh_structure_org_score": "Expert structural annotation score (annotator 1)",
-        "kg_structure_org_score": "Expert structural annotation score (annotator 2)",
-        "napariCell_ObjectNumber": "Cell number",
-        "fov_path": "FOV path",
-        "rescaled_2D_single_cell_tiff_path": "Rescaled 2D single cell tiff path",
-        "structure_org_score": "Expert structural annotation score (mean)",
-        "cell_area": "Cell area",
-        "cell_area_micrometers_squared": "Cell area (μm)^2",
-        "cell_aspect_ratio": "Cell aspect ratio",
-        "frac_area_background": "Fraction cell area background",
-        "frac_area_messy": "Fraction cell area diffuse/other",
-        "frac_area_threads": "Fraction cell area fibers",
-        "frac_area_random": "Fraction cell area disorganized puncta",
-        "frac_area_regular_dots": "Fraction cell area organized puncta",
-        "frac_area_regular_stripes": "Fraction cell area organized z-disks",
-        "max_coeff_var": "Max coefficient var",
-        "h_peak": "Peak height",
-        "peak_distance": "Peak distance",
-        "peak_angle": "Peak angle",
-        "IntensityMedian": "Alpha-actinin intensity (median)",
-        "IntensityMedianNoUnits": "Alpha-actinin intensity (median, normalized per day)",
-        "IntensityIntegrated": "Alpha-actinin intensity (integrated)",
-        "HPRT1_count": "HPRT1 count",
-        "COL2A1_count": "COL2A1 count",
-        "H19_count": "H19 count",
-        "ATP2A2_count": "ATP2A2 count",
-        "MYH6_count": "MYH6 count",
-        "MYH7_count": "MYH7 count",
-        "BAG3_count": "BAG3 count",
-        "TCAP_count": "TCAP count",
-        "consensus_structure_org_score_roundup": "Expert structural annotation score (round-up)",
-        "consensus_structure_org_score_grouped": "Expert structural annotation score (grouped)",
-        "structure_org_weighted_linear_model_all": "Combined organizational score",
-        "structure_org_weighted_linear_model_all_rounded": "Combined organizational score (rounded)",
-        "HPRT1_density": "HPRT1 density",
-        "COL2A1_density": "COL2A1 density",
-        "H19_density": "H19 density",
-        "ATP2A2_density": "ATP2A2 density",
-        "MYH6_density": "MYH6 density",
-        "MYH7_density": "MYH7 density",
-        "BAG3_density": "BAG3 density",
-        "TCAP_density": "TCAP density",
-        "HPRT1_count_per_micrometer_squared": "HPRT1 count/(μm)^2",
-        "COL2A1_count_per_micrometer_squared": "COL2A1 count/(μm)^2",
-        "H19_count_per_micrometer_squared": "H19 count/(μm)^2",
-        "ATP2A2_count_per_micrometer_squared": "ATP2A2 count/(μm)^2",
-        "MYH6_count_per_micrometer_squared": "MYH6 count/(μm)^2",
-        "MYH7_count_per_micrometer_squared": "MYH7 count/(μm)^2",
-        "BAG3_count_per_micrometer_squared": "BAG3 count/(μm)^2",
-        "TCAP_count_per_micrometer_squared": "TCAP count/(μm)^2",
-        "FISH_probe": "FISH probe",
-        "FISH_probe_count": "FISH probe count",
-        "FISH_probe_density": "FISH probe density",
-        "FISH_probe_density_count_per_micrometer_squared": "FISH probe count/(μm)^2",
-        "MYH7-MYH6_normalized_difference": "MYH7-MYH6 relative expression (normalized)",
-        "MYH6_localization": "MYH6 localization",
-        "MYH7_localization": "MYH7 localization",
-        "MYH6_probe_frac_regular_dots_gain_over_random": "Enrichment of MYH6 transcript localization to organized puncta",
-        "MYH7_probe_frac_regular_dots_gain_over_random": "Enrichment of MYH7 transcript localization to organized puncta",
-        "MYH6_probe_frac_regular_stripes_gain_over_random": "Enrichment of MYH6 transcript localization to organized z-disks",
-        "MYH7_probe_frac_regular_stripes_gain_over_random": "Enrichment of MYH7 transcript localization to organized z-disks",
-        "MYH6_probe_frac_threads_gain_over_random": "Enrichment of MYH6 transcript localization to fibers",
-        "MYH7_probe_frac_threads_gain_over_random": "Enrichment of MYH7 transcript localization to fibers",
-        "MYH6_probe_frac_threads_regular_dots_regular_stripes_gain_over_random": "Enrichment of MYH6 transcript localization to fibers, organized puncta, and organized z-disks",
-        "MYH7_probe_frac_threads_regular_dots_regular_stripes_gain_over_random": "Enrichment of MYH7 transcript localization to fibers, organized puncta, and organized z-disks",
-        "MYH6_dist_to_alpha-actinin_segmentation": "MYH6 probe distance to alpha-actinin segmentation (mean)",
-        "MYH7_dist_to_alpha-actinin_segmentation": "MYH7 probe distance to alpha-actinin segmentation (mean)",
-    }
-
     # merge in MYH6 & MYH7 specific stuff
     df = df.merge(df_myh67, how="left")
 
@@ -297,6 +302,7 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
         "IntensityIntegratedBkgSub",
         "frac_area_regular_sum",
         "cell_area",
+        "peak_distance",
     ]
     df = df.drop(columns=dropcols_all).drop(
         columns=[
@@ -312,7 +318,7 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
     )
 
     # rename cols in dfs
-    df = df.rename(columns=pretty_name_map)
+    df = df.rename(columns=PRETTY_NAME_MAP)
 
     # enforce int dtype in some cols
     int_cols = [
