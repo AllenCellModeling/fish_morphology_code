@@ -29,7 +29,7 @@ PRETTY_NAME_MAP = {
     "max_coeff_var": "Max coefficient var",
     "h_peak": "Peak height",
     "peak_distance": "Peak distance",
-    "peak_distance_micrometers": "Peak distance (μm^2)",
+    "peak_distance_micrometers": "Peak distance (μm)",
     "peak_angle": "Peak angle",
     "IntensityMedian": "Alpha-actinin intensity (median)",
     "IntensityMedianNoUnits": "Alpha-actinin intensity (median, normalized per day)",
