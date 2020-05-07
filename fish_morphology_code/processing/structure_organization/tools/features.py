@@ -10,6 +10,13 @@ from scipy import stats as scistats
 
 def ProcessFOV(FOVId, df_fov):
 
+    '''
+        Takes an FIVId and the FOV dataframe and calculates local structure
+        organization adn global strucuural alignment features for every single
+        segmented cell in that FOV.
+    '''
+
+    # Channel numbers
     ch_raw = 0
     ch_prs = slice(1,6)
     ch_cla = 6
@@ -21,38 +28,28 @@ def ProcessFOV(FOVId, df_fov):
 
     data = skio.imread(os.path.join(source,f'fov_{FOVId}.tif'))
 
-    #
-    # Orientation features
-    #
-    
+    # Load global structural alignment features    
     df_align = pd.read_csv(os.path.join(source,f'fov_{FOVId}.csv'), index_col=0)
 
-    #
-    # Calculate local structure organization feature and merge
-    #
-
+    # Calculate local structure organization features and merge
     for CellId in tqdm(df_fov.index):
 
+        # Get single cell masks
         mask = (data[ch_msk].astype(np.uint8)==CellId).astype(np.uint8)
-
-        #
-        # CNN classification features
-        #
-
-        classification = data[ch_cla].astype(np.uint8) - 1
 
         total_area = mask.sum()
 
+        # Classification results from CNN classifier
+        classification = data[ch_cla].astype(np.uint8) - 1
+
+        # Total number of classes is 5 + background (0)
         covered_area = np.bincount(classification[mask>0].flatten(), minlength=6)
 
         covered_area = covered_area / total_area
 
         probs = data[ch_prs,mask>0].mean(axis=1)
 
-        #
         # Intensity based features
-        #
-
         intensities = data[ch_raw,mask>0].flatten()
         
         background_intensity = np.percentile(data[ch_raw], 10)
@@ -65,10 +62,7 @@ def ProcessFOV(FOVId, df_fov):
 
         int_intensity_bs = np.sum(intensities-background_intensity)
 
-        #
         # Dict for features
-        #
-
         features = {
             'FOVId': FOVId,
             'CellId': CellId,
@@ -97,29 +91,26 @@ def ProcessFOV(FOVId, df_fov):
 
     df_features = pd.DataFrame(df_features).set_index(['FOVId','CellId'])
 
-    pd.merge(
+    df = pd.merge(
         df_fov,
         df_features,
         left_index = True,
         right_index = True
-    ).to_csv(os.path.join(source,f'fov_{FOVId}.csv'))
+    )
+
+    df.to_csv(os.path.join(source,f'fov_{FOVId}.csv'))
 
     print('DONE')
 
 if __name__ == "__main__":
 
-    #
-    # Get FOV id
-    #
-
+    # Get FOV id as argument
     parser = argparse.ArgumentParser(description="Merge local organization and global alignment features")
     parser.add_argument("--fov", help="Full path to FOV", required=True)
     args = vars(parser.parse_args())   
+    FOVId = int(args['fov'])
 
-    #
-    # Run FOV
-    #
-
+    # Gather necessary information
     df_fov = pd.read_csv('../database/database.csv', index_col=1)
 
     df_cell = pd.read_csv('../database/cell_database.csv')
@@ -130,6 +121,5 @@ if __name__ == "__main__":
 
     df_cell = df_cell.sort_index()
 
-    FOVId = int(args['fov'])
-
+    # Run FOV
     ProcessFOV(FOVId=FOVId, df_fov=df_cell.loc[(FOVId,)])

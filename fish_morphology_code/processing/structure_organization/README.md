@@ -12,10 +12,12 @@ The folder `local_organization` contains the data and code to train the ResNet18
 
 ### Requirerments to train and use a model
 
+```
 aicssegmentation==0.1.12
 Pillow==6.2.0
 torch==1.3.0
 torchvision==0.4.1
+```
 
 Be aware that both training and inference process can be considerably slow if you don't have GPU available.
 
@@ -115,7 +117,7 @@ This metrics are appended as new columns in the CSV file `output/fov_0.csv`.
 
 # 4 - Merging information of all FOVS in a single CSV file
 
-After the features have been computed for all FOVs, we run the script `merge.py` found in folder `tools/` to merge all the feature in a singel CSV file that is then used for making plots.
+After the features have been computed for all FOVs, we run the script `merge_and_upload.py` found in folder `tools/` to merge all the feature in a singel CSV file that is then used for making plots. This script also upload final results to Quilt.
 
 # 5 - Extra figures
 

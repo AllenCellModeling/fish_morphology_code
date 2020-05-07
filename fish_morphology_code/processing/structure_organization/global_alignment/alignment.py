@@ -9,6 +9,10 @@ from matplotlib import cm, pyplot
 
 def GetCroppedCell(input_img, input_msk=None):
     
+    '''
+    Extracts a cell out a FOV based on the segmentation mask
+    '''
+
     if input_msk is None:
         [y,x] = np.nonzero(input_img)
     else:
@@ -28,6 +32,11 @@ def GetCroppedCell(input_img, input_msk=None):
 
 def QuantizeImage(input_img, nlevels=8):
     
+    '''
+    Quantize the pixels intensity in nlevels for orientation
+    calculation.
+    '''
+
     vmax = input_img.max()
     
     bins = [0] + np.percentile(input_img[input_img>0], np.linspace(0,100,nlevels+1))[:-1].tolist() + [1+vmax]
@@ -44,8 +53,8 @@ def ExpDecay(x, a):
 def AnalyzeOrientation(raw, mask, CellLabel, nlevels=8, dmax=32, nangles=16, expdecay=0.5, plot=True, save_fig=None):
 
     '''
-        This combination of parameters display the best performance in ranking
-        10 cells by CV compared to manual ranking.
+    This combination of default parameters display the best performance in ranking
+    10 cells by CV compared to manual ranking.
     '''
     
     dists = np.linspace(0,dmax,dmax+1)
@@ -76,9 +85,10 @@ def AnalyzeOrientation(raw, mask, CellLabel, nlevels=8, dmax=32, nangles=16, exp
     hpeak_dist = dists[hpeak_dist_pos]
     hpeak_angle_pos = corr_reg.max(axis=1).argmax()
     hpeak_angle = 180*angles[hpeak_angle_pos]/np.pi
-    
+
     if plot:
 
+        # Whether or not to show the result
         fontsize = 16
 
         colormap = cm.get_cmap('cool',len(angles))
@@ -162,18 +172,13 @@ def ProcessFOV(FOVId, df_fov):
 
 if __name__ == "__main__":
 
-    #
     # Get FOV id
-    #
-
     parser = argparse.ArgumentParser(description="Runs Radon analysis on a particular FOV")
     parser.add_argument("--fov", help="Full path to FOV", required=True)
     args = vars(parser.parse_args())   
-
-    #
-    # Run FOV
-    #
-
+    FOVId = int(args['fov'])
+    
+    # Gather information necessary
     df_fov = pd.read_csv('../database/database.csv', index_col=1)
 
     df_cell = pd.read_csv('../database/cell_database.csv')
@@ -184,6 +189,5 @@ if __name__ == "__main__":
 
     df_cell = df_cell.sort_index()
 
-    FOVId = int(args['fov'])
-
+    # Run FOV
     ProcessFOV(FOVId=FOVId, df_fov=df_cell.loc[(FOVId,)])

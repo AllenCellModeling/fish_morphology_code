@@ -46,9 +46,6 @@ def load_data(data_path, label_lists, window_size):
         in_class = np.squeeze(labels==i)
         class_patches = cropped_images[in_class,:,:]
         skio.imsave(f'./patches/{i}_patches.tif', class_patches)
-
-    #print('Mean: {}'.format(np.mean(cropped_images.flatten())))
-    #print('StDev: {}'.format(np.std(cropped_images.flatten())))
     
     print('Patches Saved')
 

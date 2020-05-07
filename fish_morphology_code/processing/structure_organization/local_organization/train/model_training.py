@@ -20,10 +20,7 @@ import pickle
 from quilt3 import Package
 import pandas as pd
 
-#
 # Load data from quilt
-#
-
 p = Package.browse("matheus/assay_dev_classifier_train", "s3://allencell-internal-quilt").fetch('data/')
 
 manifest = pd.read_csv('data/metadata.csv', index_col=0)
