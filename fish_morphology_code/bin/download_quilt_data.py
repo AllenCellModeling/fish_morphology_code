@@ -90,7 +90,7 @@ def download_2D_nuclear_masks(test=False):
             data_save_loc="quilt_data_2d_nuclear_masks",
             ignore_warnings=True
         )
-        
+
 
 def download_scrnaseq(test=False):
     """download scrnaseq data. if test=True, only download counts for ten random cells."""
