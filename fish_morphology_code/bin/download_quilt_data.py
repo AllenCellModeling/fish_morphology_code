@@ -74,6 +74,24 @@ def download_2D_features(test=False):
         )
 
 
+def download_2D_nuclear_masks(test=False):
+    """download 2D nuclear mask images. if test=True, only download two randomly sampled images"""
+    if test:
+        download_quilt_data(
+            package="calystay/2d_nuclear_masks_test",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_2d_nuclear_masks_test",
+            ignore_warnings=True,
+        )
+    else:
+        download_quilt_data(
+            package="calystay/2d_nuclear_masks",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_2d_nuclear_masks",
+            ignore_warnings=True
+        )
+        
+
 def download_scrnaseq(test=False):
     """download scrnaseq data. if test=True, only download counts for ten random cells."""
     if test:
