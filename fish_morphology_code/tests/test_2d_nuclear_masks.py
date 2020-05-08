@@ -23,15 +23,8 @@ def test_merge():
     p_new = quilt3.Package.browse(
         "calystay/2d_nuclear_masks", "s3://allencell-internal-quilt"
     )
-    df_new = (
-        p_new["metadata.csv"]()
-        .drop("Unnamed: 0", axis="columns")
-        .rename(
-            columns={
-                "fov_location": "FOV path",
-                "napariCell_ObjectNumber": "Cell number",
-            }
-        )
+    df_new = p_new["metadata.csv"]().rename(
+        columns={"fov_location": "FOV path", "napariCell_ObjectNumber": "Cell number"}
     )
 
     # merge
