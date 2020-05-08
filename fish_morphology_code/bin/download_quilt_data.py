@@ -110,6 +110,16 @@ def download_scrnaseq(test=False):
         )
 
 
+def download_scrnaseq_raw(test=False):
+    """download scrnaseq raw data"""
+    download_quilt_data(
+        package="tanyasg/scrnaseq_data_raw",
+        bucket="s3://allencell-internal-quilt",
+        data_save_loc="quilt_data_scrnaseq_raw",
+        ignore_warnings=True,
+    )
+
+
 def download_ML_struct_scores():
     """download automated structure channel scoring."""
     download_quilt_data(
@@ -138,6 +148,24 @@ def download_nonstructure_2D_segs(test=False):
         )
 
 
+def download_2D_nonstructure_features(test=False):
+    """download non-structure features. if test=True, only download features for two randomly sampled images."""
+    if test:
+        download_quilt_data(
+            package="tanyasg/2d_nonstructure_single_cell_features_test",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_nonstructure_features_test",
+            ignore_warnings=True,
+        )
+    else:
+        download_quilt_data(
+            package="tanyasg/2d_nonstructure_single_cell_features",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_nonstructure_features",
+            ignore_warnings=True,
+        )
+
+
 def main_segs():
     fire.Fire(download_2D_segs)
 
@@ -154,9 +182,17 @@ def main_scrnaseq():
     fire.Fire(download_scrnaseq)
 
 
+def main_scrnaseq_raw():
+    fire.Fire(download_scrnaseq_raw)
+
+
 def main_MLstruct():
     fire.Fire(download_ML_struct_scores)
 
 
 def main_nonstructure_segs():
     fire.Fire(download_nonstructure_2D_segs)
+
+
+def main_nonstructure_features():
+    fire.Fire(download_2D_nonstructure_features)
