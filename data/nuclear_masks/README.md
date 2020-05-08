@@ -8,7 +8,7 @@
 
 ## explain manifest:
 ### columns:
-original_fov_location: Path to raw data truncated to before '_C0.tif'
+original_fov_location: Path to raw data truncated to before `_C0.tif`
 
 nuc_mask_path: Path to nucleus segmentation image
 
