@@ -111,3 +111,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Results from assay-dev
+./fish_morphology_code/processing/structure_organization/local_organization/train/data/
+./fish_morphology_code/processing/structure_organization/local_organization/train/patches/
+./fish_morphology_code/processing/structure_organization/output/
+./fish_morphology_code/processing/structure_organization/results/

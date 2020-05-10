@@ -3,6 +3,7 @@ import lmfit
 import argparse
 import numpy as np
 import pandas as pd
+from quilt3 import Package
 from skimage import io as skio
 from skimage import feature as skfeature
 from matplotlib import cm, pyplot
@@ -178,10 +179,20 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())   
     FOVId = int(args['fov'])
     
-    # Gather information necessary
-    df_fov = pd.read_csv('../database/database.csv', index_col=1)
+    # Downlaod the datasets from Quilt if there is no local copy
+    ds_folder = '../database/'
 
-    df_cell = pd.read_csv('../database/cell_database.csv')
+    if not os.path.exists(os.path.join(ds_folder,'metadata.csv')):
+
+        pkg = Package.browse("matheus/assay_dev_datasets", "s3://allencell-internal-quilt").fetch(ds_folder)
+
+    metadata = pd.read_csv(os.path.join(ds_folder,'metadata.csv'))
+
+    df_fov = pd.read_csv(os.path.join(ds_folder,metadata.database_path[0]), index_col=1)
+
+    df_cell = pd.read_csv(os.path.join(ds_folder,metadata.cell_database_path[0]))
+
+    # Merge dataframes
 
     df_cell['FOVId'] = df_fov.loc[df_cell.RawFileName].FOVId.values
 

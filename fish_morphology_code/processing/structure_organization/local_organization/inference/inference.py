@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+from quilt3 import Package
 from skimage import io as skio
 from skimage.transform import resize
 from skimage.filters import median
@@ -19,12 +20,32 @@ os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
-classifier = cardioCNN(model_path='../best_model/res18_final_e708.pth')
 
-#
-# Aux
-#
+# Download the model weights from Quilt if the folder `best_model` is empty
 
+model_weights_path = []
+for f in os.listdir('../best_model'):
+    # Search for pth files
+    if f.endswith('.pth'):
+        model_weights_path.append(os.path.join('..','best_model',f))
+if not model_weights_path:
+    # Download from Quilt
+    print('No weights were found locally. Downloading from Quilt...')
+    pkg = Package.browse("matheus/assay_dev_actn2_classifier", "s3://allencell-internal-quilt").fetch('../best_model')
+    metadata = pd.read_csv(os.path.join('..','best_model','metadata.csv'))
+    model_weights_path = os.path.join('..','best_model',metadata.model_path[0])
+elif len(model_weights_path) > 1:
+    # Use the last one in case more than 1 are found
+    model_weights_path = model_weights_path[-1]
+    print(f'More than 1 weight file found. Using the last one: {model_weights_path}.')
+else:
+    # Only one file found
+    model_weights_path = model_weights_path[0]
+
+# Load weights
+classifier = cardioCNN(model_path=model_weights_path)
+
+# Segment the images for background calculation
 def SegmentImage(struct_img):
     
     INTENSITY_NORM_PARAM = [5, 15]
@@ -38,12 +59,20 @@ def SegmentImage(struct_img):
     return (response>VESSELNESS_THRESHOLD).astype(np.uint8)
 
 #
-# Load CSVs with FOV and cell information
+# Downlaod the datasets from Quilt if there is no local copy
 #
 
-df_fov = pd.read_csv('../../database/database.csv', index_col=0)
+ds_folder = '../../database/'
 
-df_cell = pd.read_csv('../../database/cell_database.csv')
+if not os.path.exists(os.path.join(ds_folder,'metadata.csv')):
+
+    pkg = Package.browse("matheus/assay_dev_datasets", "s3://allencell-internal-quilt").fetch(ds_folder)
+
+metadata = pd.read_csv(os.path.join(ds_folder,'metadata.csv'))
+
+df_fov = pd.read_csv(os.path.join(ds_folder,metadata.database_path[0]), index_col=0)
+
+df_cell = pd.read_csv(os.path.join(ds_folder,metadata.cell_database_path[0]))
 
 #
 # Run all FOVs
