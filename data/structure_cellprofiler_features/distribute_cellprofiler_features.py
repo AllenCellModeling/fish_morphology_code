@@ -43,7 +43,7 @@ def distribute_cellprofiler_features(
         df = pd.DataFrame(
             {
                 "feature_file": ["cp_features_test.csv"],
-                "object_count_file": ["image_object_counts_test.csv"],
+                "image_object_count_file": ["image_object_counts_test.csv"],
                 "cell_line": [cell_line],
                 "cellprofiler_id": [cellprofiler_id],
             }
