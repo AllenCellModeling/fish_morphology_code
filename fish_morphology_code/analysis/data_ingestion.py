@@ -310,7 +310,7 @@ def clean_up_loc_scores(
     """
 
     loc_scores = list(
-        set(x for l in [list(df[col].unique()) for col in probe_loc_cols] for x in l)
+        set(x for L in [list(df[col].unique()) for col in probe_loc_cols] for x in L)
     )
 
     d_nan = {k: np.nan for k in loc_scores if k in nans}
