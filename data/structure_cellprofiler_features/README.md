@@ -1,37 +1,38 @@
-# AICS cardio FISH features 
+# AICS cardio RNA-FISH features 
 
 **Overview:** This dataset contains transcript levels, cell, and nuclear features from
-FISH experiments on cardiomyocytes
+RNA-FISH experiments on hiPSC derived cardiomyocytes
 
 ## RNA-FISH 
-RNA-FISH experiments were performed on glass replated, fixed cardiomyocytes aged to 
-D18 (plate 5500000013) and D30 (plate 5500000014). All samples are the AICS-75 (clone 85)
-ACTN2-mEGFP cell line, which tags the sarcomere in cardiomyocytes. Two genes were
-targeted for FISH (hcr method) in each well. 
+RNA-FISH experiments were performed on glass re-plated, fixed cardiomyocytes aged to 
+D18 (plate 5500000013) and D30 (plate 5500000014). All samples are from AICS-75 (clone 85)
+ACTN2-mEGFP cell line. Alpha-actinin-2 protein is fluorescently tagged, and it localizes to the
+sarcomeres in cardiomyocytes. Two genes were targeted for RNA-FISH (Molecular Instruments HCR v3
+method) at a time in each well. 
 
 ## Imaging 
 FISH plates were imaged on 3i microscope and raw 3D images contain the following channels:
 0: 638 (probe 2)
-1: nuclear dye (dapi)
+1: nuclear dye (DAPI)
 2: brightfield
 3: 561 (probe 1)
 4: brightfield
-5: 488 (ACTN2 structure)
+5: 488 (ACTN2/alpha-actitin-2-mEGFP structure)
 
 ## Segmentation and analysis
 Cells boundaries were hand drawn by three annotators. Cell segmentations are in 2D (annotators
-used the 3D raw image to segment). Raw images were processed to segment the probe
-and ACTN2 structure channels, and raw nuclear, brightfield, and structure fluorescent
+used the 3D raw image to guide segmentation). Raw images were processed to segment the probe
+and alpha-actinin-2-mEGFP structure channels. Raw nuclear, brightfield, and structure fluorescent
 channels were normalized before being analyzed using cellprofiler. Cell profiler was
 used to calculate per cell probe counts, cell and nuclei shape features (ex. area, perimeter,
-etc), and texture features from brightfield, ACTN2 structure, and nuclear normalized 
+etc), and texture features from brightfield, alpha-actinin-2 structure, and nuclear normalized 
 fluorescent channels. 
 
 Nuclei were assigned to cells if their centroid overlapped the cell boundary. Multiple nuclei
 assigned to one cell were merged into one object for calculation of shape and texture features.
 
 ## Merged feature csv
-Each row in feature csv file correponds to one hand drawn cell. 
+Each row in feature csv file corresponds to one hand drawn cell. 
 
 Merged feature csv includes the following columns:
 
@@ -48,12 +49,12 @@ Merged feature csv includes the following columns:
 - `finalnuc_border`: TRUE indicates that merged nuclei object touches border of image
 - `cell_border`: TRUE indicates that napari annotated cell touches border of image
 - `mh_structure_org_score` and `kg_structure_org_score`: manual sarcomere organization scores
-- `probe_561_loc_score` and `probe_638_loc_score`: manual probe localization scores
-- all other columns starting with `finalnuc_`: nuclear shape and texture features; only for MYH6/MYH7 probes
+- `probe_561_loc_score` and `probe_638_loc_score`: manual probe localization scores; only for MYH6/MYH7 probes
+- all other columns starting with `finalnuc_`: nuclear shape and texture features
 - all other columns starting with `napariCell_`: cell shape and texture features
 
 ### Notes on texture:
-Texture features are calculated for nuclear and cell objects from 3 normalized channels:
+Cellprofiler texture features are calculated for nuclear and cell objects from 3 normalized channels:
 brightfield (`_bf_`), nuclear (`_nuc_`), and ACTN2 structure (`_structure_`) at 3 scales (3, 5, 10). 
 
 ### Image object count csv
