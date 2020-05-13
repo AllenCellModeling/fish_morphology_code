@@ -9,7 +9,6 @@ from fish_morphology_code.processing.merge_features.cp_processing_utils import (
     image_processing_errors,
     merge_cellprofiler_output,
     add_sample_image_metadata,
-    add_cell_structure_scores,
     remove_missing_images,
     prepend_localpath,
     add_cell_border_filter,
@@ -23,13 +22,13 @@ def run(
     csv_prefix="napari_",
     out_csv="./merged_features.csv",
     normalized_image_manifest="",
-    norm_image_key="rescaled_2D_fov_tiff_path",
+    norm_image_key="merged_2D_fov_tiff_path",
     fov_metadata="",
-    structure_scores="",
     prepend_local=None,
     relative_columns=None,
     flag_border_cell_csv=None,
     output_object_counts_csv=None,
+    single_cell_tiff=False,
 ):
     """
     Merge cellprofiler output csvs with image metadata and structure scores
@@ -45,6 +44,7 @@ def run(
         relative_columns (NoneType or str: optional list of comma separated column names in normalized_image_manifest with relative image paths that need to be converted to absolute
         flag_border_cell_csv (NoneType or str): optional path to csv with napari cells that DO touch the border of the image
         output_object_counts_csv (NoneType or str): optionally output csv with cellprofiler object counts (from Image.csv); if provided, str must be absolute path to where csv will be saved
+        single_cell_tiff (bool): True indicates that manifest has single cell tiffs; false means it only has fov level tiffs
     """
 
     image_csv = os.path.join(
@@ -92,6 +92,8 @@ def run(
             cell_feature_df=cp_feature_df,
             norm_image_manifest=new_normalized_image_manifest,
             fov_metadata=fov_metadata,
+            norm_image_key=norm_image_key,
+            single_cell_tiff=single_cell_tiff,
         )
 
     # if normalized_image_manifest already has absolute image paths, able to merge using original file
@@ -100,30 +102,34 @@ def run(
             cell_feature_df=cp_feature_df,
             norm_image_manifest=normalized_image_manifest,
             fov_metadata=fov_metadata,
+            norm_image_key=norm_image_key,
+            single_cell_tiff=single_cell_tiff,
         )
 
-    # add manual structure scores to feature data frame
-    feature_df = add_cell_structure_scores(
-        cell_feature_df=cp_feature_metadata_df, structure_scores_csv=structure_scores
-    )
-
     # optional merge: merge with napari cell border filter to flag cells that touch border of image
-
     if flag_border_cell_csv:
-        feature_df = add_cell_border_filter(flag_border_cell_csv, feature_df)
+        cp_feature_metadata_df = add_cell_border_filter(
+            flag_border_cell_csv, cp_feature_metadata_df
+        )
 
         # move cell_border column next to finalnuc_border column
         move_cols = ["cell_border"]
 
-        first_cols = feature_df.columns.tolist()[0:18]
+        first_cols = cp_feature_metadata_df.columns.tolist()[
+            0:18
+        ]  # TO DO: check if this is ok for non-structure
 
         remaining_cols = [
-            c for c in feature_df.columns.tolist() if c not in move_cols + first_cols
+            c
+            for c in cp_feature_metadata_df.columns.tolist()
+            if c not in move_cols + first_cols
         ]
 
-        feature_df = feature_df.loc[:, first_cols + move_cols + remaining_cols]
+        cp_feature_metadata_df = cp_feature_metadata_df.loc[
+            :, first_cols + move_cols + remaining_cols
+        ]
 
-    final_feature_df = remove_missing_images(feature_df)
+    final_feature_df = remove_missing_images(cp_feature_metadata_df)
 
     final_feature_df.to_csv(out_csv, index=False)
 
@@ -132,7 +138,7 @@ def run(
         object_count_df = image_object_counts(image_csv)
         object_count_df = pd.merge(
             object_count_df,
-            feature_df.loc[
+            final_feature_df.loc[
                 :,
                 (
                     "ImageNumber",

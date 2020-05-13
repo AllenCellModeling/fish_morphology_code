@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import quilt3
 import logging
 
@@ -20,6 +21,19 @@ from fish_morphology_code.analysis.structure_prediction import (
     prep_human_score_regression_data,
     regress_human_scores_on_feats,
 )
+
+
+def fetch_df(
+    csv_qloc, quilt_package, dest_dir=Path("tmp_quilt_data"), dtype={}, use_cached=False
+):
+    """get a df from quilt csv using intermediate fetch to disk -- windows bug"""
+    qloc = quilt_package[csv_qloc]
+    csv_path = dest_dir / csv_qloc
+    if use_cached and csv_path.is_file():
+        pass
+    else:
+        qloc.fetch(dest=dest_dir / csv_qloc)
+    return pd.read_csv(csv_path, dtype=dtype)
 
 
 def make_small_dataset(
@@ -41,6 +55,8 @@ def make_small_dataset(
         "fov_path",
         "probe546",
         "probe647",
+        "probe_561_loc_score",
+        "probe_638_loc_score",
     ],
     loc_obs=["rescaled_2D_single_cell_tiff_path"],
 ):
@@ -94,43 +110,47 @@ def pretty_chart(
     )
 
 
-def load_data():
-    """Monster function for loading and munging data for plots."""
+rename_dict = {
+    "napariCell_nuclei_Count": "nuclei_count",
+    "consensus_structure_org_score": "structure_org_score",
+    "napariCell_AreaShape_Area": "cell_area",
+    "napariCell_AreaShape_AspectRatio": "cell_aspect_ratio",
+    "Frac_Area_Background": "frac_area_background",
+    "Frac_Area_DiffuseOthers": "frac_area_messy",
+    "Frac_Area_Fibers": "frac_area_threads",
+    "Frac_Area_Disorganized_Puncta": "frac_area_random",
+    "Frac_Area_Organized_Puncta": "frac_area_regular_dots",
+    "Frac_Area_Organized_ZDisks": "frac_area_regular_stripes",
+    "SarcomereWidth": "sarcomere_width",
+    "SarcomereLength": "sarcomere_length",
+    "NRegularStripesVoronoi": "n_regular_stripes_voronoi",
+    "RadonDominantAngleEntropyThreads": "radon_entropy_threads",
+    "RadonResponseRatioAvgThreads": "radon_response_threads",
+    "RadonDominantAngleEntropyRegStripes": "radon_entropy_stripes",
+    "RadonResponseRatioAvgRegStripes": "radon_response_stripes",
+    "Maximum_Coefficient_Variation": "max_coeff_var",
+    "Peak_Height": "h_peak",
+    "Peak_Distance": "peak_distance",
+    "Peak_Angle": "peak_angle",
+}
 
-    # clean up some feature/column names
-    rename_dict = {
-        "napariCell_nuclei_Count": "nuclei_count",
-        "consensus_structure_org_score": "structure_org_score",
-        "napariCell_AreaShape_Area": "cell_area",
-        "napariCell_AreaShape_AspectRatio": "cell_aspect_ratio",
-        "FracAreaBackground": "frac_area_background",
-        "FracAreaMessy": "frac_area_messy",
-        "FracAreaThreads": "frac_area_threads",
-        "FracAreaRandom": "frac_area_random",
-        "FracAreaRegularDots": "frac_area_regular_dots",
-        "FracAreaRegularStripes": "frac_area_regular_stripes",
-        "SarcomereWidth": "sarcomere_width",
-        "SarcomereLength": "sarcomere_length",
-        "NRegularStripesVoronoi": "n_regular_stripes_voronoi",
-        "RadonDominantAngleEntropyThreads": "radon_entropy_threads",
-        "RadonResponseRatioAvgThreads": "radon_response_threads",
-        "RadonDominantAngleEntropyRegStripes": "radon_entropy_stripes",
-        "RadonResponseRatioAvgRegStripes": "radon_response_stripes",
-        "MaxCoeffVar": "max_coeff_var",
-        "HPeak": "h_peak",
-        "PeakDistance": "peak_distance",
-        "PeakAngle": "peak_angle",
-    }
 
+def load_main_feat_data(rename_dict=rename_dict, use_cached=False):
     # load main feature data
     p_feats = quilt3.Package.browse(
         "tanyasg/2d_autocontrasted_single_cell_features",
         "s3://allencell-internal-quilt",
     )
-    df_feats = p_feats["features"]["a749d0e2_cp_features.csv"]()
+    df_feats = fetch_df(
+        "features/a749d0e2_cp_features.csv",
+        p_feats,
+        dtype={"probe_561_loc_score": object, "probe_638_loc_score": object},
+        use_cached=use_cached,
+    )
+    return df_feats
 
-    # make anndata from feature data
-    # anndata as intermediate because our general purpose cleaning functions are written for anndata rather than pandas objects
+
+def adata_manipulations(df_feats, rename_dict=rename_dict):
     anndata_logger = logging.getLogger("anndata")
     anndata_logger.setLevel(logging.CRITICAL)
     adata = make_anndata_feats(df_feats)
@@ -146,29 +166,30 @@ def load_data():
 
     # drop uninformative features
     adata = remove_low_var_feat_cols(adata)
+    return adata
 
-    # make a df version of the feature data that only has a handful of simple features
-    df_small = make_small_dataset(adata)
 
-    # load in global structure features (DNN area classifier + radon transform stuff)
+def get_global_structure(rename_dict=rename_dict, use_cached=False):
     p_gs = quilt3.Package.browse(
         "matheus/assay_dev_fish_analysis", "s3://allencell-internal-quilt"
     )
-    df_gs = p_gs["metadata.csv"]().drop("Unnamed: 0", axis="columns")
+    df_gs = df_gs = fetch_df("metadata.csv", p_gs, use_cached=use_cached).drop(
+        "Unnamed: 0", axis="columns"
+    )
     df_gs = df_gs[
         [
             "napariCell_ObjectNumber",
             "original_fov_location",
-            "FracAreaBackground",
-            "FracAreaMessy",
-            "FracAreaThreads",
-            "FracAreaRandom",
-            "FracAreaRegularDots",
-            "FracAreaRegularStripes",
-            "MaxCoeffVar",
-            "HPeak",
-            "PeakDistance",
-            "PeakAngle",
+            "Frac_Area_Background",
+            "Frac_Area_DiffuseOthers",
+            "Frac_Area_Fibers",
+            "Frac_Area_Disorganized_Puncta",
+            "Frac_Area_Organized_Puncta",
+            "Frac_Area_Organized_ZDisks",
+            "Maximum_Coefficient_Variation",
+            "Peak_Height",
+            "Peak_Distance",
+            "Peak_Angle",
             "IntensityMedian",
             "IntensityIntegrated",
             "IntensityMedianBkgSub",
@@ -178,32 +199,23 @@ def load_data():
 
     # clean up some columns to use as ids and merge into main dataframe
     df_gs = df_gs.rename(columns={"original_fov_location": "fov_path"})
-    df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p)))
+    df_gs["fov_path"] = df_gs["fov_path"].apply(lambda p: str(Path(p).as_posix()))
+    return df_gs
 
-    # merge in the global structure metrics
-    df_small = df_small.merge(df_gs)
 
-    # make wide version
-    df = widen_df(df_small)
-
-    # group manual human structure scores into coarser bins
+def group_human_scores(df, rename_dict=rename_dict):
     df["consensus_structure_org_score_roundup"] = np.ceil(
         df["consensus_structure_org_score"]
     ).astype(int)
     df["consensus_structure_org_score_grouped"] = df[
         "consensus_structure_org_score_roundup"
     ].map({1: "1-2", 2: "1-2", 3: "3", 4: "4-5", 5: "4-5"})
+    return df
 
-    # aggregate metric for total fraction of cell covered by "regular" ACTN2 structure
-    df["frac_area_regular_sum"] = (
-        df["frac_area_regular_dots"] + df["frac_area_regular_stripes"]
-    )
 
-    # clean up feauter/column names on the dataframes
-    df = df.rename(rename_dict, axis="columns")
-
-    # add linear model structure scores
-    X_cols = [
+def make_regression_df(
+    df,
+    X_cols=[
         "cell_area",
         "cell_aspect_ratio",
         "frac_area_background",
@@ -215,9 +227,12 @@ def load_data():
         "max_coeff_var",
         "h_peak",
         "peak_distance",
-    ]
-    y_col = "structure_org_score"
-    weight_col = "structure_org_score"
+    ],
+    y_col="structure_org_score",
+    weight_col="structure_org_score",
+):
+    # add linear model structure scores
+
     my_reg_df = prep_human_score_regression_data(df)
     regression = regress_human_scores_on_feats(
         my_reg_df, X_cols=X_cols, y_col=y_col, weight_col=weight_col
@@ -226,14 +241,12 @@ def load_data():
         my_reg_df[X_cols]
     )
 
-    # create version of feature data where FISH probes are unpaired (makes facet plots easier)
-    df_tidy = tidy_df(df)
+    regression_info_df = pd.DataFrame({"feature": X_cols, "coef": regression.coef_})
 
-    # clean up feature/column names on the dataframes
-    df = df.rename(rename_dict, axis="columns")
-    df_tidy = df_tidy.rename(rename_dict, axis="columns")
+    return df, regression_info_df
 
-    # clean up FISH probe names to drop amplifier ID
+
+def clean_probe_names(df, df_tidy):
     df = df.rename(
         columns={
             c: c.replace("-B1", "").replace("-B3", "").replace("-B4", "")
@@ -249,11 +262,59 @@ def load_data():
     df_tidy.FISH_probe = df_tidy.FISH_probe.map(
         {c: c.split("-")[0] for c in df_tidy.FISH_probe.unique()}
     )
+    return df, df_tidy
 
-    # move from counts to count densities (normalize to cell area)
+
+def add_densities(df, df_tidy):
     count_cols = [c for c in df.columns if ("_count" in c) & ("nuclei" not in c)]
     for col in count_cols:
         df[col.replace("count", "density")] = df[col] / df["cell_area"]
     df_tidy["FISH_probe_density"] = df_tidy["FISH_probe_count"] / df_tidy["cell_area"]
-
     return df, df_tidy
+
+
+def load_data():
+    """Monster function for loading and munging data for plots."""
+
+    # load main feature data
+    df_feats = load_main_feat_data()
+
+    # make anndata from feature data
+    # anndata as intermediate because our general purpose cleaning functions are written for anndata rather than pandas objects
+    adata = adata_manipulations(df_feats)
+
+    # make a df version of the feature data that only has a handful of simple features
+    df_small = make_small_dataset(adata)
+
+    # load in global structure features (DNN area classifier + radon transform stuff)
+    df_gs = get_global_structure()
+
+    # merge in the global structure metrics
+    df_small = df_small.merge(df_gs)
+
+    # make wide version
+    df = widen_df(df_small)
+
+    # group manual human structure scores into coarser bins
+    df = group_human_scores(df)
+
+    # clean up feauter/column names on the dataframes
+    df = df.rename(rename_dict, axis="columns")
+
+    # add regressed organizational score and grab regression info
+    df, df_regression = make_regression_df(df)
+
+    # create version of feature data where FISH probes are unpaired (makes facet plots easier)
+    df_tidy = tidy_df(df)
+
+    # clean up feature/column names on the dataframes
+    df = df.rename(rename_dict, axis="columns")
+    df_tidy = df_tidy.rename(rename_dict, axis="columns")
+
+    # clean up FISH probe names to drop amplifier ID
+    df, df_tidy = clean_probe_names(df, df_tidy)
+
+    # move from counts to count densities (normalize to cell area)
+    df, df_tidy = add_densities(df, df_tidy)
+
+    return df, df_tidy, df_regression
