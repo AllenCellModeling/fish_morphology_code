@@ -7,7 +7,7 @@ from quilt3distribute.validation import validate
 
 def distribute_nonstructure_dataset(
     test=False,
-    csv_loc="/allen/aics/gene-editing/FISH/2019/chaos/data/cp_testing_zeiss_nonstructure/zeiss_image_set/nonstructure_fov_manifest_for_quilt.csv",
+    csv_loc="nonstructure_fov_manifest_for_quilt.csv",
     col_name_map={"FOVId": "fov_id", "fov_path": "original_fov_location"},
     dataset_name="2d_nonstructure_fields",
     package_owner="tanyasg",
@@ -40,12 +40,7 @@ def distribute_nonstructure_dataset(
     # set data path cols, metadata cols, and extra files
     ds.set_metadata_columns(["fov_id", "original_fov_location"])
     ds.set_path_columns(["merged_2D_fov_tiff_path"])
-    ds.set_extra_files(
-        [
-            "channel_defs.json",
-            "/allen/aics/gene-editing/FISH/2019/chaos/data/cp_testing_zeiss_nonstructure/zeiss_image_set/channel_defs.json",
-        ]
-    )
+    ds.set_extra_files(["channel_defs.json"])
 
     # tag with commit hash
     label = (
