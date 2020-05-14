@@ -10,7 +10,7 @@ Images used to generate the numbers:
 4. 3D ACTN structure classification
 
 ---------------------------------------------------------------
-COLUMN NAMES								COLUMN DESCRIPTIONS:
+`Column names` and column descriptions
 ---------------------------------------------------------------
 * `RawPath`										Path to raw data
 * `fov_path`									Path to raw data truncated to before `_C0.tif`
