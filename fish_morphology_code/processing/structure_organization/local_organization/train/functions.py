@@ -1,19 +1,15 @@
 import os
 import math
 import numpy as np
-from tqdm import tqdm
 import skimage.io as skio
-from scipy.ndimage import zoom
 from aicsimageio import AICSImage
-from scipy.ndimage.measurements import center_of_mass
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score
 
 import torch
 import torch.nn as nn
 from torch.utils import data
 import torch.nn.functional as F
 import torchvision.models as models
-import torchvision.transforms as transforms
 
 
 def get_crop(image_set, location, window_size):
@@ -82,6 +78,7 @@ def load_data(data_path, label_lists, window_size):
 
     return cropped_images, labels
 
+
 class dataset_training(data.Dataset):
     def __init__(self, cropped_images, labels, transform=None):
         self.image_set = []
@@ -95,9 +92,7 @@ class dataset_training(data.Dataset):
                 image = np.repeat(np.expand_dims(image, axis=2), repeats=3, axis=2)
                 self.image_set.append(image)
 
-        self.labels = (
-            labels
-        )
+        self.labels = labels
         self.transform = transform
 
     def __len__(self):
@@ -108,6 +103,7 @@ class dataset_training(data.Dataset):
         X = self.image_set[idx]
 
         return X, y
+
 
 class myoCNN_resnet_18(nn.Module):
     def __init__(self, num_classes=5):
@@ -206,15 +202,11 @@ def validation(model, device, test_loader, optimizer, save_model_path, epoch):
             output = model(X)
 
             if device is torch.device("cuda"):
-                loss = F.cross_entropy(
-                    torch.squeeze(output), y, reduction="sum"
-                )
+                loss = F.cross_entropy(torch.squeeze(output), y, reduction="sum")
             else:
                 loss = F.cross_entropy(output, y, reduction="sum")  # for cpu
             test_loss += loss.cpu().data  # sum up batch loss
-            y_pred = output.max(1, keepdim=True)[
-                1
-            ]
+            y_pred = output.max(1, keepdim=True)[1]
 
             # collect all y and y_pred in all batches
             all_y.extend(y)
