@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import quilt3
 from fish_morphology_code.bin.download_quilt_data import download_probe_struc_classifier_features
 
 
 def test_download():
-    "test downloading the data"
+    """test downloading the data"""
     download_probe_struc_classifier_features(test=True)
 
 
@@ -20,7 +21,7 @@ def test_merge():
 
     # new df
     p_new = quilt3.Package.browse(
-        "calystay/probe_structure_classifier_test", "s3://allencell-internal-quilt"
+        "calystay/probe_structure_classifier", "s3://allencell-internal-quilt"
     )
     df_new = p_new["metadata.csv"]().rename(
         columns={"original_fov_location": "FOV path"}
