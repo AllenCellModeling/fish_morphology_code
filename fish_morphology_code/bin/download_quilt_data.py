@@ -120,6 +120,24 @@ def download_nonstructure_2D_segs(test=False):
         )
 
 
+def download_probe_localization_features(test=False):
+    """download probe localization features. if test=True, only download two randomly sampled images."""
+    if test:
+        download_quilt_data(
+            package="calystay/probe_localization_test",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_probe_localization_features_test",
+            ignore_warnings=True,
+        )
+    else:
+        download_quilt_data(
+            package="calystay/probe_localization",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_probe_localization_features",
+            ignore_warnings=True,
+        )
+
+
 def main_segs():
     fire.Fire(download_2D_segs)
 
