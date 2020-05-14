@@ -10,7 +10,7 @@ Images used to generate the numbers:
 4. 3D Structure segmentation
 
 ---------------------------------------------------------------
-COLUMN NAMES						COLUMN DESCRIPTIONS:
+`Column name` and column description
 ---------------------------------------------------------------
 * `cell_age`							Age of cardios
 * `cell_ar`							Cell aspect ratio (min_feret_diameter/max_feret_diameter)
