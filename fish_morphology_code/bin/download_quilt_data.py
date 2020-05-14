@@ -119,7 +119,6 @@ def download_scrnaseq_raw(test=False):
         ignore_warnings=True,
     )
 
-
     download_quilt_data(
         package="tanyasg/scrnaseq_data_raw",
         bucket="s3://allencell-internal-quilt",
