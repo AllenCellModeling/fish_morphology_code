@@ -170,14 +170,14 @@ def download_probe_struc_classifier_features(test=False):
     """download features relating probes and structure classifier. if test=True, only download features for two randomly sampled images."""
     if test:
         download_quilt_data(
-            package="calystay/probe_structure_classifier_features_test",
+            package="calystay/probe_structure_classifier_test",
             bucket="s3://allencell-internal-quilt",
             data_save_loc="quilt_probe_struc_classifier_features_test",
             ignore_warnings=True,
         )
     else:
         download_quilt_data(
-            package="calystay/probe_structure_classifier_features",
+            package="calystay/probe_structure_classifier",
             bucket="s3://allencell-internal-quilt",
             data_save_loc="quilt_probe_struc_classifier_features",
             ignore_warnings=True,
