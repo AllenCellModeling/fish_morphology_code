@@ -15,6 +15,7 @@ import torch.nn.functional as F
 import torchvision.models as models
 import torchvision.transforms as transforms
 
+
 def get_crop(image_set, location, window_size):
     image = image_set[location[0], :, :]
     xCoor = location[1]
@@ -45,11 +46,12 @@ def get_crop(image_set, location, window_size):
 
     return image_crop
 
+
 def load_data(data_path, label_lists, window_size):
 
-    '''
+    """
     Load training data
-    '''
+    """
 
     reader = AICSImage(data_path)
     image_set = np.squeeze(reader.data)
@@ -80,135 +82,7 @@ def load_data(data_path, label_lists, window_size):
 
     return cropped_images, labels
 
-
-# def eval_image(image, model, window_size):
-
-#     '''
-#     Single image evaluation
-#     '''
-
-#     model.eval()
-
-#     tf = transforms.Compose(
-#         [
-#             transforms.ToPILImage(),
-#             transforms.ToTensor(),
-#             transforms.Normalize(mean=[0.0966], std=[0.1153]),
-#         ]
-#     )
-
-#     im_shape = np.shape(image)
-#     nr = im_shape[0]
-#     nc = im_shape[1]
-#     prob_map = np.zeros((nr, nc, 5))
-
-#     for r in range(nr):
-#         for c in range(nc):
-#             patch = get_patch(image, (r, c), window_size)
-#             patch = tf.__call__(torch.Tensor(patch))
-#             patch = patch[None, :, :, :]
-
-#             pred = F.softmax(model(patch), dim=-1).detach().numpy()
-#             prob_map[r, c, :] = np.squeeze(pred)
-
-#     return prob_map
-
-# def eval_image_subsample(image, model, window_size, stride, device):
-#     model.eval()
-
-#     tf = transforms.Compose(
-#         [
-#             transforms.ToPILImage(),
-#             transforms.ToTensor(),
-#             transforms.Normalize(mean=[0.0966], std=[0.1153]),
-#         ]
-#     )
-
-#     im_shape = np.shape(image)
-#     nr = im_shape[0] // stride
-#     nc = im_shape[1] // stride
-#     prob_map = np.zeros((5, nr, nc))
-
-#     for r in tqdm(range(nr)):
-#         for c in range(nc):
-#             patch = get_patch(image, (int(r * stride), int(c * stride)), window_size)
-#             patch = tf.__call__(torch.Tensor(patch)).to(device)
-#             patch = patch[None, :, :, :]
-
-#             pred = F.softmax(model(patch), dim=-1).cpu().detach().numpy()
-#             prob_map[:, r, c] = np.squeeze(pred)
-
-#     prob_map = zoom(prob_map, (1, im_shape[0] / nr, im_shape[1] / nc), order=0)
-
-#     return prob_map
-
-
-# def eval_image_voronoi(image, voronoi, model, window_size, device):
-#     model.to(device)
-#     model.eval()
-
-#     tf = transforms.Compose(
-#         [
-#             transforms.ToPILImage(),
-#             transforms.ToTensor(),
-#             transforms.Normalize(mean=[0.0966], std=[0.1153]),
-#         ]
-#     )
-
-#     im_shape = np.shape(image)
-#     prob_map = np.zeros((5, im_shape[0], im_shape[1]))
-
-#     numUnits = np.amax(voronoi)
-#     unit = np.zeros_like(voronoi)
-#     for u in tqdm(range(numUnits)):
-#         unit[:] = 0
-#         unit[voronoi == u] = 1
-
-#         center = center_of_mass(unit)
-#         patch = get_patch(image, (int(center[0]), int(center[1])), window_size)
-#         patch = tf.__call__(torch.Tensor(patch)).to(device)
-#         patch = patch[None, :, :, :]
-
-#         pred = np.squeeze(F.softmax(model(patch), dim=-1).cpu().detach().numpy())
-
-#         for c in range(5):
-#             prob_map[c][voronoi == u] = pred[c]
-
-#     return prob_map
-
-
-# def get_patch(image, location, window_size):
-#     xCoor = location[0]
-#     yCoor = location[1]
-#     imShape = np.shape(image)
-#     image_crop = np.zeros((window_size, window_size), dtype=np.float16)
-#     crop_center = math.ceil(window_size / 2)
-
-#     if window_size % 2 == 0:
-#         xMinus = window_size / 2
-#         xPlus = xMinus
-#         yMinus = window_size / 2
-#         yPlus = yMinus
-#     else:
-#         xMinus = xPlus = window_size // 2
-#         xMinus = yPlus = window_size // 2
-
-#     xMinus = int(np.min([xMinus, xCoor]))
-#     yMinus = int(np.min([yMinus, yCoor]))
-#     xPlus = int(np.min([xPlus, imShape[0] - xCoor]))
-#     yPlus = int(np.min([yPlus, imShape[1] - yCoor]))
-
-#     image_crop[
-#         (crop_center - xMinus) : (crop_center + xPlus),
-#         (crop_center - yMinus) : (crop_center + yPlus),
-#     ] = image[(xCoor - xMinus) : (xCoor + xPlus), (yCoor - yMinus) : (yCoor + yPlus)]
-#     image_crop = image_crop / np.amax(image_crop)
-
-#     return image_crop
-
-
 class dataset_training(data.Dataset):
-
     def __init__(self, cropped_images, labels, transform=None):
         self.image_set = []
         for i in range(len(labels)):
@@ -222,7 +96,7 @@ class dataset_training(data.Dataset):
                 self.image_set.append(image)
 
         self.labels = (
-            labels  # F.one_hot(torch.from_numpy(labels).long(), num_classes=5)
+            labels
         )
         self.transform = transform
 
@@ -236,18 +110,12 @@ class dataset_training(data.Dataset):
         return X, y
 
 class myoCNN_resnet_18(nn.Module):
-
     def __init__(self, num_classes=5):
         super(myoCNN_resnet_18, self).__init__()
 
         resnet18 = models.resnet18(pretrained=True)
         res_modules = list(resnet18.children())[:-1]
-        # l = 0
         self.resnet18 = nn.Sequential(*res_modules)
-        # for p in self.resnet18.parameters():
-        #    if l > 0:
-        #    p.requires_grad = False
-        #   l += 1
         self.fc = self.fcClassifier(512, num_classes)
 
     def forward(self, x):
@@ -271,9 +139,9 @@ class myoCNN_resnet_18(nn.Module):
 
 def train(log_interval, model, device, train_loader, optimizer, epoch):
 
-    '''
+    """
     Function for CNN training
-    '''
+    """
 
     model.train()
 
@@ -320,9 +188,9 @@ def train(log_interval, model, device, train_loader, optimizer, epoch):
 
 def validation(model, device, test_loader, optimizer, save_model_path, epoch):
 
-    '''
+    """
     Applying model on validation/test set
-    '''
+    """
 
     # set model as testing mode
     model.eval()
@@ -340,13 +208,13 @@ def validation(model, device, test_loader, optimizer, save_model_path, epoch):
             if device is torch.device("cuda"):
                 loss = F.cross_entropy(
                     torch.squeeze(output), y, reduction="sum"
-                )  # for gpu
+                )
             else:
                 loss = F.cross_entropy(output, y, reduction="sum")  # for cpu
             test_loss += loss.cpu().data  # sum up batch loss
             y_pred = output.max(1, keepdim=True)[
                 1
-            ]  # (y_pred != output) get the index of the max log-probability
+            ]
 
             # collect all y and y_pred in all batches
             all_y.extend(y)
@@ -370,36 +238,10 @@ def validation(model, device, test_loader, optimizer, save_model_path, epoch):
     # save Pytorch models of best record
     if not os.path.isdir(save_model_path):
         os.mkdir(save_model_path)
-    
+
     torch.save(
         model.state_dict(),
         os.path.join(save_model_path, "3dcnn_epoch{}.pth".format(epoch + 1)),
     )
 
     return test_loss, test_score
-
-
-# def myoCNN_final_prediction(model, device, loader):
-
-#     model.eval()
-
-#     all_y_probs = []
-#     all_y_pred = []
-#     all_y = []
-#     with torch.no_grad():
-#         for batch_idx, (X, y) in enumerate(tqdm(loader)):
-#             # distribute data to device
-#             X = X.to(device)
-#             output = model(X)
-#             y_pred = output.max(1, keepdim=True)[
-#                 1
-#             ]  # location of max log-probability as prediction
-#             y_probs = F.softmax(output)
-#             # import pdb; pdb.set_trace()
-#             all_y_probs.append(y_probs.cpu().data.squeeze().numpy())
-#             all_y_pred.append(y_pred.cpu().data.squeeze().numpy())
-#             all_y.append(y.cpu().data.squeeze().numpy())
-
-#     confusion_mat = confusion_matrix(all_y, all_y_pred)
-
-#     return all_y, all_y_pred, all_y_probs, confusion_mat
