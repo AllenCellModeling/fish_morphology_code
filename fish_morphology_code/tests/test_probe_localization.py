@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import quilt3
-from fish_morphology_code.bin.download_quilt_data import download_2D_features
+from fish_morphology_code.bin.download_quilt_data import download_probe_localization_features
 
 
 def test_download():
