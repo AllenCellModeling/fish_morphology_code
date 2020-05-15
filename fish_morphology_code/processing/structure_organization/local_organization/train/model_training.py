@@ -7,7 +7,7 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
-from functions import load_data, dataset_training, myoCNN_resnet_18, train, validation
+from functions import load_data, dataset_training, cardio_cnn_resnet_18, train, validation
 
 from quilt3 import Package
 import pandas as pd
@@ -97,7 +97,7 @@ valid_set = dataset_training(test_X, test_y, transform=tf_val)
 train_loader = data.DataLoader(train_set, **params)
 valid_loader = data.DataLoader(valid_set, **params)
 
-cnn_model = myoCNN_resnet_18().to(device)
+cnn_model = cardio_cnn_resnet_18().to(device)
 optimizer = torch.optim.SGD(
     cnn_model.parameters(), lr=learning_rate, weight_decay=0.0001, momentum=0.9
 )

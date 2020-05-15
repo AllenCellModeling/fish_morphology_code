@@ -105,9 +105,9 @@ class dataset_training(data.Dataset):
         return X, y
 
 
-class myoCNN_resnet_18(nn.Module):
+class cardio_cnn_resnet_18(nn.Module):
     def __init__(self, num_classes=5):
-        super(myoCNN_resnet_18, self).__init__()
+        super(cardio_cnn_resnet_18, self).__init__()
 
         resnet18 = models.resnet18(pretrained=True)
         res_modules = list(resnet18.children())[:-1]

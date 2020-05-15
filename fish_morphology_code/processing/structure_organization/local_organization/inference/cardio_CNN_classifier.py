@@ -10,15 +10,15 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 
 
-class cardioCNN:
+class cardio_cnn:
     def __init__(self, model_path):
         ##
         # Inputs:
         #   model_path: file path to .pth file containing model weights
         ##
-        super(cardioCNN, self).__init__()
+        super(cardio_cnn, self).__init__()
 
-        self.__model = cardioCNN_model()  # resnet18 model
+        self.__model = cardio_cnn_model()  # resnet18 model
         self.__model.load_state_dict(torch.load(model_path))  # loading trained weights
         self.__tf_raw = transforms.Compose(
             [  # transformations for unaltered input
@@ -191,9 +191,9 @@ class cardioCNN:
         return image_crop
 
 
-class cardioCNN_model(nn.Module):
+class cardio_cnn_model(nn.Module):
     def __init__(self, num_classes=5):
-        super(cardioCNN_model, self).__init__()
+        super(cardio_cnn_model, self).__init__()
 
         resnet18 = models.resnet18(pretrained=True)
         res_modules = list(resnet18.children())[:-1]

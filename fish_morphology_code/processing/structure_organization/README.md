@@ -76,10 +76,10 @@ python alignment.py --fov 0
 
 This command will produce a CSV file with name `output/fov_0.csv`. Each row of this CSV file corresponds to one cell from FOV 0 and columns are the diferent metrics of global structural alignment used in the paper:
 
-* Maximum_Coefficient_Variation
-* Peak_Angle
-* Peak_Distance
-* Peak_Height
+* `Maximum_Coefficient_Variation`
+* `Peak_Angle`
+* `Peak_Distance`
+* `Peak_Height`
 
 Other files in the folder `global_alignment` can be used to run multiple FOVs at once in a cluster.
 
@@ -93,31 +93,36 @@ python features.py --fov 0
 
 This script will output the following metrics:
 
-* FOVId
-* CellId
-* Total_Area
-* Frac_Area_Background
-* Frac_Area_DiffuseOthers
-* Frac_Area_Fibers
-* Frac_Area_Disorganized_Puncta
-* Frac_Area_Organized_Puncta
-* Frac_Area_Organized_ZDisks
-* Prob_DiffuseOthers
-* Prob_Fibers
-* Prob_Disorganized_Puncta
-* Prob_Organized_Puncta
-* Prob_Organized_ZDisks
-* Intensity_Median
-* Intensity_Integrated
-* Intensity_Median_BackSub
-* Intensity_Integrated_BackSub
-* Background_Value
+* `FOVId`
+* `CellId`
+* `Total_Area`
+* `Frac_Area_Background`
+* `Frac_Area_DiffuseOthers`
+* `Frac_Area_Fibers`
+* `Frac_Area_Disorganized_Puncta`
+* `Frac_Area_Organized_Puncta`
+* `Frac_Area_Organized_ZDisks`
+* `Prob_DiffuseOthers`
+* `Prob_Fibers`
+* `Prob_Disorganized_Puncta`
+* `Prob_Organized_Puncta`
+* `Prob_Organized_ZDisks`
+* `Intensity_Median`
+* `Intensity_Integrated`
+* `Intensity_Median_BackSub`
+* `Intensity_Integrated_BackSub`
+* `Background_Value`
 
 This metrics are appended as new columns in the CSV file `output/fov_0.csv`.
 
 # 4 - Merging information of all FOVS in a single CSV file
 
 After the features have been computed for all FOVs, we run the script `merge_and_upload.py` found in folder `tools/` to merge all the feature in a singel CSV file that is then used for making plots. This script also upload final results to Quilt.
+
+```
+cd tools
+python merge_and_upload.py
+```
 
 # 5 - Extra figures
 
@@ -128,21 +133,3 @@ Jupyter notebooks can be found in the folder `figs/` to help reproduce some of t
 [1] - Chen J, Ding L, Viana MP, Hendershott MC, Yang R, Mueller IA, Rafelski SM. The Allen Cell Structure Segmenter: a new open source toolkit for segmenting 3D intracellular structures in fluorescence microscopy images. bioRxiv. 2018 Jan 1:491035.
 
 [2] - Sutcliffe, M.D., Tan, P.M., Fernandez-Perez, A., Nam, Y.J., Munshi, N.V. and Saucerman, J.J., 2018. High content analysis identifies unique morphological features of reprogrammed cardiomyocytes. Scientific reports, 8(1), pp.1-11.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -11,7 +11,7 @@ from scipy.ndimage.morphology import distance_transform_edt as edt
 from aicssegmentation.core.vessel import vesselness3D
 from aicssegmentation.core.pre_processing_utils import edge_preserving_smoothing_3d
 
-from cardio_CNN_classifier import cardioCNN
+from cardio_CNN_classifier import cardio_cnn
 
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
@@ -43,10 +43,10 @@ else:
     model_weights_path = model_weights_path[0]
 
 # Load weights
-classifier = cardioCNN(model_path=model_weights_path)
+classifier = cardio_cnn(model_path=model_weights_path)
 
 # Segment the images for background calculation
-def SegmentImage(struct_img):
+def segment_image(struct_img):
 
     VESSELNESS_SIGMA = 1.0
     VESSELNESS_THRESHOLD = 1e-3
@@ -102,7 +102,7 @@ for index in df_fov.index:
     slice_number = np.argmax(zprofile)
 
     img = img[slice_number - 3 : slice_number + 4]
-    img_binary = SegmentImage(img)
+    img_binary = segment_image(img)
 
     data = img[3]
     data_binary = img_binary[3]

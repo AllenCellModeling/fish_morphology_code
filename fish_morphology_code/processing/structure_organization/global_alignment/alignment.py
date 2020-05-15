@@ -9,7 +9,7 @@ from skimage import feature as skfeature
 from matplotlib import cm, pyplot
 
 
-def GetCroppedCell(input_img, input_msk=None):
+def get_cropped_cell(input_img, input_msk=None):
 
     """
     Extracts a cell out a FOV based on the segmentation mask
@@ -33,7 +33,7 @@ def GetCroppedCell(input_img, input_msk=None):
     return crop.astype(np.uint16)
 
 
-def QuantizeImage(input_img, nlevels=8):
+def quantize_image(input_img, nlevels=8):
 
     """
     Quantize the pixels intensity in nlevels for orientation
@@ -57,18 +57,18 @@ def QuantizeImage(input_img, nlevels=8):
     return input_dig
 
 
-def ExpDecay(x, a):
+def exp_decay_func(x, a):
     return np.exp(-a * x ** 2)
 
 
-def AnalyzeOrientation(
+def analyze_orientation(
     raw,
     mask,
     CellLabel,
     nlevels=8,
     dmax=32,
     nangles=16,
-    expdecay=0.5,
+    decay_value=0.5,
     plot=True,
     save_fig=None,
 ):
@@ -81,8 +81,8 @@ def AnalyzeOrientation(
     dists = np.linspace(0, dmax, dmax + 1)
     angles = np.linspace(0, np.pi, nangles)
 
-    crop = GetCroppedCell(raw * (mask == CellLabel))
-    crop = QuantizeImage(crop, nlevels=nlevels)
+    crop = get_cropped_cell(raw * (mask == CellLabel))
+    crop = quantize_image(crop, nlevels=nlevels)
 
     glcm = skfeature.texture.greycomatrix(
         image=crop, distances=dists, angles=angles, levels=nlevels + 1
@@ -100,8 +100,8 @@ def AnalyzeOrientation(
 
     for i, curve in enumerate(corr):
         z = (
-            lmfit.Model(ExpDecay)
-            .fit(curve, x=dists, a=0.005, weights=np.exp(-expdecay * dists))
+            lmfit.Model(exp_decay_func)
+            .fit(curve, x=dists, a=0.005, weights=np.exp(-decay_value * dists))
             .best_fit
         )
         corr_fit[i] = z
@@ -195,7 +195,7 @@ def AnalyzeOrientation(
     }
 
 
-def ProcessFOV(FOVId, df_fov):
+def process_fov(FOVId, df_fov):
 
     filename = f"../output/fov_{FOVId}.tif"
 
@@ -204,7 +204,7 @@ def ProcessFOV(FOVId, df_fov):
     df_or = pd.DataFrame()
     for CellLabel in df_fov.index:
         s = pd.Series(
-            AnalyzeOrientation(
+            analyze_orientation(
                 raw=data[0], mask=data[-1], CellLabel=CellLabel, plot=False
             ),
             name=CellLabel,
@@ -250,4 +250,4 @@ if __name__ == "__main__":
     df_cell = df_cell.sort_index()
 
     # Run FOV
-    ProcessFOV(FOVId=FOVId, df_fov=df_cell.loc[(FOVId,)])
+    process_fov(FOVId=FOVId, df_fov=df_cell.loc[(FOVId,)])

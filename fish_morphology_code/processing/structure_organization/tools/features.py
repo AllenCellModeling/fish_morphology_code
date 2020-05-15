@@ -7,10 +7,10 @@ from quilt3 import Package
 from skimage import io as skio
 
 
-def ProcessFOV(FOVId, df_fov):
+def process_fov(FOVId, df_fov):
 
     """
-        Takes an FIVId and the FOV dataframe and calculates local structure
+        Takes a FOVId and the FOV dataframe and calculates local structure
         organization adn global strucuural alignment features for every single
         segmented cell in that FOV.
     """
@@ -133,4 +133,4 @@ if __name__ == "__main__":
     df_cell = df_cell.sort_index()
 
     # Run FOV
-    ProcessFOV(FOVId=FOVId, df_fov=df_cell.loc[(FOVId,)])
+    process_fov(FOVId=FOVId, df_fov=df_cell.loc[(FOVId,)])
