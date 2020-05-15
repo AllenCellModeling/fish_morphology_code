@@ -181,7 +181,6 @@ def download_2D_nonstructure_features(test=False):
         )
 
 
-
 def download_actn2_3d_seg(test=False):
     """download actn2 structure segmentation. if test=True, only download two randomly sampled images."""
     if test:
@@ -207,7 +206,6 @@ def download_probe_struc_classifier_features(test=False):
             package="calystay/probe_structure_classifier_test",
             bucket="s3://allencell-internal-quilt",
             data_save_loc="quilt_probe_struc_classifier_features_test",
-
             ignore_warnings=True,
         )
     else:
@@ -215,6 +213,24 @@ def download_probe_struc_classifier_features(test=False):
             package="calystay/probe_structure_classifier",
             bucket="s3://allencell-internal-quilt",
             data_save_loc="quilt_probe_struc_classifier_features",
+            ignore_warnings=True,
+        )
+
+
+def download_probe_localization_features(test=False):
+    """download probe localization features. if test=True, only download two randomly sampled images."""
+    if test:
+        download_quilt_data(
+            package="calystay/probe_localization_test",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_probe_localization_features_test",
+            ignore_warnings=True,
+        )
+    else:
+        download_quilt_data(
+            package="calystay/probe_localization",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_probe_localization_features",
             ignore_warnings=True,
         )
 
@@ -249,3 +265,7 @@ def main_nonstructure_segs():
 
 def main_nonstructure_features():
     fire.Fire(download_2D_nonstructure_features)
+
+
+def main_probe_loc_feat():
+    fire.fire(download_probe_localization_features)
