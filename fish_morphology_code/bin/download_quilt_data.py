@@ -181,6 +181,24 @@ def download_2D_nonstructure_features(test=False):
         )
 
 
+def download_actn2_3d_seg(test=False):
+    """download actn2 structure segmentation. if test=True, only download two randomly sampled images."""
+    if test:
+        download_quilt_data(
+            package="calystay/3d_actn2_segmentation_test",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_actn2_3d_seg_test",
+            ignore_warnings=True,
+        )
+    else:
+        download_quilt_data(
+            package="calystay/3d_actn2_segmentation",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_actn2_3d_seg",
+            ignore_warnings=True,
+        )
+
+
 def main_segs():
     fire.Fire(download_2D_segs)
 
