@@ -88,7 +88,7 @@ def download_2D_nuclear_masks(test=False):
             package="calystay/2d_nuclear_masks",
             bucket="s3://allencell-internal-quilt",
             data_save_loc="quilt_data_2d_nuclear_masks",
-            ignore_warnings=True
+            ignore_warnings=True,
         )
 
 
@@ -119,15 +119,30 @@ def download_scrnaseq_raw(test=False):
         ignore_warnings=True,
     )
 
-
-def download_ML_struct_scores():
-    """download automated structure channel scoring."""
     download_quilt_data(
-        package="matheus/assay_dev_fish_analysis",
+        package="tanyasg/scrnaseq_data_raw",
         bucket="s3://allencell-internal-quilt",
-        data_save_loc="quilt_data_matheus_assay_dev_fish_analysis",
+        data_save_loc="quilt_data_scrnaseq_raw",
         ignore_warnings=True,
     )
+
+
+def download_ML_struct_scores(test=False):
+    """download automated structure channel scoring."""
+    if test:
+        download_quilt_data(
+            package="matheus/assay_dev_fish_analysis_test",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_matheus_assay_dev_fish_analysis_test",
+            ignore_warnings=True,
+        )
+    else:
+        download_quilt_data(
+            package="matheus/assay_dev_fish_analysis",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_matheus_assay_dev_fish_analysis",
+            ignore_warnings=True,
+        )
 
 
 def download_nonstructure_2D_segs(test=False):
@@ -166,6 +181,25 @@ def download_2D_nonstructure_features(test=False):
         )
 
 
+
+def download_actn2_3d_seg(test=False):
+    """download actn2 structure segmentation. if test=True, only download two randomly sampled images."""
+    if test:
+        download_quilt_data(
+            package="calystay/3d_actn2_segmentation_test",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_actn2_3d_seg_test",
+            ignore_warnings=True,
+        )
+    else:
+        download_quilt_data(
+            package="calystay/3d_actn2_segmentation",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_actn2_3d_seg",
+            ignore_warnings=True,
+        )
+
+
 def download_probe_struc_classifier_features(test=False):
     """download features relating probes and structure classifier. if test=True, only download features for two randomly sampled images."""
     if test:
@@ -173,6 +207,7 @@ def download_probe_struc_classifier_features(test=False):
             package="calystay/probe_structure_classifier_test",
             bucket="s3://allencell-internal-quilt",
             data_save_loc="quilt_probe_struc_classifier_features_test",
+
             ignore_warnings=True,
         )
     else:
