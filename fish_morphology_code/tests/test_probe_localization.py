@@ -24,9 +24,8 @@ def test_merge():
         "calystay/probe_localization", "s3://allencell-internal-quilt"
     )
     df_new = p_new["metadata.csv"]().rename(
-        columns={"original_fov_location": "FOV path"}
+        columns={"original_fov_location": "FOV path", "napariCell_ObjectNumber": "Cell number"}
     )
-
     # merge
-    df_merged = df.merge(df_new, how="inner", on=["FOV path"])
+    df_merged = df.merge(df_new, how="inner", on=["FOV path", "Cell number"])
     assert len(df_merged) == len(df)
