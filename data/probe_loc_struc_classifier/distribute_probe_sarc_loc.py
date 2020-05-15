@@ -10,7 +10,6 @@ df = df.rename(columns = {'fov_path': 'original_fov_location',
 
 df = df[['nuc_mask_path', 'original_fov_location']]
 df = df.drop_duplicates()
-# df = df.drop(['RawPath'], axis=1)
 
 test_df = df.loc[0:2]
 ds = Dataset(
