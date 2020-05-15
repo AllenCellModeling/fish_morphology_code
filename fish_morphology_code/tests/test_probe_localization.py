@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import quilt3
 from fish_morphology_code.bin.download_quilt_data import download_2D_features
 
 
