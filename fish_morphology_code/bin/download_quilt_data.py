@@ -88,7 +88,7 @@ def download_2D_nuclear_masks(test=False):
             package="calystay/2d_nuclear_masks",
             bucket="s3://allencell-internal-quilt",
             data_save_loc="quilt_data_2d_nuclear_masks",
-            ignore_warnings=True
+            ignore_warnings=True,
         )
 
 
@@ -119,15 +119,30 @@ def download_scrnaseq_raw(test=False):
         ignore_warnings=True,
     )
 
-
-def download_ML_struct_scores():
-    """download automated structure channel scoring."""
     download_quilt_data(
-        package="matheus/assay_dev_fish_analysis",
+        package="tanyasg/scrnaseq_data_raw",
         bucket="s3://allencell-internal-quilt",
-        data_save_loc="quilt_data_matheus_assay_dev_fish_analysis",
+        data_save_loc="quilt_data_scrnaseq_raw",
         ignore_warnings=True,
     )
+
+
+def download_ML_struct_scores(test=False):
+    """download automated structure channel scoring."""
+    if test:
+        download_quilt_data(
+            package="matheus/assay_dev_fish_analysis_test",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_matheus_assay_dev_fish_analysis_test",
+            ignore_warnings=True,
+        )
+    else:
+        download_quilt_data(
+            package="matheus/assay_dev_fish_analysis",
+            bucket="s3://allencell-internal-quilt",
+            data_save_loc="quilt_data_matheus_assay_dev_fish_analysis",
+            ignore_warnings=True,
+        )
 
 
 def download_nonstructure_2D_segs(test=False):
