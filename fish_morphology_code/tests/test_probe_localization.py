@@ -21,7 +21,7 @@ def test_merge():
 
     # new df
     p_new = quilt3.Package.browse(
-        "calystay/probe_localization_test", "s3://allencell-internal-quilt"
+        "calystay/probe_localization", "s3://allencell-internal-quilt"
     )
     df_new = p_new["metadata.csv"]().rename(
         columns={"original_fov_location": "FOV path"}
