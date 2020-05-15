@@ -87,18 +87,14 @@ Methods
 --------------------------------------------------------------------------------
 
 1. Distance between two points:
-math.sqrt((y1-y2)**2 + (x1-x2)**2)
+```math.sqrt((y1-y2)**2 + (x1-x2)**2)```
 
 2. Distance between the center of a probe object and its nearest px identified as nucleus
-scipy.distance.cdist([(probe_y_coor, probe_x_coor)], [(nuc_y_coor, nuc_x_coor), ...], `euclidean`)
+```scipy.distance.cdist([(probe_y_coor, probe_x_coor)], [(nuc_y_coor, nuc_x_coor), ...], "euclidean")```
 
 3. Distance between the center of a probe object and its nearest px identified as cell boundary
 cell_inv = inverse of cell object
-scipy.distance.cdist([(probe_y_coor, probe_x_coor)], [(cell_inv_y_coor, cell_inv_x_coor), ...], `euclidean`)
+```scipy.distance.cdist([(probe_y_coor, probe_x_coor)], [(cell_inv_y_coor, cell_inv_x_coor), ...], "euclidean")```
 
 4. Ratio between (the distance between the center of a probe object and its nearest px identified as nucleus) and (the distance between the center of a probe object and its nearest px identified as cell boundary)
 Method2/Method3 (Distance between the center of a probe object and its nearest px identified as nucleus / Distance between the center of a probe object and its nearest px identified as cell boundary)
-
-
-
-
