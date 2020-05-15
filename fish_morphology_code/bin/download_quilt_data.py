@@ -180,7 +180,7 @@ def download_2D_nonstructure_features(test=False):
             ignore_warnings=True,
         )
 
-  
+
 def download_actn2_3d_seg(test=False):
     """download actn2 structure segmentation. if test=True, only download two randomly sampled images."""
     if test:
