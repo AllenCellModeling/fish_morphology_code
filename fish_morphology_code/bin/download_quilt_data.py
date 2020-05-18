@@ -110,15 +110,8 @@ def download_scrnaseq(test=False):
         )
 
 
-def download_scrnaseq_raw(test=False):
-    """download scrnaseq raw data"""
-    download_quilt_data(
-        package="tanyasg/scrnaseq_data_raw",
-        bucket="s3://allencell-internal-quilt",
-        data_save_loc="quilt_data_scrnaseq_raw",
-        ignore_warnings=True,
-    )
-
+def download_scrnaseq_raw():
+    """download scrnaseq raw fastq"""
     download_quilt_data(
         package="tanyasg/scrnaseq_data_raw",
         bucket="s3://allencell-internal-quilt",
