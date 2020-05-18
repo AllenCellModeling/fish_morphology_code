@@ -1,5 +1,6 @@
 import quilt3
 import fire
+import subprocess
 from pathlib import Path
 
 
@@ -62,6 +63,7 @@ def aggregate_and_push(
     source_S3_url="s3://allencell-internal-quilt",
     dest_S3_url="s3://allencell-internal-quilt",
     dest_pkg_name="aics/cardio_diff_manuscript",
+    message="FISH data consolidation",
 ):
     # real data
     q = quilt3.Package()
@@ -72,7 +74,12 @@ def aggregate_and_push(
         for (logical_key, physical_key) in p.walk():
             q.set(str(Path(new_subdir) / logical_key), physical_key)
 
-    q.push(dest_pkg_name, dest_S3_url, message="FISH data reorg")
+    git_commit_hash = (
+        subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
+    )
+    label = f"{message}. git commit hash of fish_morphology_code = {git_commit_hash}."
+
+    q.push(dest_pkg_name, dest_S3_url, message=label)
 
 
 PKG_MAP, PKG_MAP_TEST = make_pkg_maps()
@@ -84,6 +91,7 @@ def agg_push_test():
         source_S3_url="s3://allencell-internal-quilt",
         dest_S3_url="s3://allencell-internal-quilt",
         dest_pkg_name="aics/cardio_diff_manuscript_test",
+        message="FISH test data consolidation",
     )
 
 
@@ -93,6 +101,7 @@ def agg_push_full():
         source_S3_url="s3://allencell-internal-quilt",
         dest_S3_url="s3://allencell-internal-quilt",
         dest_pkg_name="aics/cardio_diff_manuscript",
+        message="FISH data consolidation",
     )
 
 
