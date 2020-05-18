@@ -31,7 +31,7 @@ def make_pkg_maps(
     # grab a list of packages that actually exist internally
     pkg_list = list(quilt3.list_packages("s3://allencell-internal-quilt"))
 
-    # how we're going to map them inside the main package
+    # create dictionary for original fully qualified name to simple name
     pkg_map = {p: p.split("/")[-1] for p in all_pkgs}
 
     # manually fix up some opaque names
@@ -72,7 +72,7 @@ def aggregate_and_push(
     for (low_level_pkg_str, new_subdir) in pkg_map.items():
         p = quilt3.Package.browse(low_level_pkg_str, source_S3_url)
         for (logical_key, physical_key) in p.walk():
-            q.set(str(Path(new_subdir) / logical_key), physical_key)
+            q.set(f"{new_subdir}/{logical_key}"), physical_key)
 
     git_commit_hash = (
         subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
