@@ -6,7 +6,7 @@ import subprocess
 
 
 def distribute_scrnaseq_raw(
-    csv_loc="/allen/aics/gene-editing/Manuscripts/Transcriptomics_2019/scrnaseq_supplement/data_package/scrnaseq_quilt/scrnaseq_data_raw.csv",
+    csv_loc="scrnaseq_data_raw.csv",
     dataset_name="scrnaseq_raw",
     package_owner="tanyasg",
     s3_bucket="s3://allencell-internal-quilt",
@@ -17,25 +17,12 @@ def distribute_scrnaseq_raw(
         dataset=csv_loc,
         name=dataset_name,
         package_owner=package_owner,
-        readme_path="/allen/aics/gene-editing/Manuscripts/Transcriptomics_2019/scrnaseq_supplement/data_package/scrnaseq_quilt/README.md",
+        readme_path="README.md",
     )
 
     # Rename the columns on the package level
     ds.set_column_names_map(
         {"fastq_files": "fastq", "read_assignment_files": "read_assignment"}
-    )
-
-    # add raw count matrix, cell metadata, and Seurat object (Robj) and anndata object (h5ad) as supplementary files
-    ds.set_extra_files(
-        [
-            "/allen/aics/gene-editing/Manuscripts/Transcriptomics_2019/scrnaseq_supplement/data_package/raw_counts.mtx",
-            "/allen/aics/gene-editing/Manuscripts/Transcriptomics_2019/scrnaseq_supplement/data_package/genes.csv",
-            "/allen/aics/gene-editing/Manuscripts/Transcriptomics_2019/scrnaseq_supplement/data_package/cells.csv",
-            "/allen/aics/gene-editing/Manuscripts/Transcriptomics_2019/scrnaseq_supplement/data_package/cell_metadata.csv",
-            "/allen/aics/gene-editing/RNA_seq/scRNAseq_SeeligCollaboration/2019_analysis/merged_experiment_1_2/scrnaseq_cardio_20191016.h5ad",
-            "/allen/aics/gene-editing/RNA_seq/scRNAseq_SeeligCollaboration/2019_analysis/merged_experiment_1_2/scrnaseq_cardio_20191016.Robj",
-            "/allen/aics/gene-editing/RNA_seq/scRNAseq_SeeligCollaboration/2019_analysis/merged_experiment_1_2/scrnaseq_cardio_20191210.RData",
-        ]
     )
 
     # tag with commit hash
