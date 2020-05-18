@@ -7,7 +7,7 @@ from quilt3distribute.validation import validate
 
 def distribute_autocontrasted_dataset(
     test=False,
-    csv_loc="../output_data/output_image_manifest.csv",
+    csv_loc="../../output_data/output_image_manifest.csv",
     col_name_map={},
     dataset_name="2d_autocontrasted_fields_and_single_cells",
     package_owner="rorydm",
