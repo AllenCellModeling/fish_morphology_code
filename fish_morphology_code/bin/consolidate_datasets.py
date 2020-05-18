@@ -70,7 +70,7 @@ def aggregate_and_push(
     for (low_level_pkg_str, new_subdir) in pkg_map.items():
         p = quilt3.Package.browse(low_level_pkg_str, source_S3_url)
         for (logical_key, physical_key) in p.walk():
-            q.set(str(Path(new_subdir) / logical_key), physical_key)
+            q.set(f"{new_subdir}/{logical_key}"), physical_key)
 
     q.push(dest_pkg_name, dest_S3_url, message="FISH data reorg")
 
