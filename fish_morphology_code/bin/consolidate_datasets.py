@@ -30,7 +30,7 @@ def make_pkg_maps(
     # grab a list of packages that actually exist internally
     pkg_list = list(quilt3.list_packages("s3://allencell-internal-quilt"))
 
-    # how we're going to map them inside the main package
+    # create dictionary for original fully qualified name to simple name
     pkg_map = {p: p.split("/")[-1] for p in all_pkgs}
 
     # manually fix up some opaque names
