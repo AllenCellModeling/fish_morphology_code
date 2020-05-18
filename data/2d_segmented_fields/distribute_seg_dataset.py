@@ -7,7 +7,7 @@ from quilt3distribute.validation import validate
 
 def distribute_seg_dataset(
     test=False,
-    csv_loc="input_segs_and_tiffs/raw_seg_013_014_images.csv",
+    csv_loc="../input_segs_and_tiffs/raw_seg_013_014_images.csv",
     col_name_map={
         "fov_path": "original_fov_location",
         "FOVId": "fov_id",
@@ -50,12 +50,14 @@ def distribute_seg_dataset(
         for f in score_files
     ]
     df_score = pd.concat(score_dfs, axis="rows", ignore_index=True, sort=False)
-    df_score.to_csv("structure_scores.csv")
+    df_score.to_csv("../structure_scores/structure_scores.csv")
 
     # set data path cols, metadata cols, and extra files
     ds.set_metadata_columns(["fov_id", "original_fov_location"])
     ds.set_path_columns(["2D_fov_tiff_path"])
-    ds.set_extra_files(["channel_defs.json", "structure_scores.csv"])
+    ds.set_extra_files(
+        ["../channel_defs.json", "../structure_scores/structure_scores.csv"]
+    )
 
     # tag with commit hash
     label = (
