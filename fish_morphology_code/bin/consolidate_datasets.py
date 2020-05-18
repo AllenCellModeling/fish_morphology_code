@@ -48,7 +48,7 @@ def make_pkg_maps(
     assert len([k for k, v in pkg_map.items() if k in pkg_list]) == len(pkg_map)
     assert len([k for k, v in pkg_map_test.items() if k in pkg_list]) == len(
         pkg_map_test
-    ) - len(["tanyasg/scrnaseq_raw_test", "rorydm/manuscript_plots_test"])
+    ) - len(skip_test_pkgs)
 
     # once checked, filter on only what's there
     pkg_map = {k: v for k, v in pkg_map.items() if k in pkg_list}
