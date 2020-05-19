@@ -1,6 +1,6 @@
 # Dataset for Cell states beyond transcriptomics: integrating structural organization and gene expression in hiPSC-derived cardiomyocytes
 
-This data package contains the input data for all analyses in the manuscript <insert bioarxiv link here> in a compute-friendly form.
+This data package contains the input data for all analyses in the manuscript `<insert bioarxiv link here>` in a compute-friendly form.
 Not all of these data were used in the manuscript, but all of the data used in the manuscript are included here.
 
 ## Overview
@@ -11,6 +11,7 @@ Notably, we provide 478 fields of view containing approximately 5000 segmented s
 - Two FISH probes per cell (eight probes overall)
 
 Also included are
+- expert annotations of these ~5000 segmented cells
 - FISH images of cells without a GFP labeled structure (~30 probes)
 - scRNAseq (Split-seq) data collected on approximately 22,000 cells that underwent similar differentiaion protocals as the cells we imaged
 
@@ -66,4 +67,4 @@ pkg = quilt3.Package.browse(
     "s3://allencell-internal-quilt",
 )
 ```
-Instructions for interacting with quilt packages can be found [here](https://docs.quiltdata.com/walkthrough/getting-data-from-a-package)
+Instructions for interacting with quilt packages can be found [here](https://docs.quiltdata.com/walkthrough/getting-data-from-a-package).
