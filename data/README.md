@@ -13,7 +13,7 @@ Notably, we provide 478 fields of view containing approximately 5000 segmented s
 Also included are
 - expert annotations of these ~5000 segmented cells
 - FISH images of cells without a GFP labeled structure (~30 probes)
-- scRNAseq (Split-seq) data collected on approximately 22,000 cells that underwent similar differentiaion protocals as the cells we imaged
+- scRNAseq (Split-seq) data collected on approximately 22,000 cells that underwent similar differentiaion protocols as the cells we imaged
 
 ## Organization
 The data in this package is organized into seperate data sets, reflecting different data of different types (scRNAseq vs FISH / image data), and different downstream processing / feature derivation.
@@ -27,7 +27,7 @@ The data sets included in this package are:
 - `2d_nuclear_masks`
 - `2d_segmented_fields`
 - `3d_actn2_segmentation`
-- `automated_local_and_global_structure`
+- `automated_local_structure_and_global_alignment`
 - `manuscript_plots`
 - `probe_localization`
 - `probe_structure_classifier`
@@ -35,7 +35,7 @@ The data sets included in this package are:
 - `scrnaseq_raw`
 - `segmented_nuc_labels`
 
-Notably absent from this release are the raw 3D imagages from which our 2D images are derived.
+Notably absent from this release are the raw 3D images from which our 2D images are derived.
 These will be included shortly.
 
 ## Access
