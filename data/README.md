@@ -13,10 +13,10 @@ Notably, we provide 478 fields of view containing approximately 5000 segmented s
 Also included are
 - expert annotations of these ~5000 segmented cells
 - FISH images of cells without a GFP labeled structure (~30 probes)
-- scRNAseq (Split-seq) data collected on approximately 22,000 cells that underwent similar differentiaion protocols as the cells we imaged
+- scRNA-seq (Split-seq) data collected on approximately 22,000 cells that underwent similar differentiation protocols as the cells we imaged
 
 ## Organization
-The data in this package is organized into seperate data sets, reflecting different data of different types (scRNAseq vs FISH / image data), and different downstream processing / feature derivation.
+The data in this package is organized into separate data sets, reflecting different data of different types (scRNAseq vs FISH / image data), and different downstream processing / feature derivation.
 
 The data sets included in this package are:
 
@@ -39,11 +39,11 @@ Notably absent from this release are the raw 3D images from which our 2D images 
 These will be included shortly.
 
 ## Access
-The data is programatically accessible via `quilt`, and is also (somewhat) browseable via this web ui.
+The data is programmatically accessible via `quilt`, and is also (somewhat) browse-able via this web ui.
 
 ### Bulk download
 To download the entire data set, install the `quilt` python package using
-```
+```bash
 pip install quilt
 ```
 and then
@@ -54,12 +54,12 @@ b.fetch("aics/cardio_diff_manuscript/", "./")
 ```
 
 ### Download specific files or data sets
-To download only certain individual files, naviagte the web ui here to the specific file you are interested in, and use the `DOWNLOAD FILE` button in the upper right of the page.
+To download only certain individual files, navigate the web ui here to the specific file you are interested in, and use the `DOWNLOAD FILE` button in the upper right of the page.
 
-To download specific folders/directories of data, similarly use the web ui to fin dthe directory you want, and check the `<> CODE` tab at the top of the page for the python code that downloads that specific subset of data.
+To download specific folders/directories of data, similarly use the web ui to fin the directory you want, and check the `<> CODE` tab at the top of the page for the python code that downloads that specific subset of data.
 
 ### Programatic access
-To access the data via the python quilt API, isnall `quilt` via `pip`, and then load the package with:
+To access the data via the python quilt API, install `quilt` via `pip`, and then load the package with:
 
 ```python
 pkg = quilt3.Package.browse(
