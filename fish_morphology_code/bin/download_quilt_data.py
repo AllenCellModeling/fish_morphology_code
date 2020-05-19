@@ -96,14 +96,14 @@ def download_scrnaseq(test=False):
     """download scrnaseq data. if test=True, only download counts for ten random cells."""
     if test:
         download_quilt_data(
-            package="rorydm/scrnaseq_data_test",
+            package="tanyasg/scrnaseq_data_test",
             bucket="s3://allencell-internal-quilt",
             data_save_loc="quilt_data_scrnaseq_test",
             ignore_warnings=True,
         )
     else:
         download_quilt_data(
-            package="rorydm/scrnaseq_data",
+            package="tanyasg/scrnaseq_data",
             bucket="s3://allencell-internal-quilt",
             data_save_loc="quilt_data_scrnaseq",
             ignore_warnings=True,
