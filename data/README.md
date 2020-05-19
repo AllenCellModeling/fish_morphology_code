@@ -43,7 +43,7 @@ The data is programmatically accessible via `quilt`, and is also (somewhat) brow
 
 ### Bulk download
 To download the entire data set, install the `quilt` python package using
-```
+```bash
 pip install quilt
 ```
 and then
