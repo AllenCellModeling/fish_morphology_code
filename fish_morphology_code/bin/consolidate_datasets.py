@@ -68,7 +68,7 @@ def aggregate_and_push(
 ):
     # real data
     q = quilt3.Package()
-    # TODO add readme to top level package
+    q.set("README.md", "../../data/README.md")
 
     for (low_level_pkg_str, new_subdir) in pkg_map.items():
         p = quilt3.Package.browse(low_level_pkg_str, source_S3_url)
