@@ -1,4 +1,5 @@
 import subprocess
+from pathlib import Path
 import pandas as pd
 import fire
 from quilt3distribute import Dataset
@@ -43,14 +44,14 @@ def distribute_seg_dataset(
 
     # structure scores as auxilary file
     score_files = [
-        f"structure_scores/structure_score_55000000{p}.csv" for p in (13, 14)
+        Path(f"../structure_scores/structure_score_55000000{p}.csv") for p in (13, 14)
     ]
     score_dfs = [
         pd.read_csv(f).rename({"mh Score": "mh score"}, axis="columns")
         for f in score_files
     ]
     df_score = pd.concat(score_dfs, axis="rows", ignore_index=True, sort=False)
-    df_score.to_csv("../structure_scores/structure_scores.csv")
+    df_score.to_csv(Path("../structure_scores/structure_scores.csv"))
 
     # set data path cols, metadata cols, and extra files
     ds.set_metadata_columns(["fov_id", "original_fov_location"])
