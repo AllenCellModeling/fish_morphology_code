@@ -67,6 +67,9 @@ def distribute_scrnaseq_data(
             readme_path="README.md",
         )
 
+        # columns with files to upload
+        ds.set_path_columns(["counts"])
+
     else:
         ds = Dataset(
             dataset=df,
@@ -74,6 +77,9 @@ def distribute_scrnaseq_data(
             package_owner=package_owner,
             readme_path="README.md",
         )
+
+        # columns with files to upload
+        ds.set_path_columns(["counts", "anndata"])
 
         # anndata object (h5ad) as supplementary files
         ds.set_extra_files(
