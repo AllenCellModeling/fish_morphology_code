@@ -21,18 +21,18 @@ The data in this package is organized into seperate datasets, reflecting differe
 
 The datasets included in this package are:
 
-`2d_autocontrasted_fields_and_single_cells`
-`2d_autocontrasted_single_cell_features`
-`2d_nonstructure_fields`
-`2d_nonstructure_single_cell_features`
-`2d_nuclear_masks`
-`2d_segmented_fields`
-`3d_actn2_segmentation`
-`automated_local_and_global_structure`
-`manuscript_plots`
-`probe_localization`
-`probe_structure_classifier`
-`scrnaseq_data`
-`scrnaseq_raw`
-`segmented_nuc_labels`
+- `2d_autocontrasted_fields_and_single_cells`
+- `2d_autocontrasted_single_cell_features`
+- `2d_nonstructure_fields`
+- `2d_nonstructure_single_cell_features`
+- `2d_nuclear_masks`
+- `2d_segmented_fields`
+- `3d_actn2_segmentation`
+- `automated_local_and_global_structure`
+- `manuscript_plots`
+- `probe_localization`
+- `probe_structure_classifier`
+- `scrnaseq_data`
+- `scrnaseq_raw`
+- `segmented_nuc_labels`
 
