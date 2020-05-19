@@ -45,7 +45,7 @@ def distribute_autocontrasted_dataset(
     ds.set_path_columns(
         ["rescaled_2D_fov_tiff_path", "rescaled_2D_single_cell_tiff_path"]
     )
-    ds.set_extra_files(["channel_defs.json", "../../output_data/parameters.json"])
+    ds.set_extra_files(["../channel_defs.json", "../../output_data/parameters.json"])
 
     # tag with commit hash
     label = (
