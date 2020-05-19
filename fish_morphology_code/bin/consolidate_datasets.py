@@ -12,7 +12,6 @@ def make_pkg_maps(
         "calystay/3d_actn2_segmentation",
         "calystay/probe_localization",
         "calystay/probe_structure_classifier",
-        "calystay/segmented_nuc_labels",
         "matheus/assay_dev_fish_analysis",
         "rorydm/scrnaseq_data",
         "tanyasg/2d_autocontrasted_single_cell_features",
