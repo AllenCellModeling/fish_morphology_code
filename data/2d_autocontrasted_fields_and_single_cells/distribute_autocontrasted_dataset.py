@@ -7,7 +7,7 @@ from quilt3distribute.validation import validate
 
 def distribute_autocontrasted_dataset(
     test=False,
-    csv_loc="../output_data/output_image_manifest.csv",
+    csv_loc="../../output_data/output_image_manifest.csv",
     col_name_map={},
     dataset_name="2d_autocontrasted_fields_and_single_cells",
     package_owner="rorydm",
@@ -45,7 +45,7 @@ def distribute_autocontrasted_dataset(
     ds.set_path_columns(
         ["rescaled_2D_fov_tiff_path", "rescaled_2D_single_cell_tiff_path"]
     )
-    ds.set_extra_files(["channel_defs.json", "../output_data/parameters.json"])
+    ds.set_extra_files(["../channel_defs.json", "../../output_data/parameters.json"])
 
     # tag with commit hash
     label = (
