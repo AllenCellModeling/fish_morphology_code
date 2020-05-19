@@ -21,7 +21,7 @@ def download_quilt_data(
 
 
 def download_2D_segs(test=False):
-    """download maxporject/seg data. if test=True, only download two randomly dampled images."""
+    """download maxproject/seg data. if test=True, only download two randomly dampled images."""
     if test:
         download_quilt_data(
             package="rorydm/2d_segmented_fields_test",
