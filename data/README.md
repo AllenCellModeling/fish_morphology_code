@@ -19,7 +19,7 @@ Also included are
 The data in this package is organized into separate data sets, reflecting different data of different types (scRNAseq vs FISH / image data), and different downstream processing / feature derivation.
 
 The data creation and processing pipeline is oragized according to the following schematic:
-![Data pipeline schematic](Website_schematic_data_flow_20200310_v2.png)
+![Data pipeline schematic](resources/Website_schematic_data_flow_20200310_v2.png)
 
 The data sets included in this package are:
 
