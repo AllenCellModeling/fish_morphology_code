@@ -32,7 +32,6 @@ The data sets included in this package are:
     ├── 2d_nuclear_masks
     ├── 2d_segmented_fields
     ├── 3d_actn2_segmentation
-    ├── README.md
     ├── automated_local_and_global_structure
     ├── manuscript_plots
     ├── probe_localization
