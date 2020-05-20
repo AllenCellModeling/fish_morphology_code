@@ -16,22 +16,21 @@ if not os.path.exists(os.path.join(ds_folder, "metadata.csv")):
 
 metadata = pd.read_csv(os.path.join(ds_folder, "metadata.csv"))
 
-df_fov = pd.read_csv(os.path.join(ds_folder, metadata.database_path[0]), index_col=0)
+df_meta = pd.read_csv(os.path.join(ds_folder, metadata.database_path[0]), index_col=0)
 
 # Gathering results
 df = []
-for FOVId in tqdm(df_fov.index):
+for FOVId in tqdm(df_meta.index):
 
     prefix = os.path.join('..', 'output', f"fov_{FOVId}")
 
     if os.path.exists(prefix + ".csv"):
 
         df_fov = pd.read_csv(prefix + ".csv")
+
         df_fov["FOVId"] = FOVId
         df_fov["result_image_path"] = os.path.abspath(prefix + ".tif")
-        df_fov["original_fov_location"] = df_fov.RawFileName[FOVId].replace(
-            "_C0.tif", ""
-        )
+        df_fov["original_fov_location"] = df_meta.RawFileName[FOVId].replace("_C0.tif", "")
 
         df.append(df_fov)
 
@@ -219,10 +218,11 @@ for feature in features_rename:
     df = df.rename(columns=feature)
 
 with open("assay-dev-fish.md", "w") as ftxt:
+    ftxt.write("### Global structure organization and local structural alignment features\n\n")
     for meta in metadata:
         for key, value in meta.items():
             ftxt.write(
-                "Feature: {0}, Description: {1}\n".format(
+                "- `{0}`: {1}\n".format(
                     value["name"] if value["name"] is not None else key,
                     value["description"],
                 )
