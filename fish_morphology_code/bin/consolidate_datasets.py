@@ -18,6 +18,28 @@ def update_quilt_readme(
     p.push(pkg_name, s3_bucket)
 
 
+README_MAP = {
+    "rorydm/2d_autocontrasted_fields_and_single_cells": "data/2d_autocontrasted_fields_and_single_cells/README.md",
+    "tanyasg/2d_autocontrasted_single_cell_features": "data/structure_cellprofiler_features/README.md",
+    "tanyasg/2d_nonstructure_fields": "data/nonstructure_fields/README.md",
+    "tanyasg/2d_nonstructure_single_cell_features": "data/nonstructure_features/README.md",
+    "calystay/2d_nuclear_masks": "data/nuclear_masks/README.md",
+    "rorydm/2d_segmented_fields": "data/2d_segmented_fields/README.md",
+    "calystay/3d_actn2_segmentation": "data/actn2_3d_seg/README.md",
+    "matheus/assay_dev_fish_analysis": "fish_morphology_code/processing/structure_organization/tools/assay-dev-fish.md",
+    "rorydm/manuscript_plots": "data/plots_dataset/README.md",
+    "calystay/probe_localization": "data/probe_localization/README.md",
+    "calystay/probe_structure_classifier": "data/probe_loc_struc_classifier/README.md",
+    "tanyasg/scrnaseq_data": "data/scrnaseq_counts/README.md",
+    "tanyasg/scrnaseq_raw": "data/scrnaseq_raw/README.md",
+}
+
+
+def update_all_quilt_readmes():
+    for k, v in README_MAP.items():
+        update_quilt_readme(pkg_name=k, new_readme_loc=v)
+
+
 def make_pkg_maps(
     all_pkgs=[
         "calystay/2d_nuclear_masks",
