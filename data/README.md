@@ -5,7 +5,7 @@ Not all of these data were used in the manuscript, but all of the data used in t
 
 ## Overview
 Notably, we provide 478 fields of view containing approximately 5000 segmented single cells in different stages of cardiomyogenisis, imaged in five channels:
-- Bright field
+- Brightfield
 - Hoechst nuclear stain
 - Endogenously GFP-tagged alpha-actinin-2 structure
 - Two FISH probes per cell (eight probes overall)
@@ -17,6 +17,9 @@ Also included are
 
 ## Organization
 The data in this package is organized into separate data sets, reflecting different data of different types (scRNAseq vs FISH / image data), and different downstream processing / feature derivation.
+
+The data creation and processing pipeline is oragized according to the following schematic:
+![Data pipeline schematic](Website_schematic_data_flow_20200310_v2.png)
 
 The data sets included in this package are:
 
