@@ -203,6 +203,26 @@ def get_global_structure(rename_dict=rename_dict, use_cached=False):
     return df_gs
 
 
+def get_probe_localization(use_cached=False):
+    p_pl = quilt3.Package.browse(
+        "calysta/probe_localization", "s3://allencell-internal-quilt"
+    )
+    df_pl = fetch_df("metadata.csv", p_pl, use_cached=use_cached).drop(
+        "Unnamed: 0", axis="columns"
+    )
+
+    df_pl = df_pl.rename(columns={"original_fov_location": "fov_path"})
+    df_pl = df_pl[
+        [
+            "fov_path",
+            "napariCellObjectNumber",
+            "seg_561_cell_dist_nuc_per_obj_median",
+            "seg_638_cell_dist_nuc_per_obj_median",
+        ]]
+    df_pl["fov_path"] = df_pl["fov_path"].apply(lambda p: str(Path(p).as_posix()))
+    return df_pl
+
+
 def group_human_scores(df, rename_dict=rename_dict):
     df["consensus_structure_org_score_roundup"] = np.ceil(
         df["consensus_structure_org_score"]
@@ -291,6 +311,12 @@ def load_data():
 
     # merge in the global structure metrics
     df_small = df_small.merge(df_gs)
+
+    # load in probe localization features
+    df_pl = get_probe_localization()
+
+    # merge in the probe localization features
+    df_small = df_small.merge(df_pl)
 
     # make wide version
     df = widen_df(df_small)

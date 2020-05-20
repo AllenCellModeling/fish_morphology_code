@@ -79,6 +79,14 @@ PRETTY_NAME_MAP = {
     "MYH7_probe_frac_threads_regular_dots_regular_stripes_gain_over_random": "Enrichment of MYH7 transcript localization to fibers, organized puncta, and organized z-disks",
     "MYH6_dist_to_alpha-actinin_segmentation": "MYH6 probe distance to alpha-actinin segmentation (mean)",
     "MYH7_dist_to_alpha-actinin_segmentation": "MYH7 probe distance to alpha-actinin segmentation (mean)",
+	"MYH7_cell_dist_nuc_per_obj_median": "MYH7 relative distance to cell per object (median)",
+	"MYH6_cell_dist_nuc_per_obj_median": "MYH6 relative distance to cell per object (median)",
+	"BAG3_cell_dist_nuc_per_obj_median": "BAG3 relative distance to cell per object (median)",
+	"TCAP_cell_dist_nuc_per_obj_median": "TCAP relative distance to cell per object (median)",
+	"ATP2A2_cell_dist_nuc_per_obj_median": "ATP2A2 relative distance to cell per object (median)",
+	"H19_cell_dist_nuc_per_obj_median": "H19 relative distance to cell per object (median)",
+	"HPRT1_cell_dist_nuc_per_obj_median": "HPRT1 relative distance to cell per object (median)",
+	"COL2A1_cell_dist_nuc_per_obj_median": "COL2A1 relative distance to cell per object (median)",
 }
 
 
@@ -131,6 +139,8 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
             "napariCell_ObjectNumber",
             "seg_561_cell_abs_dist_struc_total_mean",
             "seg_638_cell_abs_dist_struc_total_mean",
+			"seg_561_cell_dist_nuc_per_obj_median",
+			"seg_638_cell_dist_nuc_per_obj_median"
         ]
     ]
 
