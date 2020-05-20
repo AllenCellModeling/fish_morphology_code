@@ -69,6 +69,10 @@ def aggregate_and_push(
     # real data
     q = quilt3.Package()
     q.set("README.md", "../../data/README.md")
+    q.set(
+        "resources/Website_schematic_data_flow_20200310_v2.png",
+        "../../data/resources/Website_schematic_data_flow_20200310_v2.png",
+    )
 
     for (low_level_pkg_str, new_subdir) in pkg_map.items():
         p = quilt3.Package.browse(low_level_pkg_str, source_S3_url)
