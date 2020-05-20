@@ -23,20 +23,23 @@ The data creation and processing pipeline is oragized according to the following
 
 The data sets included in this package are:
 
-- `2d_autocontrasted_fields_and_single_cells`
-- `2d_autocontrasted_single_cell_features`
-- `2d_nonstructure_fields`
-- `2d_nonstructure_single_cell_features`
-- `2d_nuclear_masks`
-- `2d_segmented_fields`
-- `3d_actn2_segmentation`
-- `automated_local_structure_and_global_alignment`
-- `manuscript_plots`
-- `probe_localization`
-- `probe_structure_classifier`
-- `scrnaseq_data`
-- `scrnaseq_raw`
-- `segmented_nuc_labels`
+```bash
+cardio_diff_manuscript
+├── 2d_autocontrasted_fields_and_single_cells
+├── 2d_autocontrasted_single_cell_features
+├── 2d_nonstructure_fields
+├── 2d_nonstructure_single_cell_features
+├── 2d_nuclear_masks
+├── 2d_segmented_fields
+├── 3d_actn2_segmentation
+├── README.md
+├── automated_local_and_global_structure
+├── manuscript_plots
+├── probe_localization
+├── probe_structure_classifier
+├── scrnaseq_data
+└── scrnaseq_raw
+```
 
 Notably absent from this release are the raw 3D images from which our 2D images are derived.
 These will be included shortly.
