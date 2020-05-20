@@ -4,7 +4,7 @@ This data package contains the input data for all analyses in the manuscript `<i
 Not all of these data were used in the manuscript, but all of the data used in the manuscript are included here.
 
 ## Overview
-Notably, we provide 478 fields of view containing approximately 5000 segmented single cells in different stages of cardiomyogenisis, imaged in five channels:
+Notably, we provide 478 fields of view containing approximately 5000 segmented single cells in different stages of cardiomyogenesis, imaged in five channels:
 - Brightfield
 - Hoechst nuclear stain
 - Endogenously GFP-tagged alpha-actinin-2 structure
@@ -16,36 +16,36 @@ Also included are
 - scRNA-seq (Split-seq) data collected on approximately 22,000 cells that underwent similar differentiation protocols as the cells we imaged
 
 ## Organization
-The data in this package is organized into separate data sets, reflecting different data of different types (scRNAseq vs FISH / image data), and different downstream processing / feature derivation.
+The data in this package is organized into separate data sets, reflecting different data of different types (scRNA-seq vs FISH / image data), and different downstream processing / feature derivation.
 
-The data creation and processing pipeline is oragized according to the following schematic:
+The data creation and processing pipeline is organized according to the following schematic:
 ![Data pipeline schematic](resources/Website_schematic_data_flow_20200310_v2.png)
 
 The data sets included in this package are:
 
 ```bash
-cardio_diff_manuscript
-├── 2d_autocontrasted_fields_and_single_cells
-├── 2d_autocontrasted_single_cell_features
-├── 2d_nonstructure_fields
-├── 2d_nonstructure_single_cell_features
-├── 2d_nuclear_masks
-├── 2d_segmented_fields
-├── 3d_actn2_segmentation
-├── README.md
-├── automated_local_and_global_structure
-├── manuscript_plots
-├── probe_localization
-├── probe_structure_classifier
-├── scrnaseq_data
-└── scrnaseq_raw
+    cardio_diff_manuscript
+    ├── 2d_autocontrasted_fields_and_single_cells
+    ├── 2d_autocontrasted_single_cell_features
+    ├── 2d_nonstructure_fields
+    ├── 2d_nonstructure_single_cell_features
+    ├── 2d_nuclear_masks
+    ├── 2d_segmented_fields
+    ├── 3d_actn2_segmentation
+    ├── README.md
+    ├── automated_local_and_global_structure
+    ├── manuscript_plots
+    ├── probe_localization
+    ├── probe_structure_classifier
+    ├── scrnaseq_data
+    └── scrnaseq_raw
 ```
 
 Notably absent from this release are the raw 3D images from which our 2D images are derived.
 These will be included shortly.
 
 ## Access
-The data is programmatically accessible via `quilt`, and is also (somewhat) browse-able via this web ui.
+The data are programmatically accessible via `quilt`, and is also (somewhat) browse-able via this web ui.
 
 ### Bulk download
 To download the entire data set, install the `quilt` python package using
@@ -64,7 +64,7 @@ To download only certain individual files, navigate the web ui here to the speci
 
 To download specific folders/directories of data, similarly use the web ui to fin the directory you want, and check the `<> CODE` tab at the top of the page for the python code that downloads that specific subset of data.
 
-### Programatic access
+### Programmatic access
 To access the data via the python quilt API, install `quilt` via `pip`, and then load the package with:
 
 ```python
