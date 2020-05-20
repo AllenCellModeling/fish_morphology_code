@@ -205,17 +205,15 @@ def get_global_structure(rename_dict=rename_dict, use_cached=False):
 
 def get_probe_localization(use_cached=False):
     p_pl = quilt3.Package.browse(
-        "calysta/probe_localization", "s3://allencell-internal-quilt"
+        "calystay/probe_localization", "s3://allencell-internal-quilt"
     )
-    df_pl = fetch_df("metadata.csv", p_pl, use_cached=use_cached).drop(
-        "Unnamed: 0", axis="columns"
-    )
+    df_pl = fetch_df("metadata.csv", p_pl, use_cached=use_cached)
 
     df_pl = df_pl.rename(columns={"original_fov_location": "fov_path"})
     df_pl = df_pl[
         [
             "fov_path",
-            "napariCellObjectNumber",
+            "napariCell_ObjectNumber",
             "seg_561_cell_dist_nuc_per_obj_median",
             "seg_638_cell_dist_nuc_per_obj_median",
         ]]
