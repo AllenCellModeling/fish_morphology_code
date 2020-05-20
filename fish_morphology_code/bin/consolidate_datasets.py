@@ -30,7 +30,7 @@ def make_pkg_maps(
 ):
 
     # grab a list of packages that actually exist internally
-    pkg_list = list(quilt3.list_packages("s3://allencell-internal-quilt"))
+    pkg_list = list(quilt3.list_packages(internal_s3_url))
 
     # create dictionary for original fully qualified name to simple name
     pkg_map = {p: p.split("/")[-1] for p in all_pkgs}
@@ -62,9 +62,9 @@ def make_pkg_maps(
 def aggregate_and_push(
     pkg_map,
     source_S3_url="s3://allencell-internal-quilt",
-    dest_S3_url="s3://allencell-internal-quilt",
-    dest_pkg_name="aics/cardio_diff_manuscript",
-    message="FISH data consolidation",
+    dest_S3_url="s3://allencell",
+    dest_pkg_name="aics/integrated_transcriptomics_structural_organization_hipsc_cm",
+    message="Public data set",
 ):
     # real data
     q = quilt3.Package()
@@ -95,8 +95,8 @@ def agg_push_test():
         PKG_MAP_TEST,
         source_S3_url="s3://allencell-internal-quilt",
         dest_S3_url="s3://allencell-internal-quilt",
-        dest_pkg_name="aics/cardio_diff_manuscript_test",
-        message="FISH test data consolidation",
+        dest_pkg_name="aics/integrated_transcriptomics_structural_organization_hipsc_cm_test",
+        message="Public data set",
     )
 
 
@@ -105,8 +105,18 @@ def agg_push_full():
         PKG_MAP,
         source_S3_url="s3://allencell-internal-quilt",
         dest_S3_url="s3://allencell-internal-quilt",
-        dest_pkg_name="aics/cardio_diff_manuscript",
-        message="FISH data consolidation",
+        dest_pkg_name="aics/integrated_transcriptomics_structural_organization_hipsc_cm",
+        message="Public data set",
+    )
+
+
+def agg_push_public():
+    aggregate_and_push(
+        PKG_MAP,
+        source_S3_url="s3://allencell-internal-quilt",
+        dest_S3_url="s3://allencell",
+        dest_pkg_name="aics/integrated_transcriptomics_structural_organization_hipsc_cm",
+        message="Public data set",
     )
 
 
