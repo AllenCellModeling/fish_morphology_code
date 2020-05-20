@@ -1,9 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
 import subprocess
 import quilt3
 import fire
+
+
+def update_quilt_readme(
+    pkg_name="calystay/probe_localization",
+    s3_bucket="s3://allencell-internal-quilt",
+    new_readme_loc=Path("data/probe_localization/README.md"),
+):
+    """Quickly update a package's README without ahving to run all the distribute code."""
+    p = quilt3.Package.browse(pkg_name, s3_bucket)
+    p.set("README.md", new_readme_loc)
+    p.push(pkg_name, s3_bucket)
 
 
 def make_pkg_maps(
