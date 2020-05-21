@@ -350,8 +350,8 @@ def widen_df(
     probe_expr_cols=[
         "napariCell_Children_seg_probe_561_Count",
         "napariCell_Children_seg_probe_638_Count",
-        "probe_561_cell_dist_nuc_per_obj_median",
-        "probe_638_cell_dist_nuc_per_obj_median"
+        "seg_561_cell_dist_nuc_per_obj_median",
+        "seg_638_cell_dist_nuc_per_obj_median"
     ],
     probe_id_cols=["probe_561", "probe_638"],
 ):
@@ -367,8 +367,8 @@ def widen_df(
         probe_638 = row["probe_638"]
         df.at[i, f"{probe_561}_count"] = row["napariCell_Children_seg_probe_561_Count"]
         df.at[i, f"{probe_638}_count"] = row["napariCell_Children_seg_probe_638_Count"]
-        df.at[i, f"{probe_561}_cell_dist_nuc_per_obj_median"] = row["probe_561_cell_dist_nuc_per_obj_median"]
-        df.at[i, f"{probe_638}_cell_dist_nuc_per_obj_median"] = row["probe_638_cell_dist_nuc_per_obj_median"]
+        df.at[i, f"{probe_561}_cell_dist_nuc_per_obj_median"] = row["seg_561_cell_dist_nuc_per_obj_median"]
+        df.at[i, f"{probe_638}_cell_dist_nuc_per_obj_median"] = row["seg_638_cell_dist_nuc_per_obj_median"]
 
     df = df.drop(probe_expr_cols + probe_id_cols, axis="columns")
 

@@ -209,15 +209,14 @@ def get_probe_localization(use_cached=False):
     )
     df_pl = fetch_df("metadata.csv", p_pl, use_cached=use_cached)
 
-    df_pl = df_pl.rename(columns={"original_fov_location": "fov_path",
-                                  "seg_561_cell_dist_nuc_per_obj_median": "probe_561_cell_dist_nuc_per_obj_median",
-                                  "seg_638_cell_dist_nuc_per_obj_median": "probe_638_cell_dist_nuc_per_obj_median"})
+    df_pl = df_pl.rename(columns={"original_fov_location": "fov_path"})
+
     df_pl = df_pl[
         [
             "fov_path",
             "napariCell_ObjectNumber",
-            "probe_561_cell_dist_nuc_per_obj_median",
-            "probe_638_cell_dist_nuc_per_obj_median",
+            "seg_561_cell_dist_nuc_per_obj_median",
+            "seg_638_cell_dist_nuc_per_obj_median",
         ]]
     df_pl["fov_path"] = df_pl["fov_path"].apply(lambda p: str(Path(p).as_posix()))
     return df_pl

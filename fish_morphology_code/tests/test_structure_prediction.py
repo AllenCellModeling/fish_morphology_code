@@ -37,7 +37,7 @@ def test_prep_human_score_regression_data(df_feats):
     df_pl = get_probe_localization(use_cached=True)
     assert len(df_pl) > 0
     df_small = df_small.merge(df_pl)
-    assert len(df_small)>0
+    assert len(df_small) > 0
     df = widen_df(df_small)
     assert len(df) > 0
     df = group_human_scores(df)
