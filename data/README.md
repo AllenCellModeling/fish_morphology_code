@@ -79,3 +79,6 @@ For questions on licensing please refer to https://www.allencell.org/terms-of-us
 
 ## Contact
 Allen Institute for Cell Science E-mail: cells@alleninstitute.org
+
+## Feedback
+Feedback on benefits and issues you discovered while using this data package is greatly appreciated. [Feedback Form](https://forms.gle/GUBC3zU5kuA8wyS17)
