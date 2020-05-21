@@ -51,7 +51,13 @@ new_df = plot_ds.merge(right=df,
                        left_on=['FOV path', 'Cell number'],
                        right_on=['original_fov_location', 'napariCell_ObjectNumber'])
 
-new_df = new_df[df.columns.values.tolist()]
+new_df = new_df[
+    ['original_fov_location',
+     'napariCell_ObjectNumber',
+     'seg_561_cell_dist_nuc_per_obj_median',
+     'seg_638_cell_dist_nuc_per_obj_median',
+     ]
+]
 
 test_df = new_df.loc[0:2]
 ds = Dataset(
