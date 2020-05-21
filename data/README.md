@@ -72,4 +72,7 @@ pkg = quilt3.Package.browse(
     "s3://allencell",
 )
 ```
-Instructions for interacting with quilt packages can be found [here](https://docs.quiltdata.com/walkthrough/getting-data-from-a-package).
+Instructions for interacting with quilt packages in Python can be found [here](https://docs.quiltdata.com/walkthrough/getting-data-from-a-package).
+
+### License
+For questions on licensing please refer to https://www.allencell.org/terms-of-use.html.
