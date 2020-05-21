@@ -217,7 +217,8 @@ def get_probe_localization(use_cached=False):
             "napariCell_ObjectNumber",
             "seg_561_cell_dist_nuc_per_obj_median",
             "seg_638_cell_dist_nuc_per_obj_median",
-        ]]
+        ]
+    ]
     df_pl["fov_path"] = df_pl["fov_path"].apply(lambda p: str(Path(p).as_posix()))
     return df_pl
 
