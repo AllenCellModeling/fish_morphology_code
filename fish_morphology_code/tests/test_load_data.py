@@ -11,6 +11,7 @@ from fish_morphology_code.analysis.plots import (
     load_main_feat_data,
     adata_manipulations,
     get_global_structure,
+    get_probe_localization,
     group_human_scores,
     make_regression_df,
     clean_probe_names,
@@ -46,11 +47,17 @@ def test_get_global_structure(df_feats):
     assert len(df_gs) > 0
 
 
+def test_get_probe_localization():
+    df_pl = get_probe_localization(use_cached=True)
+    assert len(df_pl) > 0
+
 def test_group_human_scores(df_feats):
     adata = adata_manipulations(df_feats)
     df_small = make_small_dataset(adata)
     df_gs = get_global_structure(use_cached=True)
     df_small = df_small.merge(df_gs)
+    df_pl = get_probe_localization(use_cached=True)
+    df_small = df_small.merge(df_pl)
     df = widen_df(df_small)
     df = group_human_scores(df)
     assert len(df) > 0
@@ -61,6 +68,8 @@ def test_make_regression_df(df_feats):
     df_small = make_small_dataset(adata)
     df_gs = get_global_structure(use_cached=True)
     df_small = df_small.merge(df_gs)
+    df_pl = get_probe_localization(use_cached=True)
+    df_small = df_small.merge(df_pl)
     df = widen_df(df_small)
     df = group_human_scores(df)
     df = df.rename(rename_dict, axis="columns")
@@ -74,6 +83,8 @@ def test_clean_probe_names(df_feats):
     df_small = make_small_dataset(adata)
     df_gs = get_global_structure(use_cached=True)
     df_small = df_small.merge(df_gs)
+    df_pl = get_probe_localization(use_cached=True)
+    df_small = df_small.merge(df_pl)
     df = widen_df(df_small)
     df = group_human_scores(df)
     df = df.rename(rename_dict, axis="columns")
@@ -91,6 +102,8 @@ def test_add_densities(df_feats):
     df_small = make_small_dataset(adata)
     df_gs = get_global_structure(use_cached=True)
     df_small = df_small.merge(df_gs)
+    df_pl = get_probe_localization(use_cached=True)
+    df_small = df_small.merge(df_pl)
     df = widen_df(df_small)
     df = group_human_scores(df)
     df = df.rename(rename_dict, axis="columns")

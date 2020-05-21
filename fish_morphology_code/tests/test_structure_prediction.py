@@ -14,6 +14,7 @@ from fish_morphology_code.analysis.plots import (
     load_main_feat_data,
     adata_manipulations,
     get_global_structure,
+    get_probe_localization,
     group_human_scores,
     rename_dict,
 )
@@ -33,6 +34,10 @@ def test_prep_human_score_regression_data(df_feats):
     assert len(df_gs) > 0
     df_small = df_small.merge(df_gs)
     assert len(df_small) > 0
+    df_pl = get_probe_localization(use_cached=True)
+    assert len(df_pl) > 0
+    df_small = df_small.merge(df_pl)
+    assert len(df_small)>0
     df = widen_df(df_small)
     assert len(df) > 0
     df = group_human_scores(df)
