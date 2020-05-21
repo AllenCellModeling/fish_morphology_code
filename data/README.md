@@ -54,8 +54,8 @@ pip install quilt
 and then
 ```python
 import quilt3
-b = quilt3.Bucket("s3://allencell-internal-quilt")
-b.fetch("aics/cardio_diff_manuscript/", "./")
+b = quilt3.Bucket("s3://allencell")
+b.fetch("aics/integrated_transcriptomics_structural_organization_hipsc_cm/", "./")
 ```
 
 ### Download specific files or data sets
@@ -68,8 +68,8 @@ To access the data via the python quilt API, install `quilt` via `pip`, and then
 
 ```python
 pkg = quilt3.Package.browse(
-    "aics/cardio_diff_manuscript",
-    "s3://allencell-internal-quilt",
+    "aics/integrated_transcriptomics_structural_organization_hipsc_cm",
+    "s3://allencell",
 )
 ```
 Instructions for interacting with quilt packages can be found [here](https://docs.quiltdata.com/walkthrough/getting-data-from-a-package).
