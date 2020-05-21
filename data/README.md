@@ -74,5 +74,8 @@ pkg = quilt3.Package.browse(
 ```
 Instructions for interacting with quilt packages in Python can be found [here](https://docs.quiltdata.com/walkthrough/getting-data-from-a-package).
 
-### License
+## License
 For questions on licensing please refer to https://www.allencell.org/terms-of-use.html.
+
+## Contact
+Allen Institute for Cell Science E-mail: cells@alleninstitute.org
