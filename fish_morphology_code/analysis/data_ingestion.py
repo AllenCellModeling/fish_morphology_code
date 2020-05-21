@@ -350,6 +350,8 @@ def widen_df(
     probe_expr_cols=[
         "napariCell_Children_seg_probe_561_Count",
         "napariCell_Children_seg_probe_638_Count",
+        "seg_561_cell_dist_nuc_per_obj_median",
+        "seg_638_cell_dist_nuc_per_obj_median"
     ],
     probe_id_cols=["probe_561", "probe_638"],
 ):
