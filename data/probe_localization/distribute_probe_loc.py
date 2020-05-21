@@ -47,8 +47,9 @@ ds = Dataset(
     dataset=df,
     name='probe_localization',
     package_owner='calystay',
-    readme_path=r'C:/Users/calystay/Desktop/README.md',
+    readme_path='C:/Users/calystay/Desktop/README.md',
 )
+ds.set_extra_files(['C:/Users/calystay/Desktop/probe_localization_for_plot.csv'])
 ds.set_metadata_columns(["original_fov_location"])
 ds.distribute(
     "s3://allencell-internal-quilt", message="probe localization with original_fov_location"
