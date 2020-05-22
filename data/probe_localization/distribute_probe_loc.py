@@ -53,7 +53,7 @@ plot_df = plot_df[['original_fov_location', 'napariCell_ObjectNumber',
                    'seg_561_cell_dist_nuc_per_obj_median',
                    'seg_638_cell_dist_nuc_per_obj_median']]
 
-plot_df.to_csv('C:/Users/calysta/Desktop/probe_localization_for_plot.csv')
+plot_df.to_csv('probe_localization_for_plot.csv')
 
 test_df = df.loc[0:2]
 ds = Dataset(
@@ -62,7 +62,7 @@ ds = Dataset(
     package_owner='calystay',
     readme_path='C:/Users/calystay/Desktop/README.md',
 )
-ds.set_extra_files(['C:/Users/calystay/Desktop/probe_localization_for_plot.csv'])
+ds.set_extra_files(['probe_localization_for_plot.csv'])
 ds.set_metadata_columns(["original_fov_location"])
 ds.distribute(
     "s3://allencell-internal-quilt", message="probe localization with original_fov_location"
