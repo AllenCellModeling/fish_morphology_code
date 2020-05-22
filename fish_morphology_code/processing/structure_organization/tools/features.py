@@ -83,15 +83,13 @@ def process_fov(FOVId, df_fov):
         }
 
         for key, value in features.items():
-            df_features.loc[CellId,key] = value
+            df_features.loc[CellId, key] = value
 
     cols_to_use = [c for c in df_features if c not in df_fov.columns]
 
     df = pd.merge(df_fov, df_features[cols_to_use], left_index=True, right_index=True)
 
     df.to_csv(os.path.join(source, f"fov_{FOVId}.csv"))
-
-    import pdb; pdb.set_trace()
 
     print("DONE")
 
