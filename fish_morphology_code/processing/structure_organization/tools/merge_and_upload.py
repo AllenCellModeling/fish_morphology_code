@@ -20,7 +20,7 @@ df_meta = pd.read_csv(os.path.join(ds_folder, metadata.database_path[0]), index_
 
 # FOVs that could not be read from the server
 # We shall come back to this files in the future.
-fovs_with_read_problems = [40, 135, 462]
+fovs_with_read_problems = [40, 135, 462, 2000]
 
 # Gathering results
 df = []
