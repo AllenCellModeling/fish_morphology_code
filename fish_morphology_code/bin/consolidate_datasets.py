@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 from pathlib import Path
 import subprocess
+import boto3
 import quilt3
 import fire
 
@@ -102,8 +102,6 @@ def aggregate_and_push(
     message="Public data set",
     public=False,
 ):
-    # use default to grab private data
-    os.environ["AWS_PROFILE"] = "default"
 
     # real data
     q = quilt3.Package()
@@ -125,7 +123,7 @@ def aggregate_and_push(
 
     # set profile to public bucket access if pushing public
     if public:
-        os.environ["AWS_PROFILE"] = "allencell"
+        boto3.setup_default_session(profile_name="allencell")
 
     q.push(dest_pkg_name, dest_S3_url, message=label)
 
