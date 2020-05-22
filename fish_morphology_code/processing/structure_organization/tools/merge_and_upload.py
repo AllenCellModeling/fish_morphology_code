@@ -235,8 +235,8 @@ df = df[selected_features]
 features_rename = [
     {key: value["name"]}
     for f in metadata
-        for key, value in f.items()
-            if value["name"] is not None
+    for key, value in f.items()
+    if value["name"] is not None
 ]
 
 for feature in features_rename:
