@@ -24,6 +24,7 @@ fovs_with_read_problems = [40, 135, 462]
 
 # Gathering results
 df = []
+
 for FOVId in tqdm(df_meta.index):
 
     if FOVId not in fovs_with_read_problems:
