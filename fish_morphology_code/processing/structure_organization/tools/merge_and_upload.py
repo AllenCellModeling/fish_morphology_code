@@ -267,6 +267,7 @@ ds = Dataset(
     readme_path="assay-dev-fish.md",
 )
 
+# Set metadata and path columns
 ds.set_metadata_columns(["CellId"])
 ds.set_path_columns(["result_image_path"])
 
