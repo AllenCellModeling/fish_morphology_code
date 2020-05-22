@@ -103,6 +103,8 @@ def aggregate_and_push(
     public=False,
 ):
 
+    internal = boto3.session.Session(profile_name="default")  # noqa: F841
+
     # real data
     q = quilt3.Package()
     q.set("README.md", "../../data/README.md")
@@ -123,7 +125,7 @@ def aggregate_and_push(
 
     # set profile to public bucket access if pushing public
     if public:
-        boto3.setup_default_session(profile_name="allencell")
+        external = boto3.session.Session(profile_name="allencell")  # noqa: F841
 
     q.push(dest_pkg_name, dest_S3_url, message=label)
 
