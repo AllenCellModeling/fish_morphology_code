@@ -1,6 +1,8 @@
 import pandas as pd
 import quilt3
 from quilt3distribute import Dataset
+from fish_morphology_code.analysis.collate_plot_dataset import collate_plot_dataset
+
 
 df = pd.read_csv('/allen/aics/microscopy/Calysta/test/fish_struc_seg/dist_radon_transform_all.csv')
 
@@ -16,6 +18,7 @@ df_feat_inds.drop_duplicates()
 plates_date = {'20190807': '5500000013',
                '20190816': '5500000014'}
 
+plot_ds = collate_plot_dataset()
 
 def convert_original_fov_location_to_img_name(original_fov_location, plates_date):
     file_name = original_fov_location.split('/')[-1]
@@ -41,6 +44,16 @@ for index, row in df.iterrows():
     image_name = row['image_name']
     location = list(set(df_feat_inds.loc[df_feat_inds['image_name'] == image_name, 'original_fov_location']))[0]
     df.loc[index, 'original_fov_location'] = location
+
+plot_df = new_df = plot_ds.merge(right=df,
+                       left_on=['FOV path', 'Cell number'],
+                       right_on=['original_fov_location', 'napariCell_ObjectNumber'])
+
+plot_df = plot_df[['original_fov_location', 'napariCell_ObjectNumber',
+                   'seg_561_cell_dist_nuc_per_obj_median',
+                   'seg_638_cell_dist_nuc_per_obj_median']]
+
+plot_df.to_csv('C:/Users/calysta/Desktop/probe_localization_for_plot.csv')
 
 test_df = df.loc[0:2]
 ds = Dataset(
