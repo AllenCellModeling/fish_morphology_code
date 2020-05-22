@@ -171,7 +171,9 @@ def adata_manipulations(df_feats, rename_dict=rename_dict):
 
 def get_global_structure(rename_dict=rename_dict, use_cached=False):
     p_gs = quilt3.Package.browse(
-        "matheus/assay_dev_fish_analysis", "s3://allencell-internal-quilt"
+        "matheus/assay_dev_fish_analysis",
+        "s3://allencell-internal-quilt",
+        top_hash="1a4c248a0913feb5f1114a5f46560d90094c1f9dce6fbd3e48882c0fddd9f394",
     )
     df_gs = df_gs = fetch_df("metadata.csv", p_gs, use_cached=use_cached).drop(
         "Unnamed: 0", axis="columns"
