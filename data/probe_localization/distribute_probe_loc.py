@@ -45,9 +45,9 @@ for index, row in df.iterrows():
     location = list(set(df_feat_inds.loc[df_feat_inds['image_name'] == image_name, 'original_fov_location']))[0]
     df.loc[index, 'original_fov_location'] = location
 
-plot_df = new_df = plot_ds.merge(right=df,
-                       left_on=['FOV path', 'Cell number'],
-                       right_on=['original_fov_location', 'napariCell_ObjectNumber'])
+plot_df = plot_ds.merge(right=df,
+                        left_on=['FOV path', 'Cell number'],
+                        right_on=['original_fov_location', 'napariCell_ObjectNumber'])
 
 plot_df = plot_df[['original_fov_location', 'napariCell_ObjectNumber',
                    'seg_561_cell_dist_nuc_per_obj_median',
