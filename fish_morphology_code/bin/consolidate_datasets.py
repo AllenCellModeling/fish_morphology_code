@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 from pathlib import Path
 import subprocess
 import quilt3
@@ -99,7 +100,11 @@ def aggregate_and_push(
     dest_S3_url="s3://allencell",
     dest_pkg_name="aics/integrated_transcriptomics_structural_organization_hipsc_cm",
     message="Public data set",
+    public=False,
 ):
+    # use default to grab private data
+    os.environ["AWS_PROFILE"] = "default"
+
     # real data
     q = quilt3.Package()
     q.set("README.md", "../../data/README.md")
@@ -117,6 +122,10 @@ def aggregate_and_push(
         subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
     )
     label = f"{message}. git commit hash of fish_morphology_code = {git_commit_hash}."
+
+    # set profile to public bucket access if pushing public
+    if public:
+        os.environ["AWS_PROFILE"] = "allencell"
 
     q.push(dest_pkg_name, dest_S3_url, message=label)
 
@@ -151,6 +160,7 @@ def agg_push_public():
         dest_S3_url="s3://allencell",
         dest_pkg_name="aics/integrated_transcriptomics_structural_organization_hipsc_cm",
         message="Public data set",
+        public=True,
     )
 
 
