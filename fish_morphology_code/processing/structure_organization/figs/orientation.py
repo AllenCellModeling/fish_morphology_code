@@ -3,17 +3,12 @@ import lmfit
 import argparse
 import numpy as np
 import pandas as pd
-from quilt3 import Package
 from skimage import io as skio
 from skimage import feature as skfeature
 from matplotlib import cm, pyplot
 
 
-def get_cropped_cell(input_img, input_msk=None):
-
-    """
-    Extracts a cell out a FOV based on the segmentation mask
-    """
+def GetCroppedCell(input_img, input_msk=None):
 
     if input_msk is None:
         [y, x] = np.nonzero(input_img)
@@ -33,12 +28,7 @@ def get_cropped_cell(input_img, input_msk=None):
     return crop.astype(np.uint16)
 
 
-def quantize_image(input_img, nlevels=8):
-
-    """
-    Quantize the pixels intensity in nlevels for orientation
-    calculation.
-    """
+def QuantizeImage(input_img, nlevels=8):
 
     vmax = input_img.max()
 
@@ -57,32 +47,32 @@ def quantize_image(input_img, nlevels=8):
     return input_dig
 
 
-def exp_decay_func(x, a):
+def ExpDecay(x, a):
     return np.exp(-a * x ** 2)
 
 
-def analyze_orientation(
+def AnalyzeOrientation(
     raw,
     mask,
     CellLabel,
     nlevels=8,
     dmax=32,
     nangles=16,
-    decay_value=0.5,
+    expdecay=0.5,
     plot=True,
     save_fig=None,
 ):
 
     """
-    This combination of default parameters display the best performance in ranking
-    10 cells by CV compared to manual ranking.
+        This combination of parameters display the best performance in ranking
+        10 cells by CV compared to manual ranking.
     """
 
     dists = np.linspace(0, dmax, dmax + 1)
     angles = np.linspace(0, np.pi, nangles)
 
-    crop = get_cropped_cell(raw * (mask == CellLabel))
-    crop = quantize_image(crop, nlevels=nlevels)
+    crop = GetCroppedCell(raw * (mask == CellLabel))
+    crop = QuantizeImage(crop, nlevels=nlevels)
 
     glcm = skfeature.texture.greycomatrix(
         image=crop, distances=dists, angles=angles, levels=nlevels + 1
@@ -100,8 +90,8 @@ def analyze_orientation(
 
     for i, curve in enumerate(corr):
         z = (
-            lmfit.Model(exp_decay_func)
-            .fit(curve, x=dists, a=0.005, weights=np.exp(-decay_value * dists))
+            lmfit.Model(ExpDecay)
+            .fit(curve, x=dists, a=0.005, weights=np.exp(-expdecay * dists))
             .best_fit
         )
         corr_fit[i] = z
@@ -115,7 +105,6 @@ def analyze_orientation(
 
     if plot:
 
-        # Whether or not to show the result
         fontsize = 16
 
         colormap = cm.get_cmap("cool", len(angles))
@@ -138,7 +127,7 @@ def analyze_orientation(
             name = f"{180*angles[i]/np.pi:1.0f}°"
 
             ax[0, 1].plot(
-                dists,
+                0.12 * dists,
                 curve,
                 color=colormap(i / (len(angles) - 1))
                 if i != hpeak_angle_pos
@@ -146,37 +135,42 @@ def analyze_orientation(
                 label=name,
                 linewidth=1 if i != hpeak_angle_pos else 2,
             )
-            ax[0, 1].plot(dists, curve_fit, "--", color=colormap(i / (len(angles) - 1)))
+            ax[0, 1].plot(
+                0.12 * dists, curve_fit, "--", color=colormap(i / (len(angles) - 1))
+            )
             ax[1, 0].plot(
-                dists,
+                0.12 * dists,
                 curve_reg,
                 color=colormap(i / (len(angles) - 1))
                 if i != hpeak_angle_pos
                 else "black",
                 linewidth=1 if i != hpeak_angle_pos else 2,
             )
-            ax[1, 0].axvline(x=hpeak_dist_pos, linestyle="--", color="black")
+            ax[1, 0].axvline(x=0.12 * hpeak_dist_pos, linestyle="--", color="black")
             ax[1, 0].axhline(y=hpeak, linestyle="--", color="black")
 
-        ax[0, 1].set_xlabel("Distance (pixels)", fontsize=fontsize)
-        ax[0, 1].set_ylabel("Correlation", fontsize=fontsize)
+        ax[0, 1].set_xlabel("Offset distance (µm)", fontsize=fontsize)
+        ax[0, 1].set_ylabel("Haralick correlation", fontsize=fontsize)
         ax[0, 1].legend(bbox_to_anchor=(1.01, 1.05))
 
         ax[1, 0].set_title(
-            f"Peak value: {hpeak:1.3f} at distance: {hpeak_dist} (pixels) for angle {hpeak_angle:1.1f}°"
+            f"Peak value: {hpeak:1.3f} at distance: {0.12*hpeak_dist} (µm) for angle {hpeak_angle:1.1f}°"
         )
-        ax[1, 0].set_xlabel("Distance (pixels)", fontsize=fontsize)
-        ax[1, 0].set_ylabel("Correlation - exponetial fitting", fontsize=fontsize)
+        ax[1, 0].set_xlabel("Offset distance (µm)", fontsize=fontsize)
+        ax[1, 0].set_ylabel(
+            "Haralick correlation with\nexponetial decay removed", fontsize=fontsize
+        )
+        ax[1, 0].set_ylim(0, 1)
 
-        ax[1, 1].plot(dists, avg_corr, color="red", label="mean (reg)")
-        ax[1, 1].plot(dists, cvr_corr, color="blue", label="cv")
+        ax[1, 1].plot(0.12 * dists, avg_corr, color="red", label="mean (reg)")
+        ax[1, 1].plot(0.12 * dists, cvr_corr, color="blue", label="cv")
         ax[1, 1].set_title(f"Maximum coefficient of variation: {cvr_corr.max():1.3f}")
-        ax[1, 1].set_xlabel("Distance (pixels)", fontsize=fontsize)
+        ax[1, 1].set_xlabel("Offset distance (µm)", fontsize=fontsize)
         ax[1, 1].set_ylim(0, 1)
         ax[1, 1].legend()
 
         ax3 = ax[1, 1].twinx()
-        ax3.plot(dists, std_corr, color="black")
+        ax3.plot(0.12 * dists, std_corr, color="black")
         ax3.set_ylim(0, std_corr.max())
         ax3.set_ylabel("StDev", fontsize=fontsize)
 
@@ -188,61 +182,64 @@ def analyze_orientation(
             pyplot.close(fig)
 
     return {
-        "Maximum_Coefficient_Variation": cvr_corr.max(),
-        "Peak_Height": hpeak,
-        "Peak_Distance": hpeak_dist,
-        "Peak_Angle": hpeak_angle,
+        "MaxCoeffVar": cvr_corr.max(),
+        "HPeak": hpeak,
+        "PeakDistance": hpeak_dist,
+        "PeakAngle": hpeak_angle,
     }
 
 
-def process_fov(FOVId, df_fov):
+def ProcessFOV(FOVId, df_fov):
 
-    filename = f"../output/fov_{FOVId}.tif"
+    source = "/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/output/"
+
+    filename = os.path.join(source, f"data_output_fov_{FOVId}_bkgrd.tif")
 
     data = skio.imread(filename)
+
+    mask = skio.imread(df_fov.MaskFileName.values[0])
 
     df_or = pd.DataFrame()
     for CellLabel in df_fov.index:
         s = pd.Series(
-            analyze_orientation(
-                raw=data[0], mask=data[-1], CellLabel=CellLabel, plot=False
+            AnalyzeOrientation(
+                raw=data[0], mask=mask[-1], CellLabel=CellLabel, plot=False
             ),
             name=CellLabel,
         )
         df_or = df_or.append(s)
 
-    df_or.index = df_or.index.rename('CellId')
-    df_or.to_csv(filename.replace(".tif", ".csv"))
+    #
+    # Concatenate CNN predictions, Radon angle map and single cells masks. Save reesult
+    #
+
+    data_final = np.vstack([data, mask[-1:]]).astype(np.float32)
+
+    save_name = filename.replace("data_output_", "").replace("_bkgrd", "")
+
+    df_or.to_csv(save_name.replace(".tif", ".orientation"))
+    skio.imsave(save_name, data_final)
 
 
 if __name__ == "__main__":
 
+    #
     # Get FOV id
+    #
+
     parser = argparse.ArgumentParser(
         description="Runs Radon analysis on a particular FOV"
     )
     parser.add_argument("--fov", help="Full path to FOV", required=True)
     args = vars(parser.parse_args())
-    FOVId = int(args["fov"])
 
-    # Downlaod the datasets from Quilt if there is no local copy
-    ds_folder = "../database/"
+    #
+    # Run FOV
+    #
 
-    if not os.path.exists(os.path.join(ds_folder, "metadata.csv")):
+    df_fov = pd.read_csv("database/database.csv", index_col=1)
 
-        pkg = Package.browse(
-            "matheus/assay_dev_datasets", "s3://allencell-internal-quilt"
-        ).fetch(ds_folder)
-
-    metadata = pd.read_csv(os.path.join(ds_folder, "metadata.csv"))
-
-    df_fov = pd.read_csv(
-        os.path.join(ds_folder, metadata.database_path[0]), index_col=1
-    )
-
-    df_cell = pd.read_csv(os.path.join(ds_folder, metadata.cell_database_path[0]))
-
-    # Merge dataframes
+    df_cell = pd.read_csv("database/cell_database.csv")
 
     df_cell["FOVId"] = df_fov.loc[df_cell.RawFileName].FOVId.values
 
@@ -250,5 +247,6 @@ if __name__ == "__main__":
 
     df_cell = df_cell.sort_index()
 
-    # Run FOV
-    process_fov(FOVId=FOVId, df_fov=df_cell.loc[(FOVId,)])
+    FOVId = int(args["fov"])
+
+    ProcessFOV(FOVId=FOVId, df_fov=df_cell.loc[(FOVId,)])

@@ -58,6 +58,8 @@ if not os.path.exists("../results/"):
     os.makedirs("../results/")
 df.set_index(["CellId"]).to_csv("../results/AssayDevFishAnalsysis2020.csv")
 
+import pdb; pdb.set_trace()
+
 # -------------------------------------------------------------------------------------------------
 # Upload results to Quilt
 # -------------------------------------------------------------------------------------------------
