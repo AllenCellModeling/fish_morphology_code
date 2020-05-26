@@ -2,13 +2,12 @@
 
 [![Build Status](https://github.com/AllenCellModeling/fish_morphology_code/workflows/Build%20Master/badge.svg)](https://github.com/AllenCellModeling/fish_morphology_code/actions)
 
-data ingestion, processing, and analysis for cardio/FISH project
+Data ingestion, processing, and analysis code for _Cell states beyond transcriptomics: integrating structural organization and gene expression in hiPSC-derived cardiomyocytes_ `<insert bioarxiv link here>`
 
 ---
 
-
 ## Installation
-Recommended installation procedure is to create a conda environment and then pip install into that environment.
+The recommended installation procedure is to create a conda environment and then pip install into that environment.
 
 ### Normal users
 Clone this repository, then
@@ -27,61 +26,18 @@ pre-commit install
 ```
 
 ## Downloading the data
-The data for this project lives in a quilt package backed by a private S3 bucket (`s3://allencell-internal-quilt`).
-To download it you need aws credentials to that bucket: ask [@cdw]( https://github.com/cdw ) or someone on software.
-You can access all the data as normal through quilt, but this repo provides convenience functions to download the data from the command line (explained more below):
+See the open data release (produced by this code) for instructions to download the data:
+https://open.quiltdata.com/b/allencell/tree/aics/integrated_transcriptomics_structural_organization_hipsc_cm/
 
- - `download_2D_segs [--test=True]`
- - `download_2D_contrasted [--test=True]`
- - `download_2D_features [--test=True]`
- - `download_ML_struct_scores`
- - `download_scrnaseq [--test=True]`
+## Notes on using the code
 
-### Un-normalized 2D tiffs
-These images are maximum intensity projections of the data as it came off the microscope, plus some segmentations masks.
-The images in this dataset are 16 bits.
-To get the whole dataset (~9 GB) of all 478 fields:
-```
-download_2D_segs
-```
-This will download the dataset to the `quilt_data` directory.
-Use `--test=True` to download only two sample fields to the `quilt_data_test` directory.
-
-### Normalized (autocontrasted) 2D tiffs
-These images are autocontrasted versions of the above tiffs, using code in this repo, as well as single cell segmentated images of the fields using their segmentaitons masks.
-The images in this dataset are 8 bits.
-To get the whole dataset (~7 GB) of all 478 fields:
-```
-download_2D_contrasted
-```
-This will download the dataset to the `2d_autocontrasted_fields_and_single_cells` directory.
-Use `--test=True` to download only two sample fields + single cells to the `2d_autocontrasted_fields_and_single_cells_test` directory.
-
-### Single cell features from normalized (autocontrasted) 2D tiffs
-The features in this dataset are computed on the single cell images in the 8-bit normalized (aurocontrasted) tiff dataset, using the cellprofiler pipeline in this repo.
-To get the whole dataset (~100 MB) of features on singles cells from all 478 fields:
-```
-download_2D_features
-```
-This will download the dataset to the `quilt_data_features` directory.
-Use `--test=True` to download only two sample fields + single cells to the `quilt_data_features_test` directory.
-
-### Single cell RNA sequencing from cells in related conditions
-Split-seq single cell transcriptomics on 21864 cells, quantifying the abundance of 38216 unique transcipts in the cells.
-To get the whole dataset (~4 GB):
-```
-download_scrnaseq
-```
-This will download the dataset to the `quilt_data_scrnaseq` directory.
-Use `--test=True` to download counts for only 10 cells (~6 MB) to the `quilt_data_scrnaseq_test` directory.
-
-## Running the auto-contrasting code
+### Running the auto-contrasting code
 To run the image normalization code, from the main repo dir:
 ```
 contrast_and_segment quilt_data/metadata.csv quilt_data/supporting_files/channel_defs.json --out_dir=output_data
 ```
 
-## Running cellprofiler to calculate single cell shape and texture features
+### Running cellprofiler to calculate single cell shape and texture features
 
 Before running cellprofiler, download auto-contrasted images from quilt (ex. ```download_2D_contrasted --test=True```) into current working directory. 
 
@@ -115,7 +71,7 @@ module load anaconda3
 source activate cellprofiler-3.1.8
 ```
 
-## Merge single cell features calculated by cellprofiler and image metadata
+### Merge single cell features calculated by cellprofiler and image metadata
 To merge features, also need these files from repo:
 1. **fov metadata:** ```data/input_segs_and_tiffs/labkey_fov_metadata.csv```)
 2. **structure scores with fov id:** ```data/structure_scores_fov.csv```
@@ -132,27 +88,13 @@ merge_cellprofiler_output \
 
 ```
 
-## Running the tests
+### Running the tests
 To run the `pytest` tests defined in `fish_morphology_code/tests` via `tox`, use
 ```
 make build
 ```
 This will take a while the first time setting up the test environment.
 
-## Uploading data to quilt
+### Uploading data to quilt
 Uploading to quilt should happen infrequently so all the code has been put in the `data` directory outside of the main `fish_morphology_code` library.
-All uploading can be down in the `data` directory using `python distribute_<your_dataset>.py`
-
-### Un-normalized 2D tiffs
-To upload a new version of the un-normalized 2D fovs, from the `data` directory:
-```
-python distribute_seg_dataset.py
-```
-
-### Normalized 2D tiffs
-To upload a new version of the normalized (autocontrasted) 2D fovs + single cell images, from the `data` directory:
-```
-python distribute_autocontrasted_dataset.py
-```
-
-
+All uploading can be down in the `data` directory using `python distribute_<your_dataset>.py`.
