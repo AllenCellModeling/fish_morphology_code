@@ -26,8 +26,8 @@ pre-commit install
 ```
 
 ## Downloading the data
-See the open data release (produced by this code) for instructions to download the data:
-https://open.quiltdata.com/b/allencell/tree/aics/integrated_transcriptomics_structural_organization_hipsc_cm/
+See the [open data release](https://open.quiltdata.com/b/allencell/tree/aics/integrated_transcriptomics_structural_organization_hipsc_cm/
+) (produced by this code) for instructions to download the data:
 
 ## Notes on using the code
 
