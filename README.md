@@ -96,5 +96,5 @@ make build
 This will take a while the first time setting up the test environment.
 
 ### Uploading data to quilt
-Uploading to quilt should happen infrequently so all the code has been put in the `data` directory outside of the main `fish_morphology_code` library.
-All uploading can be down in the `data` directory using `python distribute_<your_dataset>.py`.
+Uploading to quilt should happen infrequently, so all the code has been put in the `data` directory outside of the main `fish_morphology_code` library.
+All uploading can be done in the `data` directory using `python distribute_<your_dataset>.py`.
