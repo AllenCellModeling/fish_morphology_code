@@ -1,6 +1,6 @@
 # Data set for _Cell states beyond transcriptomics: integrating structural organization and gene expression in hiPSC-derived cardiomyocytes_
 
-This data package contains the input data for all analyses in the manuscript `<insert bioarxiv link here>` in a compute-friendly form.
+This data package contains the input data for all analyses in the manuscript [_Cell states beyond transcriptomics: integrating structural organization and gene expression in hiPSC-derived cardiomyocytes_](https://www.biorxiv.org/content/10.1101/2020.05.26.081083v1) in a compute-friendly form.
 Not all of these data were used in the manuscript, but all of the data used in the manuscript are included here.
 
 ## Overview
@@ -73,6 +73,21 @@ pkg = quilt3.Package.browse(
 )
 ```
 Instructions for interacting with quilt packages in Python can be found [here](https://docs.quiltdata.com/walkthrough/getting-data-from-a-package).
+
+## Citation
+```
+@article {Gerbin2020.05.26.081083,
+	author = {Gerbin, Kaytlyn A and Grancharova, Tanya and Donovan-Maiye, Rory and Hendershott, Melissa C and Brown, Jackson and Dinh, Stephanie Q and Gehring, Jamie L and Hirano, Matthew and Johnson, Gregory R and Nath, Aditya and Nelson, Angelique and Roco, Charles M and Rosenberg, Alex B and Sluzewski, M Filip and Viana, Matheus P and Yan, Calysta and Zaunbrecher, Rebecca J and Cordes Metzler, Kimberly R and Menon, Vilas and Palecek, Sean P and Seelig, Georg and Gaudreault, Nathalie and Knijnenburg, Theo and Rafelski, Susanne M and Theriot, Julie A and Gunawardane, Ruwanthi N},
+	title = {Cell states beyond transcriptomics: integrating structural organization and gene expression in hiPSC-derived cardiomyocytes},
+	elocation-id = {2020.05.26.081083},
+	year = {2020},
+	doi = {10.1101/2020.05.26.081083},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2020/05/27/2020.05.26.081083},
+	eprint = {https://www.biorxiv.org/content/early/2020/05/27/2020.05.26.081083.full.pdf},
+	journal = {bioRxiv}
+}
+```
 
 ## License
 For questions on licensing please refer to https://www.allencell.org/terms-of-use.html.
