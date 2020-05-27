@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/AllenCellModeling/fish_morphology_code/workflows/Build%20Master/badge.svg)](https://github.com/AllenCellModeling/fish_morphology_code/actions)
 
-Data ingestion, processing, and analysis code for _Cell states beyond transcriptomics: integrating structural organization and gene expression in hiPSC-derived cardiomyocytes_ `<insert bioarxiv link here>`
+Data ingestion, processing, and analysis code for [_Cell states beyond transcriptomics: integrating structural organization and gene expression in hiPSC-derived cardiomyocytes_](https://www.biorxiv.org/content/10.1101/2020.05.26.081083v1)
 
 ---
 
@@ -98,3 +98,19 @@ This will take a while the first time setting up the test environment.
 ### Uploading data to quilt
 Uploading to quilt should happen infrequently, so all the code has been put in the `data` directory outside of the main `fish_morphology_code` library.
 All uploading can be done in the `data` directory using `python distribute_<your_dataset>.py`.
+
+## Citation
+
+```
+@article {Gerbin2020.05.26.081083,
+	author = {Gerbin, Kaytlyn A and Grancharova, Tanya and Donovan-Maiye, Rory and Hendershott, Melissa C and Brown, Jackson and Dinh, Stephanie Q and Gehring, Jamie L and Hirano, Matthew and Johnson, Gregory R and Nath, Aditya and Nelson, Angelique and Roco, Charles M and Rosenberg, Alex B and Sluzewski, M Filip and Viana, Matheus P and Yan, Calysta and Zaunbrecher, Rebecca J and Cordes Metzler, Kimberly R and Menon, Vilas and Palecek, Sean P and Seelig, Georg and Gaudreault, Nathalie and Knijnenburg, Theo and Rafelski, Susanne M and Theriot, Julie A and Gunawardane, Ruwanthi N},
+	title = {Cell states beyond transcriptomics: integrating structural organization and gene expression in hiPSC-derived cardiomyocytes},
+	elocation-id = {2020.05.26.081083},
+	year = {2020},
+	doi = {10.1101/2020.05.26.081083},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2020/05/27/2020.05.26.081083},
+	eprint = {https://www.biorxiv.org/content/early/2020/05/27/2020.05.26.081083.full.pdf},
+	journal = {bioRxiv}
+}
+```
