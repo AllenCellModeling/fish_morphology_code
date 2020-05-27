@@ -61,7 +61,7 @@ b.fetch("aics/integrated_transcriptomics_structural_organization_hipsc_cm/", "./
 ### Download specific files or data sets
 To download only certain individual files, navigate the web ui here to the specific file you are interested in, and use the `DOWNLOAD FILE` button in the upper right of the page.
 
-To download specific folders/directories of data, similarly use the web ui to fin the directory you want, and check the `<> CODE` tab at the top of the page for the python code that downloads that specific subset of data.
+To download specific folders/directories of data, similarly use the web ui to find the directory you want, and check the `<> CODE` tab at the top of the page for the python code that downloads that specific subset of data.
 
 ### Programmatic access
 To access the data via the python quilt API, install `quilt` via `pip`, and then load the package with:
