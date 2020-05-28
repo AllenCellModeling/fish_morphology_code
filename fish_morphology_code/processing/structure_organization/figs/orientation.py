@@ -249,4 +249,4 @@ if __name__ == "__main__":
 
     FOVId = int(args["fov"])
 
-    ProcessFOV(FOVId=FOVId, df_fov=df_cell.loc[(FOVId,)])
+    process_fov(FOVId=FOVId, df_fov=df_cell.loc[(FOVId,)])
