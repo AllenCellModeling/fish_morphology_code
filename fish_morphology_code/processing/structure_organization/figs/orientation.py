@@ -8,7 +8,7 @@ from skimage import feature as skfeature
 from matplotlib import cm, pyplot
 
 
-def GetCroppedCell(input_img, input_msk=None):
+def get_cropped_cell(input_img, input_msk=None):
 
     if input_msk is None:
         [y, x] = np.nonzero(input_img)
