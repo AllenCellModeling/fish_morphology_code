@@ -72,7 +72,7 @@ def analyze_orientation(
     angles = np.linspace(0, np.pi, nangles)
 
     crop = get_cropped_cell(raw * (mask == CellLabel))
-    crop = QuantizeImage(crop, nlevels=nlevels)
+    crop = quantize_image(crop, nlevels=nlevels)
 
     glcm = skfeature.texture.greycomatrix(
         image=crop, distances=dists, angles=angles, levels=nlevels + 1
