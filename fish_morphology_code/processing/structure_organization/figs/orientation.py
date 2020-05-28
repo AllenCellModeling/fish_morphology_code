@@ -47,7 +47,7 @@ def QuantizeImage(input_img, nlevels=8):
     return input_dig
 
 
-def ExpDecay(x, a):
+def exp_decay(x, a):
     return np.exp(-a * x ** 2)
 
 
