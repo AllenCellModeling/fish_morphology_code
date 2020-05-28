@@ -189,7 +189,7 @@ def AnalyzeOrientation(
     }
 
 
-def ProcessFOV(FOVId, df_fov):
+def process_fov(FOVId, df_fov):
 
     source = "/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/output/"
 
