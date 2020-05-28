@@ -202,7 +202,7 @@ def process_fov(FOVId, df_fov):
     df_or = pd.DataFrame()
     for CellLabel in df_fov.index:
         s = pd.Series(
-            AnalyzeOrientation(
+            analyze_orientation(
                 raw=data[0], mask=mask[-1], CellLabel=CellLabel, plot=False
             ),
             name=CellLabel,
