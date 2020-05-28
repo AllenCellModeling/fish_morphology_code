@@ -51,7 +51,7 @@ def ExpDecay(x, a):
     return np.exp(-a * x ** 2)
 
 
-def AnalyzeOrientation(
+def analyze_orientation(
     raw,
     mask,
     CellLabel,
