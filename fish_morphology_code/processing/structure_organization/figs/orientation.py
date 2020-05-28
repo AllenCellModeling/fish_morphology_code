@@ -28,7 +28,7 @@ def GetCroppedCell(input_img, input_msk=None):
     return crop.astype(np.uint16)
 
 
-def QuantizeImage(input_img, nlevels=8):
+def quantize_image(input_img, nlevels=8):
 
     vmax = input_img.max()
 
