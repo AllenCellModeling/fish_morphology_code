@@ -20,11 +20,11 @@ matplotlib.rcParams["font.family"] = "sans-serif"
 
 
 # color config
-day_18_color = "#0098EA"
-day_32_color = "#FFB2FF"
-day_colors = [day_18_color, day_32_color]
-day_color_palette = sns.color_palette(day_colors)
-day_color_palette_three = sns.color_palette(day_colors + ["grey"])
+DAY_18_COLOR = "#0098EA"
+DAY_32_COLOR = "#FFB2FF"
+DAY_COLORS = [DAY_18_COLOR, DAY_32_COLOR]
+DAY_COLOR_PALETTE = sns.color_palette(DAY_COLORS)
+DAY_COLOR_PALETTE_THREE = sns.color_palette(DAY_COLORS + ["grey"])
 
 
 # columns / facet definitons and order
@@ -231,7 +231,7 @@ def make_regression_scatter_plot(
     dims=(4, 4),
     hue="Cell age",
     hue_order=[18, 32],
-    palette=day_color_palette,
+    palette=DAY_COLOR_PALETTE,
     title="",
 ):
     """standardized scatterplot for regressions , comparing ground truth to predictions"""
