@@ -21,14 +21,14 @@ def process_fov(FOVId, df_fov):
     ch_cla = 6
     ch_msk = 7
 
-    df_features = []
-
     source = "../output/"
 
     data = skio.imread(os.path.join(source, f"fov_{FOVId}.tif"))
 
     # Load global structural alignment features
-    df_align = pd.read_csv(os.path.join(source, f"fov_{FOVId}.csv"), index_col=0)
+    df_features = pd.read_csv(os.path.join(source, f"fov_{FOVId}.csv"), index_col=0)
+
+    # df_features = df_features.set_index('CellId', drop=True)
 
     # Calculate local structure organization features and merge
     for CellId in tqdm(df_fov.index):
@@ -39,7 +39,7 @@ def process_fov(FOVId, df_fov):
         total_area = mask.sum()
 
         # Classification results from CNN classifier
-        classification = data[ch_cla].astype(np.uint8) - 1
+        classification = data[ch_cla].astype(np.uint8)
 
         # Total number of classes is 5 + background (0)
         covered_area = np.bincount(classification[mask > 0].flatten(), minlength=6)
@@ -63,8 +63,6 @@ def process_fov(FOVId, df_fov):
 
         # Dict for features
         features = {
-            "FOVId": FOVId,
-            "CellId": CellId,
             "Total_Area": total_area,
             "Frac_Area_Background": covered_area[0],
             "Frac_Area_DiffuseOthers": covered_area[1],
@@ -84,13 +82,12 @@ def process_fov(FOVId, df_fov):
             "Background_Value": background_intensity,
         }
 
-        features.update(df_align.loc[CellId].to_dict())
+        for key, value in features.items():
+            df_features.loc[CellId, key] = value
 
-        df_features.append(features)
+    cols_to_use = [c for c in df_features if c not in df_fov.columns]
 
-    df_features = pd.DataFrame(df_features).set_index(["FOVId", "CellId"])
-
-    df = pd.merge(df_fov, df_features, left_index=True, right_index=True)
+    df = pd.merge(df_fov, df_features[cols_to_use], left_index=True, right_index=True)
 
     df.to_csv(os.path.join(source, f"fov_{FOVId}.csv"))
 
@@ -118,19 +115,19 @@ if __name__ == "__main__":
 
     metadata = pd.read_csv(os.path.join(ds_folder, "metadata.csv"))
 
-    df_fov = pd.read_csv(
+    df_meta_fov = pd.read_csv(
         os.path.join(ds_folder, metadata.database_path[0]), index_col=1
     )
 
-    df_cell = pd.read_csv(os.path.join(ds_folder, metadata.cell_database_path[0]))
+    df_meta_cell = pd.read_csv(os.path.join(ds_folder, metadata.cell_database_path[0]))
 
     # Merge dataframes
 
-    df_cell["FOVId"] = df_fov.loc[df_cell.RawFileName].FOVId.values
+    df_meta_cell["FOVId"] = df_meta_fov.loc[df_meta_cell.RawFileName].FOVId.values
 
-    df_cell = df_cell.set_index(["FOVId", "CellId"])
+    df_meta_cell = df_meta_cell.set_index(["FOVId", "CellId"])
 
-    df_cell = df_cell.sort_index()
+    df_meta_cell = df_meta_cell.sort_index()
 
     # Run FOV
-    process_fov(FOVId=FOVId, df_fov=df_cell.loc[(FOVId,)])
+    process_fov(FOVId=FOVId, df_fov=df_meta_cell.loc[(FOVId,)])

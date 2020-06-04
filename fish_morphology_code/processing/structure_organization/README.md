@@ -124,10 +124,6 @@ cd tools
 python merge_and_upload.py
 ```
 
-# 5 - Extra figures
-
-Jupyter notebooks can be found in the folder `figs/` to help reproduce some of the figures used in the paper
-
 # References
 
 [1] - Chen J, Ding L, Viana MP, Hendershott MC, Yang R, Mueller IA, Rafelski SM. The Allen Cell Structure Segmenter: a new open source toolkit for segmenting 3D intracellular structures in fluorescence microscopy images. bioRxiv. 2018 Jan 1:491035.

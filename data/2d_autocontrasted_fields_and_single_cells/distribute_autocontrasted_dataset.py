@@ -5,15 +5,11 @@ from quilt3distribute import Dataset
 from quilt3distribute.validation import validate
 
 
-def distribute_seg_dataset(
+def distribute_autocontrasted_dataset(
     test=False,
-    csv_loc="input_segs_and_tiffs/raw_seg_013_014_images.csv",
-    col_name_map={
-        "fov_path": "original_fov_location",
-        "FOVId": "fov_id",
-        "seg_file_name": "2D_fov_tiff_path",
-    },
-    dataset_name="2d_segmented_fields",
+    csv_loc="../../output_data/output_image_manifest.csv",
+    col_name_map={},
+    dataset_name="2d_autocontrasted_fields_and_single_cells",
     package_owner="rorydm",
     s3_bucket="s3://allencell-internal-quilt",
 ):
@@ -23,6 +19,9 @@ def distribute_seg_dataset(
 
     # rename some cols
     df = df.rename(col_name_map, axis="columns")
+    df = df.drop(["2D_fov_tiff_path"], axis="columns").rename(
+        col_name_map, axis="columns"
+    )
 
     # drop any cols with missing data
     vds = validate(df, drop_on_error=True)
@@ -41,21 +40,12 @@ def distribute_seg_dataset(
         readme_path="README.md",
     )
 
-    # structure scores as auxilary file
-    score_files = [
-        f"structure_scores/structure_score_55000000{p}.csv" for p in (13, 14)
-    ]
-    score_dfs = [
-        pd.read_csv(f).rename({"mh Score": "mh score"}, axis="columns")
-        for f in score_files
-    ]
-    df_score = pd.concat(score_dfs, axis="rows", ignore_index=True, sort=False)
-    df_score.to_csv("structure_scores.csv")
-
     # set data path cols, metadata cols, and extra files
     ds.set_metadata_columns(["fov_id", "original_fov_location"])
-    ds.set_path_columns(["2D_fov_tiff_path"])
-    ds.set_extra_files(["channel_defs.json", "structure_scores.csv"])
+    ds.set_path_columns(
+        ["rescaled_2D_fov_tiff_path", "rescaled_2D_single_cell_tiff_path"]
+    )
+    ds.set_extra_files(["../channel_defs.json", "../../output_data/parameters.json"])
 
     # tag with commit hash
     label = (
@@ -67,4 +57,4 @@ def distribute_seg_dataset(
 
 
 if __name__ == "__main__":
-    fire.Fire(distribute_seg_dataset)
+    fire.Fire(distribute_autocontrasted_dataset)

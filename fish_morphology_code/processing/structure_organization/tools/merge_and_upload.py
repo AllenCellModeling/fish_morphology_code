@@ -16,28 +16,34 @@ if not os.path.exists(os.path.join(ds_folder, "metadata.csv")):
 
 metadata = pd.read_csv(os.path.join(ds_folder, "metadata.csv"))
 
-df_fov = pd.read_csv(os.path.join(ds_folder, metadata.database_path[0]), index_col=0)
+df_meta = pd.read_csv(os.path.join(ds_folder, metadata.database_path[0]), index_col=0)
+
+# FOVs that could not be read from the server
+# We shall come back to this files in the future.
+fovs_with_read_problems = [40, 135, 462, 2000]
 
 # Gathering results
 df = []
-for FOVId in tqdm(df_fov.index):
 
-    prefix = os.path.join('..', 'output', f"fov_{FOVId}")
+for FOVId in tqdm(df_meta.index):
 
-    if os.path.exists(prefix + ".csv"):
+    if FOVId not in fovs_with_read_problems:
 
-        df_fov = pd.read_csv(prefix + ".csv")
-        df_fov["FOVId"] = FOVId
-        df_fov["result_image_path"] = os.path.abspath(prefix + ".tif")
-        df_fov["original_fov_location"] = df_fov.RawFileName[FOVId].replace(
-            "_C0.tif", ""
-        )
+        prefix = os.path.join('..', 'output', f"fov_{FOVId}")
 
-        df.append(df_fov)
+        if os.path.exists(prefix + ".csv"):
 
-    else:
+            df_fov = pd.read_csv(prefix + ".csv")
 
-        print(f"Data for FOV {FOVId} not found")
+            df_fov["FOVId"] = FOVId
+            df_fov["result_image_path"] = os.path.abspath(prefix + ".tif")
+            df_fov["original_fov_location"] = df_meta.RawFileName[FOVId].replace("_C0.tif", "")
+
+            df.append(df_fov)
+
+        else:
+
+            print(f"Data for FOV {FOVId} not found")
 
 df = pd.concat(df, axis=0, sort=True).reset_index(drop=True)
 
@@ -57,6 +63,10 @@ df["structure_name"] = "ACTN2"
 # Save CSV for assay-dev internal analysis
 if not os.path.exists("../results/"):
     os.makedirs("../results/")
+
+# Checking expected shape of the dataframe
+assert df.shape == (5161, 33)
+
 df.set_index(["CellId"]).to_csv("../results/AssayDevFishAnalsysis2020.csv")
 
 # -------------------------------------------------------------------------------------------------
@@ -77,15 +87,30 @@ metadata = [
             "description": "Unique id that indentifies the label of cell segmentation in the fov",
         }
     },
-    {"Age": {"name": None, "description": "Cells age"}},
+    {
+        "Age": {
+            "name": None,
+            "description": "Cells age"
+        }
+    },
     {
         "result_image_path": {
             "name": None,
             "description": "Z Stack with data produced by assay-dev",
         }
     },
-    {"original_fov_location": {"name": None, "description": "Path to raw data"}},
-    {"Total_Area": {"name": None, "description": "Number of pixels in cell mask"}},
+    {
+        "original_fov_location": {
+            "name": None,
+            "description": "Path to raw data"
+        }
+    },
+    {
+        "Total_Area": {
+            "name": None,
+            "description": "Number of pixels in cell mask"
+        }
+    },
     {
         "Frac_Area_Background": {
             "name": None,
@@ -219,14 +244,18 @@ for feature in features_rename:
     df = df.rename(columns=feature)
 
 with open("assay-dev-fish.md", "w") as ftxt:
+    ftxt.write("### Global structure organization and local structural alignment features\n\n")
     for meta in metadata:
         for key, value in meta.items():
             ftxt.write(
-                "Feature: {0}, Description: {1}\n".format(
+                "- `{0}`: {1}\n".format(
                     value["name"] if value["name"] is not None else key,
                     value["description"],
                 )
             )
+
+# Checking expected shape of the dataframe
+assert df.shape == (5161, 25)
 
 # Save a hand off version for the Modeling team
 df.to_csv("../results/AssayDevFishAnalsysis-Handoff.csv")
@@ -239,6 +268,7 @@ ds = Dataset(
     readme_path="assay-dev-fish.md",
 )
 
+# Set metadata and path columns
 ds.set_metadata_columns(["CellId"])
 ds.set_path_columns(["result_image_path"])
 

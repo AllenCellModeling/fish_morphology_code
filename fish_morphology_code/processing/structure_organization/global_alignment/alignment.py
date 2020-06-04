@@ -211,6 +211,7 @@ def process_fov(FOVId, df_fov):
         )
         df_or = df_or.append(s)
 
+    df_or.index = df_or.index.rename('CellId')
     df_or.to_csv(filename.replace(".tif", ".csv"))
 
 
