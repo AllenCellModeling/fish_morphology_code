@@ -1,7 +1,8 @@
 quilt_data*/
 output_data*/
-tmp_quilt_data/
+tmp_quilt_data*/
 .vscode/
+*.pkl
 
 .nfs*
 .DS_Store
