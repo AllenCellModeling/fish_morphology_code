@@ -84,6 +84,7 @@ def make_anndata_feats(
         "probe_561_loc_score",
         "probe_638_loc_score",
     ],
+    check_full_feats=True,
 ):
     """make feature df into anndata: X=feat values, obs=metadata, var=feature annotations"""
 
@@ -98,7 +99,8 @@ def make_anndata_feats(
     ]
     obs = df_feats[obs_cols]
     X = df_feats[X_cols]
-    assert len(df_feats.columns) == len(obs_cols + X_cols)
+    if check_full_feats:
+        assert len(df_feats.columns) == len(obs_cols + X_cols)
 
     # feature annotations to use for subsetting
     var = pd.DataFrame({"name": X.columns})
@@ -370,9 +372,9 @@ def widen_df(
     return df
 
 
-def tidy_df(df):
-    """Move from all probes as columns with sparse stucture to tidy data, with probe as a categorical column."""
-    probe_cols = [
+def tidy_df(
+    df,
+    probe_cols=[
         f"{probe}_count"
         for probe in [
             "HPRT1-B1",
@@ -384,7 +386,10 @@ def tidy_df(df):
             "BAG3-B4",
             "TCAP-B3",
         ]
-    ]
+    ],
+):
+    """Move from all probes as columns with sparse stucture to tidy data, with probe as a categorical column."""
+
     non_probe_cols = [c for c in df.columns if c not in probe_cols]
 
     df_tidy = (
