@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 
@@ -29,7 +28,7 @@ def remove_low_var_feat_cols(adata, threshold=0.0):
 
 def z_score_feats(adata, probe_subsets=True):
     """z-score feat data, save params un adata.uns, scaled data in adata.layers["z-scored"].
-       if probe_subsets=True, z-score the probe features individually for each probe."""
+    if probe_subsets=True, z-score the probe features individually for each probe."""
 
     scaler = StandardScaler().fit(adata.X)
     if probe_subsets:
