@@ -148,7 +148,10 @@ def load_main_feat_data(
     feats_csv="features/a749d0e2_cp_features.csv",
 ):
     # load main feature data
-    p_feats = quilt3.Package.browse(username_packagename, bucket,)
+    p_feats = quilt3.Package.browse(
+        username_packagename,
+        bucket,
+    )
     df_feats = fetch_df(
         feats_csv,
         p_feats,
@@ -363,7 +366,11 @@ def add_densities(df, df_tidy):
 def load_round1_data(
     use_cached=False, save_regression_path=Path("org_score_regression.pkl")
 ):
-    """Monster function for loading and munging data for plots."""
+    """
+    Monster function for loading and munging data for plots.
+    Contains expert annotations of cells.
+    Fits a regression to predict org scores for round1 data.
+    """
 
     # load main feature data
     df_feats = load_main_feat_data(use_cached=use_cached)
@@ -413,7 +420,11 @@ def load_round1_data(
 
 
 def load_round2_data(use_cached=False):
-    """Monster function for loading and munging data for plots."""
+    """
+    Monster function for loading and munging data for plots.
+    Does not contain expert annotations of cells.
+    Uses the regression fit in round1 to predict org scores for round2 data.
+    """
 
     # load main feature data
     df_feats = load_main_feat_data(
@@ -549,6 +560,7 @@ def load_round2_data(use_cached=False):
 
 
 def load_data(use_cached=False):
+    """consolidate round1 and round2 data"""
     df_r1, df_tidy_r1, df_regression_r1 = load_round1_data(use_cached=use_cached)
     df_r2, df_tidy_r2, df_regression_r2 = load_round2_data(use_cached=use_cached)
 
