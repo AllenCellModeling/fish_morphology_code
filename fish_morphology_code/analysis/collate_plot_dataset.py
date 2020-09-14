@@ -79,6 +79,30 @@ PRETTY_NAME_MAP = {
     "MYH7_probe_frac_threads_regular_dots_regular_stripes_gain_over_random": "Enrichment of MYH7 transcript localization to fibers, organized puncta, and organized z-disks",
     "MYH6_dist_to_alpha-actinin_segmentation": "MYH6 probe distance to alpha-actinin segmentation (mean)",
     "MYH7_dist_to_alpha-actinin_segmentation": "MYH7 probe distance to alpha-actinin segmentation (mean)",
+    "BMPER-B2_count_per_micrometer_squared": "BMPER (count/μm^2)",
+    "CNTN5-B5_count_per_micrometer_squared": "CNTN5 (count/μm^2)",
+    "MEF2C_count_per_micrometer_squared": "MEF2C (count/μm^2)",
+    "MYL7-B5_count_per_micrometer_squared": "MYL7 (count/μm^2)",
+    "NKX2-5_count_per_micrometer_squared": "NKX2 (count/μm^2)",
+    "PLN-B2_count_per_micrometer_squared": "PLN (count/μm^2)",
+    "PRSS35_count_per_micrometer_squared": "PRSS35 (count/μm^2)",
+    "VCAN_count_per_micrometer_squared": "VCAN (count/μm^2)",
+    "BMPER-B2_count": "BMPER count",
+    "CNTN5-B5_count": "CNTN5 count",
+    "MEF2C_count": "MEF2C count",
+    "MYL7-B5_count": "MYL7 count",
+    "NKX2-5_count": "NKX2 count",
+    "PLN-B2_count": "PLN count",
+    "PRSS35_count": "PRSS35 count",
+    "VCAN_count": "VCAN count",
+    "BMPER-B2_density": "BMPER density",
+    "CNTN5-B5_density": "CNTN5 density",
+    "MEF2C_density": "MEF2C density",
+    "MYL7-B5_density": "MYL7 density",
+    "NKX2-5_density": "NKX2 density",
+    "PLN-B2_density": "PLN density",
+    "PRSS35_density": "PRSS35 density",
+    "VCAN_density": "VCAN density",
 }
 
 
@@ -266,6 +290,14 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
         "MYH7_density",
         "BAG3_density",
         "TCAP_density",
+        "BMPER-B2_density",
+        "CNTN5-B5_density",
+        "MEF2C_density",
+        "MYL7-B5_density",
+        "NKX2-5_density",
+        "PLN-B2_density",
+        "PRSS35_density",
+        "VCAN_density",
     ]
     for col in density_cols_orig_no_units:
         df[f"{col}_per_micrometer_squared".replace("density", "count")] = (
@@ -277,13 +309,6 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
 
     # get peak distance too
     df["peak_distance_micrometers"] = df["peak_distance"] * pixel_size_xy_in_micrometers
-
-    # normalize alpha-actinin intensity independently per day
-    df["IntensityMedianNoUnits"] = 0
-    for i, cell_age in enumerate(sorted(df["cell_age"].unique())):
-        condition = df["cell_age"] == cell_age
-        data = df[condition]["IntensityMedian"].copy()
-        df.loc[condition, "IntensityMedianNoUnits"] = data / data.median()
 
     # round linear model score to nearest in and clamp to target domain
     df["structure_org_weighted_linear_model_all_rounded"] = np.rint(
@@ -316,16 +341,57 @@ def collate_plot_dataset(pixel_size_xy_in_micrometers=0.12):
     # rename cols in dfs
     df = df.rename(columns=PRETTY_NAME_MAP)
 
-    # enforce int dtype in some cols
-    int_cols = [
-        "Nuclei count",
-        "Expert structural annotation score (annotator 1)",
-        "Expert structural annotation score (annotator 2)",
-        "Cell number",
-        "Expert structural annotation score (round-up)",
+    round1_cols = [
+        "HPRT1 (count/μm^2)",
+        "COL2A1 (count/μm^2)",
+        "H19 (count/μm^2)",
+        "ATP2A2 (count/μm^2)",
+        "MYH6 (count/μm^2)",
+        "MYH7 (count/μm^2)",
+        "BAG3 (count/μm^2)",
+        "TCAP (count/μm^2)",
     ]
-    for c in int_cols:
-        df[c] = df[c].astype(int)
+
+    round2_cols = [
+        "BMPER (count/μm^2)",
+        "CNTN5 (count/μm^2)",
+        "MEF2C (count/μm^2)",
+        "MYL7 (count/μm^2)",
+        "NKX2 (count/μm^2)",
+        "PLN (count/μm^2)",
+        "PRSS35 (count/μm^2)",
+        "VCAN (count/μm^2)",
+    ]
+
+    round1_condition = (df[round1_cols].notnull()).sum(axis=1) == 2
+    round2_condition = (df[round2_cols].notnull()).sum(axis=1) == 2
+
+    df["Experiment Round"] = 0
+    df["Experiment Round"][round1_condition] = 1
+    df["Experiment Round"][round2_condition] = 2
+
+    # normalize alpha-actinin intensity independently per day and per round
+    df["Alpha-actinin intensity (median, normalized per day)"] = 0
+    for i, cell_age in enumerate(sorted(df["Cell age"].unique())):
+        for j, exper_round in enumerate(sorted(df["Experiment Round"].unique())):
+            condition = (df["Cell age"] == cell_age) & (
+                df["Experiment Round"] == exper_round
+            )
+            data = df[condition]["Alpha-actinin intensity (median)"].copy()
+            df.loc[
+                condition, "Alpha-actinin intensity (median, normalized per day)"
+            ] = (data / data.median())
+
+    # # enforce int dtype in some cols
+    # int_cols = [
+    #     "Nuclei count",
+    #     "Expert structural annotation score (annotator 1)",
+    #     "Expert structural annotation score (annotator 2)",
+    #     "Cell number",
+    #     "Expert structural annotation score (round-up)",
+    # ]
+    # for c in int_cols:
+    #     df[c] = df[c].astype(int)
 
     # done
     return df
