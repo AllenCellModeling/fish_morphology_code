@@ -53,7 +53,24 @@ SHORT_FEAT_NAME_MAP = {
 
 BAR_PLOT_COLUMNS_SHORT = [SHORT_FEAT_NAME_MAP[v] for v in BAR_PLOT_COLUMNS]
 
-PROBE_ORDER = ["MYH6", "MYH7", "COL2A1", "H19", "TCAP", "ATP2A2", "BAG3", "HPRT1"]
+PROBE_ORDER = [
+    "MYH6",
+    "MYH7",
+    "COL2A1",
+    "H19",
+    "TCAP",
+    "ATP2A2",
+    "BAG3",
+    "HPRT1",
+    "BMPER",
+    "CNTN5",
+    "MEF2C",
+    "MYL7",
+    "NKX2",
+    "PLN",
+    "PRSS35",
+    "VCAN",
+]
 
 
 def safe(string, sub="_"):
