@@ -364,7 +364,9 @@ def add_densities(df, df_tidy):
 
 
 def load_round1_data(
-    use_cached=False, save_regression_path=Path("org_score_regression.pkl")
+    use_cached=False,
+    save_regression_path=Path("org_score_regression.pkl"),
+    min_background_frac=0.5,
 ):
     """
     Monster function for loading and munging data for plots.
@@ -387,6 +389,11 @@ def load_round1_data(
 
     # merge in the global structure metrics
     df_small = df_small.merge(df_gs)
+
+    # remove cells with too much "background"
+    df_small = df_small[
+        df_small["frac_area_background"] < min_background_frac
+    ].reset_index(drop=True)
 
     # make wide version
     df = widen_df(df_small)
@@ -419,7 +426,10 @@ def load_round1_data(
     return df, df_tidy, df_regression
 
 
-def load_round2_data(use_cached=False):
+def load_round2_data(
+    use_cached=False,
+    min_background_frac=0.5,
+):
     """
     Monster function for loading and munging data for plots.
     Does not contain expert annotations of cells.
@@ -506,6 +516,11 @@ def load_round2_data(use_cached=False):
 
     # merge in the global structure metrics
     df_small = df_small.merge(df_gs)
+
+    # remove cells with too much "background"
+    df_small = df_small[
+        df_small["frac_area_background"] < min_background_frac
+    ].reset_index(drop=True)
 
     # make wide version
     df = widen_df(
