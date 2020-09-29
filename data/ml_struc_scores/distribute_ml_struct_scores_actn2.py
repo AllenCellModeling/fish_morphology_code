@@ -6,10 +6,10 @@ import fire
 from quilt3distribute import Dataset
 
 
-def distribute_struct_scores_bonus(
+def distribute_struct_scores_actn2(
     test=False,
-    csv_loc="/allen/aics/gene-editing/FISH/2019/chaos/data/20200911_classifier_features_bonus/manifest_20200929_tg.csv",
-    dataset_name="struct_scores_bonus",
+    csv_loc="/allen/aics/gene-editing/FISH/2019/chaos/data/20200929_classifier_features_actn2/manifest_20200929_actn2_tg.csv",
+    dataset_name="struct_scores_actn2",
     package_owner="tanyasg",
     s3_bucket="s3://allencell-internal-quilt",
 ):
@@ -27,7 +27,7 @@ def distribute_struct_scores_bonus(
         dataset=df,
         name=dataset_name,
         package_owner=package_owner,
-        readme_path="/allen/aics/gene-editing/FISH/2019/chaos/data/20200911_classifier_features_bonus/README.md",
+        readme_path="/allen/aics/gene-editing/FISH/2019/chaos/data/20200929_classifier_features_actn2/README.md",
     )
 
     # set data path cols, metadata cols, and extra files
@@ -44,4 +44,4 @@ def distribute_struct_scores_bonus(
 
 
 if __name__ == "__main__":
-    fire.Fire(distribute_struct_scores_bonus)
+    fire.Fire(distribute_struct_scores_actn2)
