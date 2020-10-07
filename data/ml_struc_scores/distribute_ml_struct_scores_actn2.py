@@ -8,7 +8,7 @@ from quilt3distribute import Dataset
 
 def distribute_struct_scores_actn2(
     test=False,
-    csv_loc="/allen/aics/gene-editing/FISH/2019/chaos/data/20200929_classifier_features_actn2/manifest_20200929_actn2_tg.csv",
+    csv_loc="/allen/aics/gene-editing/FISH/2019/chaos/data/20200929_classifier_features_actn2/manifest_20201007_actn2_tg.csv",
     dataset_name="struct_scores_actn2",
     package_owner="tanyasg",
     s3_bucket="s3://allencell-internal-quilt",
@@ -32,7 +32,7 @@ def distribute_struct_scores_actn2(
 
     # set data path cols, metadata cols, and extra files
     #     ds.set_metadata_columns(["fov_id", "original_fov_location"])
-    ds.set_path_columns(["CellPath"])
+    ds.set_path_columns(["result_image_path"])
 
     # tag with commit hash
     label = (
