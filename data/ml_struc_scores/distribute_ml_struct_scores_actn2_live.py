@@ -21,6 +21,17 @@ def distribute_struct_scores_actn2_live(
         "/allen/aics/assay-dev/computational/data/cardio_pipeline_datastep/local_staging_pipeline_actn2/singlecells/singlecells",
         regex=False,
     )
+    df = df.drop(
+        columns=[
+            "RawFilePath",
+            "BackgroundPath",
+            "ClassificationPath",
+            "MemMaxProjectionPath",
+            "MemSegmentationPath",
+            "NucMaxProjectionPath",
+            "StrMaxIntensitySlicePath",
+        ]
+    )
 
     # subsample df for eg a test dataset
     if test:
@@ -36,7 +47,7 @@ def distribute_struct_scores_actn2_live(
     )
 
     # set data path cols, metadata cols, and extra files
-    #     ds.set_metadata_columns(["fov_id", "original_fov_location"])
+    # ds.set_metadata_columns(["RawFilePath", "BackgroundPath", "ClassificationPath", "MemMaxProjectionPath", "MemSegmentationPath", "NucMaxProjectionPath", "StrMaxIntensitySlicePath"])
     ds.set_path_columns(["CellPath"])
 
     # tag with commit hash
