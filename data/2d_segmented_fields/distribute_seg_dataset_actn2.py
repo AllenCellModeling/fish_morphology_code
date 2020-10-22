@@ -30,7 +30,7 @@ def distribute_seg_dataset(
         dataset=df,
         name=dataset_name,
         package_owner=package_owner,
-        readme_path="/allen/aics/gene-editing/FISH/2019/chaos/data/normalized_2D_tiffs/5500000075_B3/README.md",
+        readme_path="README.md",
     )
 
     # set data path cols, metadata cols, and extra files
