@@ -16,10 +16,11 @@ def process_fov(FOVId, df_fov):
     """
 
     # Channel numbers
-    ch_raw = 0
-    ch_prs = slice(1, 6)
-    ch_cla = 6
-    ch_msk = 7
+    ch_raw = 0 # highest intensity slice
+    ch_sum = 1 # sum projection
+    ch_prs = slice(2, 7) # probabilities
+    ch_cla = 7 # classification maps
+    ch_msk = 8 # cell segmentation masks
 
     source = "../output/"
 
@@ -48,18 +49,31 @@ def process_fov(FOVId, df_fov):
 
         probs = data[ch_prs, mask > 0].mean(axis=1)
 
-        # Intensity based features
+        # Intensity based features on highest intensity slice
         intensities = data[ch_raw, mask > 0].flatten()
 
-        background_intensity = np.percentile(data[ch_raw], 10)
+        background_intensity = np.percentile(data[ch_raw], 1)
+
+        avg_intensity = np.mean(intensities)
 
         med_intensity = np.percentile(intensities, 50)
 
         int_intensity = np.sum(intensities)
 
+        avg_intensity_bs = np.mean(intensities - background_intensity)
+
         med_intensity_bs = np.percentile(intensities - background_intensity, 50)
 
         int_intensity_bs = np.sum(intensities - background_intensity)
+
+        # Intensity based features on sum projection
+        nslices = int(df_fov.at[CellId,'NSlices'])
+
+        sum_intensities = data[ch_sum, mask > 0].flatten()
+
+        int_sum_intensity = np.sum(sum_intensities)
+
+        int_sum_intensity_bs = np.sum(sum_intensities - nslices*background_intensity)
 
         # Dict for features
         features = {
@@ -75,11 +89,15 @@ def process_fov(FOVId, df_fov):
             "Prob_Disorganized_Puncta": probs[2],
             "Prob_Organized_Puncta": probs[3],
             "Prob_Organized_ZDisks": probs[4],
+            "Intensity_Mean": avg_intensity,
             "Intensity_Median": med_intensity,
             "Intensity_Integrated": int_intensity,
+            "Intensity_SumIntegrated": int_sum_intensity,
+            "Intensity_Mean_BackSub": avg_intensity_bs,
             "Intensity_Median_BackSub": med_intensity_bs,
             "Intensity_Integrated_BackSub": int_intensity_bs,
-            "Background_Value": background_intensity,
+            "Intensity_SumIntegrated_BackSub": int_sum_intensity_bs,
+            "Background_Value": background_intensity
         }
 
         for key, value in features.items():
