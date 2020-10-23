@@ -81,7 +81,7 @@ df_cell = pd.read_csv(os.path.join(ds_folder, metadata.cell_database_path[0]))
 print(f'FOV shape: {df_fov.shape}, Cellshape: {df_cell.shape}')
 
 # Run all FOVs
-for index in df_fov.index[100:]:
+for index in df_fov.index:
 
     filename = df_fov.RawFileName[index]
 
