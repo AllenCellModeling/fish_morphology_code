@@ -8,7 +8,7 @@ from quilt3distribute import Dataset
 
 def distribute_struct_scores_actn2(
     test=False,
-    csv_loc="/allen/aics/gene-editing/FISH/2019/chaos/data/20200929_classifier_features_actn2/manifest_20201007_actn2_tg.csv",
+    csv_loc="/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/fish_morphology_code/fish_morphology_code/processing/structure_organization/results/AssayDevFishAnalsysis-Handoff-transcript2protein.csv",
     dataset_name="struct_scores_actn2",
     package_owner="tanyasg",
     s3_bucket="s3://allencell-internal-quilt",
