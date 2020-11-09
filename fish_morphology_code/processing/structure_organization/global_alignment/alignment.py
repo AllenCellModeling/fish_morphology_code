@@ -223,7 +223,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--fov", help="Full path to FOV", required=True)
     args = vars(parser.parse_args())
-    FOVId = int(args["fov"])
+    FOVId = args["fov"]
 
     # Downlaod the datasets from Quilt if there is no local copy
     ds_folder = "../database/"

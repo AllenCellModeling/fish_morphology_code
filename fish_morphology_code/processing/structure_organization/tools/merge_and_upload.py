@@ -64,7 +64,7 @@ df["structure_name"] = "ACTN2"
 if not os.path.exists("../results/"):
     os.makedirs("../results/")
 
-df.set_index(["CellId"]).to_csv("../results/AssayDevFishAnalsysis2020-transcript2protein.csv")
+df.set_index(["CellId"]).to_csv("../results/AssayDevFishAnalsysis2020-live_fixed.csv")
 
 # Checking expected shape of the dataframe
 # assert df.shape == (5161, 33)
@@ -282,7 +282,7 @@ with open("assay-dev-fish.md", "w") as ftxt:
 # assert df.shape == (5161, 25)
 
 # Save a hand off version for the Modeling team
-df.to_csv("../results/AssayDevFishAnalsysis-Handoff-transcript2protein.csv")
+df.to_csv("../results/AssayDevFishAnalsysis-Handoff-live_fixed.csv")
 
 if False:
 
