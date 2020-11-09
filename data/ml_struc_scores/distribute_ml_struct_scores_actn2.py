@@ -8,7 +8,7 @@ from quilt3distribute import Dataset
 
 def distribute_struct_scores_actn2(
     test=False,
-    csv_loc="/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/fish_morphology_code/fish_morphology_code/processing/structure_organization/results/AssayDevFishAnalsysis-Handoff-transcript2protein.csv",
+    csv_loc="/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/fish_morphology_code/fish_morphology_code/processing/structure_organization/results_Fish/AssayDevFishAnalsysis-Handoff-transcript2protein.csv",
     dataset_name="struct_scores_actn2",
     package_owner="tanyasg",
     s3_bucket="s3://allencell-internal-quilt",
@@ -16,6 +16,12 @@ def distribute_struct_scores_actn2(
 
     # read in original csv
     df = pd.read_csv(csv_loc)
+
+    # only include old actn2 fish in this package -> 5500000075 B3 imaged 20190710
+    date = df["original_fov_location"].str.split("/", expand=True)
+    df["date"] = date[7]
+    df = df[df.date == "20190710"]
+    df = df.drop(columns=["date"])
 
     # subsample df for eg a test dataset
     if test:
