@@ -4,6 +4,7 @@ import subprocess
 import pandas as pd
 import fire
 from quilt3distribute import Dataset
+from pathlib import Path
 
 
 def distribute_struct_scores_actn2(
@@ -22,6 +23,11 @@ def distribute_struct_scores_actn2(
     df["date"] = date[7]
     df = df[df.date == "20190710"]
     df = df.drop(columns=["date"])
+
+    # update result image dir (moved after processing)
+    img_dir = "/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/fish_morphology_code/fish_morphology_code/processing/structure_organization/output_Fish/"
+    new_result_path = [img_dir + Path(x).name for x in df["result_image_path"].tolist()]
+    df["result_image_path"] = new_result_path
 
     # subsample df for eg a test dataset
     if test:
