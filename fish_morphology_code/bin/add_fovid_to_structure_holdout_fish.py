@@ -36,18 +36,36 @@ def run(
             "rescaled_2D_single_cell_tiff_path",
         ]
     )
-    fish_classifier_manifest = fish_classifier_manifest.rename(
-        columns={
-            "fov_id": "FOVId",
-            "cell_label_value": "napariCell_ObjectNumber",
-            "original_fov_location": "fov_path",
-        }
-    )
 
     # merge on classifier pipeline assigned CellPath
     fish_classifier_manifest = fish_classifier_manifest.merge(
         manual_score_df, on="CellPath", how="inner"
     )
+
+    fish_classifier_manifest = fish_classifier_manifest.rename(
+        columns={
+            "fov_id": "FOVId",
+            "cell_label_value": "napariCell_ObjectNumber",
+            "original_fov_location": "fov_path",
+            "MH_score": "mh score",
+            "KG_score": "kg score",
+            "path": "classifier_image_path",
+            "cell_id": "classifier_cell_id",
+        }
+    )
+    fish_classifier_manifest = fish_classifier_manifest.drop(
+        columns=[
+            "fov_path",
+            "plate_name",
+            "RawFilePath",
+            "classified_fov",
+            "CellPath",
+            "type",
+            "image_name",
+            "cell_id_filename",
+        ]
+    )
+
     fish_classifier_manifest.to_csv(out_csv, index=False)
 
 
