@@ -9,7 +9,7 @@ def run(
     structure_scores="../../data/structure_scores/KG_MH_scoring_all.csv",
     classifier_manifest="/allen/aics/assay-dev/computational/data/cardio_pipeline_datastep/local_staging_pipeline_actn2/cellfeatures/manifest_sum_projs.csv",
     plate_metadata="../../data/all_plates.csv",
-    out_csv="../../data/live_data/live_manifest.csv",
+    out_csv="/allen/aics/gene-editing/FISH/2019/chaos/data/20201012_actn2_live_classifier_with_metadata/live_manifest.csv",
 ):
     r"""
         Write structure score csv that include image fovID from labkey
@@ -48,6 +48,8 @@ def run(
         on=["cell_id", "RawFilePath", "plate"],
         how="outer",
     )
+
+    merged_classifier_manual = merged_classifier_manual.drop(columns=["type"])
 
     # add plate metadata
     all_plates = pd.read_csv(plate_metadata)
