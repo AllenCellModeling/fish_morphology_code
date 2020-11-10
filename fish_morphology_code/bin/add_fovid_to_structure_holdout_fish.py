@@ -7,7 +7,7 @@ import pandas as pd
 def run(
     structure_scores="../../data/structure_scores/KG_MH_scoring_all.csv",
     classifier_manifest="/allen/aics/assay-dev/computational/data/cardio_pipeline_datastep/local_staging_new_fish_max/singlecells/manifest.csv",
-    out_csv="../../data/structure_scores/test1_fish_scores.csv",
+    out_csv="../../data/structure_scores/holdout_fish_manual_scores.csv",
 ):
     r"""
         Write structure score csv that include image fovID from labkey
