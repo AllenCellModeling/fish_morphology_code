@@ -8,7 +8,7 @@ from quilt3distribute import Dataset
 
 def distribute_struct_scores_actn2_live(
     test=False,
-    csv_loc="/allen/aics/assay-dev/computational/data/cardio_pipeline_datastep/local_staging_pipeline_actn2/cellfeatures/manifest.csv",
+    csv_loc="/allen/aics/gene-editing/FISH/2019/chaos/data/20201012_actn2_live_classifier_with_metadata/live_manifest.csv",
     dataset_name="struct_scores_actn2_live",
     package_owner="tanyasg",
     s3_bucket="s3://allencell-internal-quilt",
@@ -16,20 +16,24 @@ def distribute_struct_scores_actn2_live(
 
     # read in original csv
     df = pd.read_csv(csv_loc)
-    df["CellPath"] = df["CellPath"].str.replace(
+    df["CellPath_x"] = df["CellPath_x"].str.replace(
         "singlecells",
         "/allen/aics/assay-dev/computational/data/cardio_pipeline_datastep/local_staging_pipeline_actn2/singlecells/singlecells",
         regex=False,
     )
     df = df.drop(
         columns=[
-            "RawFilePath",
+            "FOV path",
             "BackgroundPath",
             "ClassificationPath",
             "MemMaxProjectionPath",
             "MemSegmentationPath",
             "NucMaxProjectionPath",
             "StrMaxIntensitySlicePath",
+            "CellPath_y",
+            "path",
+            "image_name",
+            "cell_id_filename",
         ]
     )
 
@@ -48,7 +52,7 @@ def distribute_struct_scores_actn2_live(
 
     # set data path cols, metadata cols, and extra files
     # ds.set_metadata_columns(["RawFilePath", "BackgroundPath", "ClassificationPath", "MemMaxProjectionPath", "MemSegmentationPath", "NucMaxProjectionPath", "StrMaxIntensitySlicePath"])
-    ds.set_path_columns(["CellPath"])
+    ds.set_path_columns(["CellPath_x"])
 
     # tag with commit hash
     label = (
