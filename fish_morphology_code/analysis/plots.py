@@ -135,16 +135,22 @@ rename_dict = {
 }
 
 
-def load_main_feat_data(rename_dict=rename_dict, use_cached=False):
+def load_main_feat_data(
+    rename_dict=rename_dict,
+    use_cached=False,
+    dest_dir=Path("tmp_quilt_data"),
+    username_packagename="tanyasg/2d_autocontrasted_single_cell_features",
+    bucket="s3://allencell-internal-quilt",
+    feats_csv="features/a749d0e2_cp_features.csv",
+):
+
     # load main feature data
-    p_feats = quilt3.Package.browse(
-        "tanyasg/2d_autocontrasted_single_cell_features",
-        "s3://allencell-internal-quilt",
-    )
+    p_feats = quilt3.Package.browse(username_packagename, bucket)
     df_feats = fetch_df(
-        "features/a749d0e2_cp_features.csv",
+        feats_csv,
         p_feats,
         dtype={"probe_561_loc_score": object, "probe_638_loc_score": object},
+        dest_dir=dest_dir,
         use_cached=use_cached,
     )
     return df_feats
