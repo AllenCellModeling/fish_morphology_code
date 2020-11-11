@@ -23,7 +23,6 @@ def distribute_struct_scores_actn2_live(
     )
     df = df.drop(
         columns=[
-            "FOV path",
             "BackgroundPath",
             "ClassificationPath",
             "MemMaxProjectionPath",

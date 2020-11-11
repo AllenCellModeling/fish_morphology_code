@@ -63,7 +63,7 @@ def run(
         columns={
             "plate": "plate_name",
             "age": "Cell age",
-            "RawFilePath": "FOV path",
+            "RawFilePath": "FOV",
             "replate": "replate_date",
         }
     )
