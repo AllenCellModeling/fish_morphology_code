@@ -396,9 +396,9 @@ def add_cell_structure_scores(cell_feature_df, structure_scores_csv):
         on=["FOVId", "napariCell_ObjectNumber"],
         how="outer",
     )
-    cell_feature_score_df = cell_feature_score_df.drop(
-        ["file_name", "file_base"], axis=1
-    )
+
+    drop_cols = [x for x in cell_feature_score_df if x in ["file_name", "file_base"]]
+    cell_feature_score_df = cell_feature_score_df.drop(drop_cols, axis=1)
 
     return cell_feature_score_df
 
