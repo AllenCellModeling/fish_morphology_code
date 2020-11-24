@@ -93,7 +93,7 @@ def run(
         )
         normalized_image_manifest_abs.to_csv(new_normalized_image_manifest, index=False)
 
-        cp_feature_metadata_df = add_sample_image_metadata(
+        feature_df = add_sample_image_metadata(
             cell_feature_df=cp_feature_df,
             norm_image_manifest=new_normalized_image_manifest,
             fov_metadata=fov_metadata,
@@ -103,7 +103,7 @@ def run(
 
     # if normalized_image_manifest already has absolute image paths, able to merge using original file
     else:
-        cp_feature_metadata_df = add_sample_image_metadata(
+        feature_df = add_sample_image_metadata(
             cell_feature_df=cp_feature_df,
             norm_image_manifest=normalized_image_manifest,
             fov_metadata=fov_metadata,
@@ -113,15 +113,17 @@ def run(
 
     # Make adding manual structure scores and probe localization scores optional
     # add manual structure scores to feature data frame
-    feature_df = add_cell_structure_scores(
-        cell_feature_df=cp_feature_metadata_df, structure_scores_csv=structure_scores
-    )
+    if structure_scores:
+        feature_df = add_cell_structure_scores(
+            cell_feature_df=feature_df, structure_scores_csv=structure_scores
+        )
 
     # add manual probe localization scores to feature data frame
-    feature_df = add_cell_probe_localization_scores(
-        cell_feature_df=feature_df,
-        probe_localization_scores_csv=probe_localization_scores,
-    )
+    if probe_localization_scores:
+        feature_df = add_cell_probe_localization_scores(
+            cell_feature_df=feature_df,
+            probe_localization_scores_csv=probe_localization_scores,
+        )
 
     # optional merge: merge with napari cell border filter to flag cells that touch border of image
 

@@ -19,6 +19,7 @@ def flag_border_cells(
     relative_columns=None,
     out_csv="./border_cells.csv",
     structure_data=True,
+    border_buffer_fix=2,
 ):
     """
     Flag napari annotated cells that touch the border of the image
@@ -29,6 +30,8 @@ def flag_border_cells(
         relative_columns (NoneType or str: optional list of comma separated column names in normalized_image_manifest with relative image paths that need to be converted to absolute
         out_csv (str): path to file where to save merged csv
         structure_data (bool): True indicates that this is structure data set with shape (1, 1, 10, 1, 1736, 1776); False indicates non-structure data set with shape (1, 1, 1, 10, 624, 924)
+        border_buffer_fix (int): number of pixels on right and bottom of array that need to be removed to correctly flag border cells touching right and bottom of image, default is 2 b/c this
+        was the # necessary for original FISH data; border issue has been fixed in napari and this argument can be se to 0 if using newest version of napari
     """
 
     # if normalized_image_manifest has relative image paths, convert to absolute
@@ -83,7 +86,9 @@ def flag_border_cells(
         else:
             napari_annotation_image = napari_annotation.data[0, 0, 0, 9]
 
-        border_adj_cells = find_border_cells(napari_annotation_image, 2)
+        # border_buffer_fix was hard coded as 2 in original version, but napari has
+        # been fixed eliminating the need for the buffer in newer annotations
+        border_adj_cells = find_border_cells(napari_annotation_image, border_buffer_fix)
         # print(border_adj_cells)
         border_only_df = pd.DataFrame(
             {

@@ -37,7 +37,12 @@ dev_requirements = [
     "wheel>=0.33.1",
 ]
 
-interactive_requirements = ["altair", "altair-data-server", "jupyterlab", "matplotlib"]
+interactive_requirements = [
+    "altair",
+    "altair-data-server",
+    "jupyterlab",
+    "matplotlib>=3.1.2",
+]
 
 requirements = [
     "aicsimageio>=3.0.2",
@@ -96,6 +101,7 @@ setup(
             "find_border_cells=fish_morphology_code.bin.find_border_cells:main_flag_border_cells",
             "merge_cellprofiler_output_nonstructure=fish_morphology_code.bin.merge_cellprofiler_output_nonstructure:main",
             "merge_cellprofiler_output_structure=fish_morphology_code.bin.merge_cellprofiler_output_structure:main",
+            "correct_napari_segs=fish_morphology_code.bin.correct_napari_segs:main_napari_correct",
         ]
     },
     install_requires=requirements,
