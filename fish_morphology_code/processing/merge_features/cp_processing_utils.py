@@ -382,11 +382,24 @@ def add_cell_structure_scores(cell_feature_df, structure_scores_csv):
 
     # rename columns to match cell feature columns
     structure_score_df = pd.read_csv(structure_scores_csv, index_col=0)
+
+    # drop columns we don't need
+    structure_score_df = structure_score_df.drop(
+        columns=[
+            "rescaled_2D_fov_tiff_path",
+            "original_fov_location",
+            "rescaled_2D_single_cell_tiff_path",
+            "single_cell_id",
+        ]
+    )
     structure_score_df = structure_score_df.rename(
         columns={
             "cell_num": "napariCell_ObjectNumber",
+            "cell_label_value": "napariCell_ObjectNumber",
             "mh score": "mh_structure_org_score",
             "kg score": "kg_structure_org_score",
+            "score": "no_structure",
+            "fov_id": "FOVId",
         }
     )
 
