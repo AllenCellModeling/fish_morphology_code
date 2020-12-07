@@ -255,9 +255,9 @@ def make_regression_df(
 
 
 def make_regression(
-    X_cols,
     scaled_data=pd.DataFrame(),
     y_col="Expert structural annotation score (mean)",
+    X_cols=[],
     weight_y=True,
     alpha=0.001,
 ):

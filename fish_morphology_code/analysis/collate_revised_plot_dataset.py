@@ -10,7 +10,7 @@ from fish_morphology_code.analysis.notebook_utils import BAR_PLOT_COLUMNS
 
 def collate_revised(
     fish_plates="/allen/aics/gene-editing/FISH/2019/chaos/2020_fish_figures/paper_fish_plates_20201027.csv",
-    plot_csv="collated_plot_data.csv",
+    plot_csv="revised_manuscript_data.csv",
 ):
 
     # get fish plates with replate dates
@@ -376,7 +376,7 @@ def collate_revised(
 
     # Predict COS for all cells
 
-    reg = fish_morphology_code.analysis.plots.make_regression(df_reg)
+    reg = fish_morphology_code.analysis.plots.make_regression(df_reg, X_cols=feat_cols)
     df["Combined organizational score"] = reg.predict(scaler.transform(df[feat_cols]))
 
     df.to_csv(plot_csv, index=False)
