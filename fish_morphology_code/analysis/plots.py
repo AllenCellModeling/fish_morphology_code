@@ -7,6 +7,8 @@ import pandas as pd
 import quilt3
 import logging
 
+from sklearn import linear_model
+
 from fish_morphology_code.analysis.data_ingestion import (
     make_anndata_feats,
     iteratively_prune,
@@ -250,6 +252,60 @@ def make_regression_df(
     regression_info_df = pd.DataFrame({"feature": X_cols, "coef": regression.coef_})
 
     return df, regression_info_df
+
+
+def make_regression(
+    X_cols,
+    scaled_data=pd.DataFrame(),
+    y_col="Expert structural annotation score (mean)",
+    weight_y=True,
+    alpha=0.001,
+):
+    X = scaled_data[X_cols]
+    y = scaled_data[y_col]
+
+    if weight_y:
+        class_weights = {
+            v: len(y) / c for v, c in zip(*np.unique(y, return_counts=True))
+        }
+        sample_weights = scaled_data[y_col].map(class_weights)
+    else:
+        sample_weights = 1
+
+    reg = linear_model.Ridge(alpha=alpha)
+    reg.fit(X, y, sample_weight=sample_weights)
+
+    return reg
+
+
+def unmelt_probes(arg_df):
+
+    out_df = arg_df.copy()
+
+    for probe in np.unique(out_df[["probe546", "probe647"]].dropna().values):
+        out_df[f"{probe}_count"] = np.nan
+
+    for i, row in out_df.iterrows():
+        probe546 = row["probe546"]
+        probe647 = row["probe647"]
+        out_df.at[i, f"{probe546}_count"] = row[
+            "napariCell_Children_seg_probe_561_Count"
+        ]
+        out_df.at[i, f"{probe647}_count"] = row[
+            "napariCell_Children_seg_probe_638_Count"
+        ]
+
+    out_df = out_df.drop(
+        [
+            "probe546",
+            "probe647",
+            "napariCell_Children_seg_probe_561_Count",
+            "napariCell_Children_seg_probe_638_Count",
+        ],
+        axis="columns",
+    )
+
+    return out_df
 
 
 def clean_probe_names(df, df_tidy):
