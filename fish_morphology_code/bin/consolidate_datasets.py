@@ -108,12 +108,6 @@ def make_pkg_maps(
         "tanyasg/struct_scores_actn2_2": "automated_local_and_global_structure_fish_4",
         "tanyasg/struct_scores_actn2_live": "automated_local_and_global_structure_live",
     },
-    manual_rename_test={
-        "rorydm/2d_segmented_fields_test": "2d_segmented_fields_fish_1_test",
-        "rorydm/2d_autocontrasted_fields_and_single_cells_test": "2d_autocontrasted_fields_and_single_cells_fish_1_test",
-        "tanyasg/2d_autocontrasted_single_cell_features_test": "2d_autocontrasted_single_cell_features_fish_1_test",
-        "matheus/assay_dev_fish_analysis_test": "automated_local_and_global_structure_fish_1_test",
-    },
     internal_s3_url="s3://allencell-internal-quilt",
 ):
 
@@ -179,6 +173,7 @@ def aggregate_and_push(
     # set profile to public bucket access if pushing public
     if public:
         external = boto3.session.Session(profile_name="allencell")  # noqa: F841
+    #         external = boto3.session.Session(profile_name="public")  # noqa: F841
 
     q.push(dest_pkg_name, dest_S3_url, message=label)
 
