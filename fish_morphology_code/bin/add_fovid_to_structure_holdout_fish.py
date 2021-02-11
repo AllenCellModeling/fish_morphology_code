@@ -5,9 +5,10 @@ import pandas as pd
 
 
 def run(
-    structure_scores="../../data/structure_scores/KG_MH_scoring_all.csv",
+    structure_scores="/allen/aics/gene-editing/FISH/2019/chaos/image_processing_scripts/fish_morphology_code/data/structure_scores/KG_MH_scoring_all.csv",
     classifier_manifest="/allen/aics/assay-dev/computational/data/cardio_pipeline_datastep/local_staging_new_fish_max/singlecells/manifest.csv",
-    out_csv="../../data/structure_scores/holdout_fish_manual_scores.csv",
+    zero_scores="/allen/aics/gene-editing/FISH/2019/chaos/image_processing_scripts/fish_morphology_code/data/structure_scores/scores_bonus_fish_metadata.csv",
+    out_csv="/allen/aics/gene-editing/FISH/2019/chaos/image_processing_scripts/fish_morphology_code/data/structure_scores/holdout_fish_manual_scores.csv",
 ):
     r"""
         Write structure score csv that include image fovID from labkey
@@ -15,6 +16,7 @@ def run(
             structure_scores (str): location (absolute path) to manual structure scores; score is actn2 organization score
             classifier_manifest (str): location (absolute path) to image manifest; image manifest must include both labkey fovID
             and cell ids used in structure classifier pipeline
+            zero_scores (str): location (absolute path) to manual 0 structure scores; only 0 scores are indicated; all other are NaN
             structure_scores_updated (str): location (absolute path) where to save structure csv with fov id
     """
 
@@ -66,7 +68,28 @@ def run(
         ]
     )
 
-    fish_classifier_manifest.to_csv(out_csv, index=False)
+    # add manual zero structure score column if it exists
+    if len(zero_scores) > 0:
+        zero_scores_df = pd.read_csv(zero_scores)
+        zero_scores_df = zero_scores_df.drop(columns=["Unnamed: 0"])
+        zero_scores_df = zero_scores_df.rename(
+            columns={
+                "fov_id": "FOVId",
+                "cell_label_value": "napariCell_ObjectNumber",
+                "score": "no_structure",
+            }
+        )
+        merged_scores = pd.merge(
+            zero_scores_df,
+            fish_classifier_manifest,
+            on=["FOVId", "napariCell_ObjectNumber"],
+            how="outer",
+        )
+
+        merged_scores.to_csv(out_csv)
+
+    else:
+        fish_classifier_manifest.to_csv(out_csv)
 
 
 if __name__ == "__main__":
