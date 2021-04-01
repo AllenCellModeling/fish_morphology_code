@@ -26,6 +26,8 @@ def distribute_raw(
         "s3://allencell",
     )
     p_manuscript_data["revised_manuscript_plots"]["data.csv"].fetch("./data.csv")
+
+    # load figure data and fish fov metadata df
     img_df = pd.read_csv("./data.csv")
     fish_fov_df = pd.read_csv("fish_fovs.csv")
 
@@ -53,7 +55,7 @@ def distribute_raw(
         "channel647",
         "Cell line",
     ]
-    #     probe_cols = [x for x in img_df.columns]
+
     remove_cols = [x for x in img_df.columns if x not in keep_cols]
     img_df = img_df.drop(columns=remove_cols)
 
@@ -174,7 +176,6 @@ def distribute_raw(
         f"raw_images/{raw_image_file_manifest}", PurePath(raw_image_file_manifest).name
     )
 
-    print(p)
     p.push(pkg_dest, s3_bucket, message="raw images")
 
 
