@@ -45,7 +45,7 @@ interactive_requirements = [
 ]
 
 requirements = [
-    "aicsimageio>=3.0.2",
+    "aicsimageio==4.0.0dev5",
     "anndata>=0.6.22",
     "fire>=0.2.1",
     "imageio>=2.6.1",
@@ -54,6 +54,7 @@ requirements = [
     "pandas>=0.25.1",
     "pingouin>=0.3.0",
     "python-dateutil==2.8.0",
+    "ome-types==0.2.4",
     "scikit-image>=0.16.1",
     "scikit-learn>=0.21.3",
     "tqdm>=4.36.1",
@@ -102,6 +103,7 @@ setup(
             "merge_cellprofiler_output_nonstructure=fish_morphology_code.bin.merge_cellprofiler_output_nonstructure:main",
             "merge_cellprofiler_output_structure=fish_morphology_code.bin.merge_cellprofiler_output_structure:main",
             "correct_napari_segs=fish_morphology_code.bin.correct_napari_segs:main_napari_correct",
+            "merge_3i_raw=fish_morphology_code.bin.merge_3i_to_ometiff:main",
         ]
     },
     install_requires=requirements,
