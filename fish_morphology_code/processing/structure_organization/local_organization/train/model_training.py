@@ -16,8 +16,8 @@ os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
 # Load data from quilt
 p = Package.browse(
-    "matheus/assay_dev_classifier_train", "s3://allencell-internal-quilt"
-).fetch("data/")
+    "aics/integrated_transcriptomics_structural_organization_hipsc_cm", "s3://allencell"
+)["actn2_pattern_ml_classifier_train"].fetch("data/")
 
 manifest = pd.read_csv("data/metadata.csv", index_col=0)
 
