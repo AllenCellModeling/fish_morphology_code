@@ -31,8 +31,8 @@ if not model_weights_path:
     # Download from Quilt
     print("No weights were found locally. Downloading from Quilt...")
     pkg = Package.browse(
-        "matheus/assay_dev_actn2_classifier", "s3://allencell-internal-quilt"
-    ).fetch("../best_model")
+        "aics/integrated_transcriptomics_structural_organization_hipsc_cm", "s3://allencell"
+    )["actn2_pattern_ml_classifier_model"].fetch("../best_model")
     metadata = pd.read_csv(os.path.join("..", "best_model", "metadata.csv"))
     model_weights_path = os.path.join("..", "best_model", metadata.model_path[0])
 elif len(model_weights_path) > 1:
