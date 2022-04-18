@@ -26,10 +26,7 @@ j2template = jinja2.Environment(loader=jinja2.FileSystemLoader(".")).get_templat
     "alignment.j2"
 )
 
-rfolder = (
-    script_folder
-) = "/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/fish_morphology_code/fish_morphology_code/processing/structure_organization/jinja2/"
-
+rfolder = "jinja2/"
 for f in ["", "scripts", "log"]:
     if not os.path.exists(os.path.join(rfolder, f)):
         os.makedirs(os.path.join(rfolder, f))

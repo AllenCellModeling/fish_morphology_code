@@ -42,14 +42,15 @@ The `.pth` file corresponding to the best model should be manually copied to the
 
 The script `inference/inference.py` uses the best model selected by the user to perform classification on new images. The classification is done by using a sliding window through the image. The patch represented in the sliding window is classified 4 times. Once raw and three times with randomizaed rotation and image flipping. The probabilities of each class are averaged together between the 4 outputs. In addition, this script also uses the Allen Cell Structure Segmenter [1] to identify background regions in the input data and mask them out from the final classification maps. The input data is organized in the CSV file `database/database.csv`. Each row in this file corresponds to an input z-stack for which the inference will be performed on. Results are saved in the folder `structure_organization/output/` as the z-stacks are processed one at the time. An additional CSV file `database/database_cell.csv` is used to load the single cell manual segmentation. For each input z-stack an output z-stack is produced. The slices of the output z-stack are:
 
-1. Highest mean intensity slice form the original input z-stack.
-2. Probaility map for class Diffuse/others
-3. Probaility map for class Fibers
-4. Probaility map for class Disorganized puncta
-5. Probaility map for class Organized Puncta
-6. Probaility map for class Organized Z-disks
-7. Final classification map based on the highest probability
-8. Single cell manual segmentation 
+1. Highest mean intensity slice of the original input z-stack.
+2. Sum projection of the original input z-stack
+3. Probaility map for class Diffuse/others
+4. Probaility map for class Fibers
+5. Probaility map for class Disorganized puncta
+6. Probaility map for class Organized Puncta
+7. Probaility map for class Organized Z-disks
+8. Final classification map based on the highest probability
+9. Single cell manual segmentation 
 
 The classes in the 7th slice are encoded as follow:
 
@@ -107,10 +108,14 @@ This script will output the following metrics:
 * `Prob_Disorganized_Puncta`
 * `Prob_Organized_Puncta`
 * `Prob_Organized_ZDisks`
+* `Intensity_Mean`
 * `Intensity_Median`
 * `Intensity_Integrated`
+* `Intensity_SumIntegrated`
+* `Intensity_Mean_BackSub`
 * `Intensity_Median_BackSub`
 * `Intensity_Integrated_BackSub`
+* `Intensity_SumIntegrated_BackSub`
 * `Background_Value`
 
 This metrics are appended as new columns in the CSV file `output/fov_0.csv`.
