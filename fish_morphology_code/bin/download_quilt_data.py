@@ -17,14 +17,14 @@ def download_quilt_data(
         registry=bucket,
         dest=data_save_loc + "/" + package,
     )
-    # dataset_manifest = quilt3.Package.browse(package, bucket)
+    dataset_manifest = quilt3.Package.browse(package, bucket)
 
-    # if ignore_warnings:
-    #     with warnings.catch_warnings():
-    #         warnings.simplefilter("ignore", UserWarning)
-    #         dataset_manifest.fetch(data_save_loc)
-    # else:
-    #     dataset_manifest.fetch(data_save_loc)
+    if ignore_warnings:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            dataset_manifest.fetch(data_save_loc)
+    else:
+        dataset_manifest.fetch(data_save_loc)
 
 def download_2D_segs():
     """download maxproject/seg data."""
@@ -55,57 +55,57 @@ def download_2D_segs():
 
 
 def download_2D_contrasted():
-    """download maxporject/seg data."""
+    """download maxproject/seg data."""
     download_quilt_data(
         package="2d_autocontrasted_fields_and_single_cells_fish_1",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_contrasted",
+        data_save_loc="./quilt_data_contrasted",
         ignore_warnings=True,
     )
     download_quilt_data(
         package="2d_autocontrasted_fields_and_single_cells_fish_2",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_contrasted",
+        data_save_loc="./quilt_data_contrasted",
         ignore_warnings=True,
     )
     download_quilt_data(
         package="2d_autocontrasted_fields_and_single_cells_fish_3",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_contrasted",
+        data_save_loc="./quilt_data_contrasted",
         ignore_warnings=True,
     )
     download_quilt_data(
         package="2d_autocontrasted_fields_and_single_cells_fish_4",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_contrasted",
+        data_save_loc="./quilt_data_contrasted",
         ignore_warnings=True,
     )
 
 
 def download_2D_features():
-    """download maxporject/seg data."""
+    """download maxproject/seg data."""
     download_quilt_data(
         package="2d_autocontrasted_single_cell_features_fish_1",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_features",
+        data_save_loc="./quilt_data_features",
         ignore_warnings=True,
     )
     download_quilt_data(
         package="2d_autocontrasted_single_cell_features_fish_2",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_features",
+        data_save_loc="./quilt_data_features",
         ignore_warnings=True,
     )
     download_quilt_data(
         package="2d_autocontrasted_single_cell_features_fish_3",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_features",
+        data_save_loc="./quilt_data_features",
         ignore_warnings=True,
     )
     download_quilt_data(
         package="2d_autocontrasted_single_cell_features_fish_4",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_features",
+        data_save_loc="./quilt_data_features",
         ignore_warnings=True,
     )
 
@@ -115,7 +115,7 @@ def download_2D_nuclear_masks():
     download_quilt_data(
         package="2d_nuclear_masks",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_2d_nuclear_masks",
+        data_save_loc="./quilt_data_2d_nuclear_masks",
         ignore_warnings=True,
     )
 
@@ -125,7 +125,7 @@ def download_scrnaseq():
     download_quilt_data(
         package="scrnaseq_data",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_scrnaseq",
+        data_save_loc="./quilt_data_scrnaseq",
         ignore_warnings=True,
     )
 
@@ -135,7 +135,7 @@ def download_scrnaseq_raw():
     download_quilt_data(
         package="scrnaseq_data_raw",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_scrnaseq_raw",
+        data_save_loc="./quilt_data_scrnaseq_raw",
         ignore_warnings=True,
     )
 
@@ -143,9 +143,27 @@ def download_scrnaseq_raw():
 def download_ML_struct_scores():
     """download automated structure channel scoring."""
     download_quilt_data(
-        package="assay_dev_fish_analysis",
+        package="automated_local_and_global_structure_fish_1",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_matheus_assay_dev_fish_analysis",
+        data_save_loc="./fish_analysis",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="automated_local_and_global_structure_fish_2",
+        bucket="s3://allencell",
+        data_save_loc="./fish_analysis",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="automated_local_and_global_structure_fish_3",
+        bucket="s3://allencell",
+        data_save_loc="./fish_analysis",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="automated_local_and_global_structure_fish_4",
+        bucket="s3://allencell",
+        data_save_loc="./fish_analysis",
         ignore_warnings=True,
     )
 
@@ -155,7 +173,7 @@ def download_nonstructure_2D_segs():
     download_quilt_data(
         package="2d_nonstructure_fields",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_nonstructure",
+        data_save_loc="./quilt_data_nonstructure",
         ignore_warnings=True,
     )
 
@@ -165,7 +183,7 @@ def download_2D_nonstructure_features():
     download_quilt_data(
         package="2d_nonstructure_single_cell_features",
         bucket="s3://allencell",
-        data_save_loc="quilt_nonstructure_features",
+        data_save_loc="./quilt_nonstructure_features",
         ignore_warnings=True,
     )
 
@@ -175,7 +193,7 @@ def download_actn2_3d_seg():
     download_quilt_data(
         package="3d_actn2_segmentation",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_actn2_3d_seg",
+        data_save_loc="./quilt_data_actn2_3d_seg",
         ignore_warnings=True,
         )
 
@@ -185,7 +203,7 @@ def download_probe_struc_classifier_features():
     download_quilt_data(
         package="probe_structure_classifier",
         bucket="s3://allencell",
-        data_save_loc="quilt_probe_struc_classifier_features",
+        data_save_loc="./quilt_probe_struc_classifier_features",
         ignore_warnings=True,
     )
 
@@ -195,7 +213,7 @@ def download_probe_localization_features():
     download_quilt_data(
         package="probe_localization",
         bucket="s3://allencell",
-        data_save_loc="quilt_data_probe_localization_features",
+        data_save_loc="./quilt_data_probe_localization_features",
         ignore_warnings=True,
     )
 
