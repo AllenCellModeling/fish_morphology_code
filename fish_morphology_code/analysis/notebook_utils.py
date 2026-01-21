@@ -42,6 +42,38 @@ BAR_PLOT_COLUMNS = [
     "Peak distance (μm)",
 ]
 
+BAR_PLOT_COLUMNS_myh67_13 = [
+    "Cell area (μm^2)",
+    "Cell aspect ratio",
+    "Fraction cell area background",
+    "Fraction cell area diffuse/other",
+    "Fraction cell area fibers",
+    "Fraction cell area disorganized puncta",
+    "Fraction cell area organized puncta",
+    "Fraction cell area organized z-disks",
+    "Max coefficient var",
+    "Peak height",
+    "Peak distance (μm)",
+    "MYH7 (count/μm^2)",
+    "MYH6 (count/μm^2)",
+]
+
+BAR_PLOT_COLUMNS_myh67_11 = [
+    "Cell area (μm^2)",
+    "Cell aspect ratio",
+    "Fraction cell area background",
+    "Fraction cell area diffuse/other",
+    "Fraction cell area fibers",
+    "Fraction cell area disorganized puncta",
+    "Fraction cell area organized puncta",
+    "Fraction cell area organized z-disks",
+    "Max coefficient var",
+    "Peak height",
+    "Peak distance (μm)",
+]
+
+BAR_PLOT_COLUMNS_myh67_2 = ["MYH7 (count/μm^2)", "MYH6 (count/μm^2)"]
+
 SHORT_FEAT_NAME_MAP = {
     c: c.replace("Fraction cell area", "")
     .replace("(μm^2)", "")
@@ -51,7 +83,39 @@ SHORT_FEAT_NAME_MAP = {
     for c in BAR_PLOT_COLUMNS
 }
 
+SHORT_FEAT_NAME_MAP_11 = {
+    c: c.replace("Fraction cell area", "")
+    .replace("(μm^2)", "")
+    .replace("(μm)", "")
+    .replace("(count/μm^2)", "")
+    .strip()
+    .capitalize()
+    for c in BAR_PLOT_COLUMNS
+}
+
+SHORT_FEAT_NAME_MAP_13 = {
+    c: c.replace("Fraction cell area", "")
+    .replace("(μm^2)", "")
+    .replace("(μm)", "")
+    .replace("(count/μm^2)", "")
+    .strip()
+    .capitalize()
+    for c in BAR_PLOT_COLUMNS_myh67_13
+}
+
+SHORT_FEAT_NAME_MAP_2 = {
+    c: c.replace("Fraction cell area", "")
+    .replace("(μm^2)", "")
+    .replace("(μm)", "")
+    .replace("(count/μm^2)", "")
+    .strip()
+    .capitalize()
+    for c in BAR_PLOT_COLUMNS_myh67_2
+}
+
 BAR_PLOT_COLUMNS_SHORT = [SHORT_FEAT_NAME_MAP[v] for v in BAR_PLOT_COLUMNS]
+BAR_PLOT_COLUMNS_SHORT_13 = BAR_PLOT_COLUMNS_SHORT + ["Myh7", "Myh6"]
+BAR_PLOT_COLUMNS_SHORT_2 = ["Myh7", "Myh6"]
 
 PROBE_ORDER = ["MYH6", "MYH7", "COL2A1", "H19", "TCAP", "ATP2A2", "BAG3", "HPRT1"]
 
@@ -116,6 +180,41 @@ FEATURE_TYPE_MAP = {
     "Max coefficient var": "Global alignment",
     "Peak height": "Global alignment",
     "Peak distance (μm)": "Global alignment",
+}
+
+FEATURE_TYPE_MAP_myh67_13 = {
+    "Cell area (μm^2)": "Cell features",
+    "Cell aspect ratio": "Cell features",
+    "Fraction cell area background": "Local organization",
+    "Fraction cell area diffuse/other": "Local organization",
+    "Fraction cell area fibers": "Local organization",
+    "Fraction cell area disorganized puncta": "Local organization",
+    "Fraction cell area organized puncta": "Local organization",
+    "Fraction cell area organized z-disks": "Local organization",
+    "Max coefficient var": "Global alignment",
+    "Peak height": "Global alignment",
+    "Peak distance (μm)": "Global alignment",
+    "MYH7 (count/μm^2)": "Transcript",
+    "MYH6 (count/μm^2)": "Transcript",
+}
+
+FEATURE_TYPE_MAP_myh67_11 = {
+    "Cell area (μm^2)": "Cell features",
+    "Cell aspect ratio": "Cell features",
+    "Fraction cell area background": "Local organization",
+    "Fraction cell area diffuse/other": "Local organization",
+    "Fraction cell area fibers": "Local organization",
+    "Fraction cell area disorganized puncta": "Local organization",
+    "Fraction cell area organized puncta": "Local organization",
+    "Fraction cell area organized z-disks": "Local organization",
+    "Max coefficient var": "Global alignment",
+    "Peak height": "Global alignment",
+    "Peak distance (μm)": "Global alignment",
+}
+
+FEATURE_TYPE_MAP_myh67_2 = {
+    "MYH7 (count/μm^2)": "Transcript",
+    "MYH6 (count/μm^2)": "Transcript",
 }
 
 
@@ -203,6 +302,58 @@ def make_regression_bar_plot(
     plt.legend(bbox_to_anchor=(1.0, 0.7), frameon=False)
 
     return fig, ax
+
+
+def make_regression_bar_plot_more_feats(
+    df_in,
+    dims=(4, 3),
+    x="Feature",
+    order=BAR_PLOT_COLUMNS_SHORT,
+    y="Feature weight (mean)",
+    hue="Feature Type",
+    palette=sns.color_palette("husl", 3),
+    ecolor="k",
+    elinewidth=1,
+    capsize=4,
+    ylabel="Feature weight in linear model\n(regression coefficient)",
+    title="",
+    short_names=SHORT_FEAT_NAME_MAP,
+):
+    """standardized bar plots of coefficients + error bars from bootstrapped regression"""
+    df = df_in.copy()
+    df["Feature"] = df["Feature"].map(short_names)
+
+    fig, ax = plt.subplots(figsize=dims)
+    feat_chart = sns.barplot(
+        data=df, x=x, order=order, y=y, hue=hue, palette=palette, dodge=False
+    )
+
+    err = np.array(
+        (
+            (df["Feature weight (mean)"] - df["Feature weight (CI low)"]).values,
+            (df["Feature weight (CI high)"] - df["Feature weight (mean)"]).values,
+        )
+    )
+
+    plt.errorbar(
+        x=df.set_index("Feature").loc[order, :].reset_index()["Feature"],
+        y=df.set_index("Feature").loc[order, :].reset_index()["Feature weight (mean)"],
+        fmt="none",
+        yerr=err,
+        ecolor=ecolor,
+        elinewidth=elinewidth,
+        capsize=capsize,
+    )
+
+    ax.set_title(title.replace("_", " "))
+
+    sns.despine()
+
+    feat_chart.set_xticklabels(
+        feat_chart.get_xticklabels(), rotation=45, horizontalalignment="right"
+    )
+    feat_chart.set(ylabel=ylabel)
+    plt.legend(bbox_to_anchor=(1.0, 0.7), frameon=False)
 
 
 def get_pred_true(
