@@ -17,10 +17,14 @@
 - `Prob_Disorganized_Puncta`: Average probability of a pixel inside the cell to be classified as disorganized puncta
 - `Prob_Organized_Puncta`: Average probability of a pixel inside the cell to be classified as organized puncta
 - `Prob_Organized_ZDisks`: Average probability of a pixel inside the cell to be classified as organized z disks
+- `IntensityMean`: Mean of GFP signal in cell mask
 - `IntensityMedian`: Median of GFP signal in cell mask
 - `IntensityIntegrated`: Integrated GFP signal in cell mask
-- `IntensityMedianBkgSub`: Median of GFP signal in cell mask with background subtracted (10% percentile
+- `IntensitySumIntegrated`: Integrated GFP signal in the sum projection of the cell mask
+- `IntensityMeanBkgSub`: Mean of GFP signal in cell mask with background subtracted (10% percentile)
+- `IntensityMedianBkgSub`: Median of GFP signal in cell mask with background subtracted (10% percentile)
 - `IntensityIntegratedBkgSub`: Integrated GFP signal in cell mask with background subtracted (10% percentile
+- `IntensitySumIntegratedBkgSub`: Integrated GFP signal in the sum projection of the cell mask with background subtracted (nSlices x 10% percentile)
 - `Maximum_Coefficient_Variation`: Maximum value of the coefficient of variation obtained from correlation plots
 - `Peak_Height`: High of the highest peak in the correlation plots
 - `Peak_Distance`: Distance in pixels in which the maximum of the highest peak occurs

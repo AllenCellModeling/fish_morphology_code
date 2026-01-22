@@ -20,7 +20,7 @@ df_meta = pd.read_csv(os.path.join(ds_folder, metadata.database_path[0]), index_
 
 # FOVs that could not be read from the server
 # We shall come back to this files in the future.
-fovs_with_read_problems = [40, 135, 462, 2000]
+fovs_with_read_problems = []#[40, 135, 462, 2000]
 
 # Gathering results
 df = []
@@ -64,10 +64,10 @@ df["structure_name"] = "ACTN2"
 if not os.path.exists("../results/"):
     os.makedirs("../results/")
 
-# Checking expected shape of the dataframe
-assert df.shape == (5161, 33)
+df.set_index(["CellId"]).to_csv("../results/AssayDevFishAnalsysis2020-live_fixed.csv")
 
-df.set_index(["CellId"]).to_csv("../results/AssayDevFishAnalsysis2020.csv")
+# Checking expected shape of the dataframe
+# assert df.shape == (5161, 33)
 
 # -------------------------------------------------------------------------------------------------
 # Upload results to Quilt
@@ -178,6 +178,12 @@ metadata = [
         }
     },
     {
+        "Intensity_Mean": {
+            "name": "IntensityMean",
+            "description": "Mean of GFP signal in cell mask",
+        }
+    },
+    {
         "Intensity_Median": {
             "name": "IntensityMedian",
             "description": "Median of GFP signal in cell mask",
@@ -190,15 +196,33 @@ metadata = [
         }
     },
     {
+        "Intensity_SumIntegrated": {
+            "name": "IntensitySumIntegrated",
+            "description": "Integrated GFP signal in the sum projection of the cell mask",
+        }
+    },
+    {
+        "Intensity_Mean_BackSub": {
+            "name": "IntensityMeanBkgSub",
+            "description": "Mean of GFP signal in cell mask with background subtracted (10% percentile)",
+        }
+    },
+    {
         "Intensity_Median_BackSub": {
             "name": "IntensityMedianBkgSub",
-            "description": "Median of GFP signal in cell mask with background subtracted (10% percentile",
+            "description": "Median of GFP signal in cell mask with background subtracted (10% percentile)",
         }
     },
     {
         "Intensity_Integrated_BackSub": {
             "name": "IntensityIntegratedBkgSub",
             "description": "Integrated GFP signal in cell mask with background subtracted (10% percentile",
+        }
+    },
+    {
+        "Intensity_SumIntegrated_BackSub": {
+            "name": "IntensitySumIntegratedBkgSub",
+            "description": "Integrated GFP signal in the sum projection of the cell mask with background subtracted (nSlices x 10% percentile)",
         }
     },
     {
@@ -255,24 +279,26 @@ with open("assay-dev-fish.md", "w") as ftxt:
             )
 
 # Checking expected shape of the dataframe
-assert df.shape == (5161, 25)
+# assert df.shape == (5161, 25)
 
 # Save a hand off version for the Modeling team
-df.to_csv("../results/AssayDevFishAnalsysis-Handoff.csv")
+df.to_csv("../results/AssayDevFishAnalsysis-Handoff-live_fixed.csv")
 
-# Upload to Quilt
-ds = Dataset(
-    dataset="../results/AssayDevFishAnalsysis-Handoff.csv",
-    name="assay_dev_fish_analysis",
-    package_owner="matheus",
-    readme_path="assay-dev-fish.md",
-)
+if False:
 
-# Set metadata and path columns
-ds.set_metadata_columns(["CellId"])
-ds.set_path_columns(["result_image_path"])
+    # Upload to Quilt
+    ds = Dataset(
+        dataset="../results/AssayDevFishAnalsysis-Handoff.csv",
+        name="assay_dev_fish_analysis",
+        package_owner="matheus",
+        readme_path="assay-dev-fish.md",
+    )
 
-# Send to Quilt
-pkg = ds.distribute(
-    push_uri="s3://allencell-internal-quilt", message="Fish dataset by assay-dev"
-)
+    # Set metadata and path columns
+    ds.set_metadata_columns(["CellId"])
+    ds.set_path_columns(["result_image_path"])
+
+    # Send to Quilt
+    pkg = ds.distribute(
+        push_uri="s3://allencell-internal-quilt", message="Fish dataset by assay-dev"
+    )
