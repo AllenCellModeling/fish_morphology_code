@@ -23,13 +23,12 @@ df_fov = pd.read_csv(os.path.join(ds_folder, metadata.database_path[0]), index_c
 # Load jinja template
 #
 
-j2template = jinja2.Environment(loader=jinja2.FileSystemLoader(".")).get_template(
-    "features.j2"
-)
+j2template = jinja2.Environment(loader=jinja2.FileSystemLoader(".")).get_template("features.j2")
 
-rfolder = (
-    script_folder
-) = "/allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/fish_morphology_code/fish_morphology_code/processing/structure_organization/jinja2/"
+rfolder = "jinja2/"
+for f in ["", "scripts", "log"]:
+    if not os.path.exists(os.path.join(rfolder, f)):
+        os.makedirs(os.path.join(rfolder, f))
 
 for index in df_fov.index:
 

@@ -10,6 +10,7 @@ from skimage.measure import block_reduce
 from scipy.ndimage.morphology import distance_transform_edt as edt
 from aicssegmentation.core.vessel import vesselness3D
 from aicssegmentation.core.pre_processing_utils import edge_preserving_smoothing_3d
+from aicsimageio import AICSImage
 
 from cardio_CNN_classifier import cardio_cnn
 
@@ -30,8 +31,8 @@ if not model_weights_path:
     # Download from Quilt
     print("No weights were found locally. Downloading from Quilt...")
     pkg = Package.browse(
-        "matheus/assay_dev_actn2_classifier", "s3://allencell-internal-quilt"
-    ).fetch("../best_model")
+        "aics/integrated_transcriptomics_structural_organization_hipsc_cm", "s3://allencell"
+    )["actn2_pattern_ml_classifier_model"].fetch("../best_model")
     metadata = pd.read_csv(os.path.join("..", "best_model", "metadata.csv"))
     model_weights_path = os.path.join("..", "best_model", metadata.model_path[0])
 elif len(model_weights_path) > 1:
@@ -71,9 +72,13 @@ if not os.path.exists(os.path.join(ds_folder, "metadata.csv")):
 
 metadata = pd.read_csv(os.path.join(ds_folder, "metadata.csv"))
 
+# Read fov database
 df_fov = pd.read_csv(os.path.join(ds_folder, metadata.database_path[0]), index_col=0)
 
+# Read single cell database
 df_cell = pd.read_csv(os.path.join(ds_folder, metadata.cell_database_path[0]))
+
+print(f'FOV shape: {df_fov.shape}, Cellshape: {df_cell.shape}')
 
 # Run all FOVs
 for index in df_fov.index:
@@ -86,7 +91,8 @@ for index in df_fov.index:
     nuc_ch = 1  # Channel of nuclar dye
     str_ch = 5  # Channel of EGFP-alpha-actinin-2
 
-    img = skio.imread(filename)
+    # img = skio.imread(filename)
+    img = AICSImage(filename).data.squeeze()
     print(img.shape)
     nuc = img[int(nuc_ch)]
     img = img[int(str_ch)]
@@ -94,16 +100,22 @@ for index in df_fov.index:
     # Load single cell segmentation
     df_cell_sub = df_cell.loc[df_cell.RawFileName == df_fov.RawFileName[index]]
     mask_name = df_cell_sub.MaskFileName.values[0]
-    single_cell_mask = skio.imread(mask_name)[-1]
+    # single_cell_mask = skio.imread(mask_name)[-1]
+    single_cell_mask = AICSImage(mask_name).data.squeeze()[-1]
 
     # Structure segmentation
     nslices = img.shape[0]
     zprofile = img.mean(axis=-1).mean(axis=-1)
     slice_number = np.argmax(zprofile)
 
+    # Sum projection
+    img_sum = img.sum(axis=0)
+
+    # Sub-stack at the center
     img = img[slice_number - 3 : slice_number + 4]
     img_binary = segment_image(img)
 
+    # Slice of highest intensity
     data = img[3]
     data_binary = img_binary[3]
 
@@ -123,6 +135,7 @@ for index in df_fov.index:
     data_lines = data_skell.copy()
     data_lines[data_junc > 3] = 0
 
+    # Background detection
     bkrad = 64
     data_mask = data_binary.copy()
     data_mask = data_mask.astype(np.uint16)
@@ -173,6 +186,7 @@ for index in df_fov.index:
     data_output = np.vstack(
         [
             data.reshape(-1, *dim),
+            img_sum.reshape(-1, *dim),
             data_probs,
             data_classification.reshape(-1, *dim),
             single_cell_mask.reshape(-1, *dim),

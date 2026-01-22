@@ -42,7 +42,7 @@ contrast_and_segment quilt_data/metadata.csv quilt_data/supporting_files/channel
 
 ### Running cellprofiler to calculate single cell shape and texture features
 
-Before running cellprofiler, download auto-contrasted images from quilt (ex. ```download_2D_contrasted --test=True```) into current working directory. 
+Before running cellprofiler, download auto-contrasted images from quilt (ex. ```download_2D_contrasted```) into current working directory. 
 
 Create an image set list in format accepted by cellprofiler's LoadData module.
 ```
@@ -51,7 +51,8 @@ make_cellprofiler_image_set \
     --defaults_json fish_morphology_code/cellprofiler/cellprofiler_image_set_defaults.json \
     --path_key rescaled_2D_fov_tiff_path \
     --local_path ./quilt_data_contrasted_test \
-    --out_loc ./test_image_set_list.csv
+    --out_loc ./test_image_set_list.csv \
+    --fish_type structure
 ```
 
 Run cellprofiler pipeline in this repository using test image set list as input:

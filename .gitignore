@@ -115,7 +115,14 @@ venv.bak/
 .mypy_cache/
 
 # Results from assay-dev
-./fish_morphology_code/processing/structure_organization/local_organization/train/data/
-./fish_morphology_code/processing/structure_organization/local_organization/train/patches/
-./fish_morphology_code/processing/structure_organization/output/
-./fish_morphology_code/processing/structure_organization/results/
+*.csv
+fish_morphology_code/processing/structure_organization/local_organization/best_model
+fish_morphology_code/processing/structure_organization/local_organization/train/data
+fish_morphology_code/processing/structure_organization/local_organization/train/models
+fish_morphology_code/processing/structure_organization/local_organization/train/patches
+fish_morphology_code/processing/structure_organization/global_alignment/jinja2
+fish_morphology_code/processing/structure_organization/tools/jinja2
+fish_morphology_code/processing/structure_organization/notebooks/figs
+fish_morphology_code/processing/structure_organization/output*
+fish_morphology_code/processing/structure_organization/results*
+

@@ -3,6 +3,6 @@
 #SBATCH --job-name=features_fov_{{ index }}
 #SBATCH --partition aics_cpu_general
 #SBATCH --mem 8G
-#SBATCH --output /allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/fish_morphology_code/fish_morphology_code/processing/structure_organization/jinja2/log/features_fov_{{ index }}.out
+#SBATCH --output /allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/fish_morphology_code/fish_morphology_code/processing/structure_organization/tools/jinja2/log/features_fov_{{ index }}.out
 
-srun /home/matheus.viana/anaconda3/envs/parallel/bin/python /allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/assay-dev-cardio/fish_morphology_code/fish_morphology_code/processing/structure_organization/tools/features.py --fov {{ index }}
+srun /home/matheus.viana/anaconda3/envs/parallel/bin/python /allen/aics/assay-dev/MicroscopyOtherData/Viana/projects/fish_morphology_code/fish_morphology_code/processing/structure_organization/tools/features.py --fov {{ index }}

@@ -1,15 +1,22 @@
 import warnings
 import quilt3
 import fire
+from random import sample, seed
 
 
 def download_quilt_data(
-    package="rorydm/2d_segmented_fields",
-    bucket="s3://allencell-internal-quilt",
-    data_save_loc="quilt_data",
+    package="2d_segmented_fields",
+    bucket="s3://allencell",
+    data_save_loc="./quilt_data",
     ignore_warnings=True,
 ):
     """download a quilt dataset and supress nfs file attribe warnings by default"""
+    quilt3.Package.install(
+        "aics/integrated_transcriptomics_structural_organization_hipsc_cm",
+        path=package,
+        registry=bucket,
+        dest=data_save_loc + "/" + package,
+    )
     dataset_manifest = quilt3.Package.browse(package, bucket)
 
     if ignore_warnings:
@@ -19,213 +26,196 @@ def download_quilt_data(
     else:
         dataset_manifest.fetch(data_save_loc)
 
-
-def download_2D_segs(test=False):
-    """download maxproject/seg data. if test=True, only download two randomly dampled images."""
-    if test:
-        download_quilt_data(
-            package="rorydm/2d_segmented_fields_test",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_test",
-            ignore_warnings=True,
-        )
-    else:
-        download_quilt_data(
-            package="rorydm/2d_segmented_fields",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data",
-            ignore_warnings=True,
-        )
-
-
-def download_2D_contrasted(test=False):
-    """download maxporject/seg data. if test=True, only download two randomly dampled images."""
-    if test:
-        download_quilt_data(
-            package="rorydm/2d_autocontrasted_fields_and_single_cells_test",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_contrasted_test",
-            ignore_warnings=True,
-        )
-    else:
-        download_quilt_data(
-            package="rorydm/2d_autocontrasted_fields_and_single_cells",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_contrasted",
-            ignore_warnings=True,
-        )
+def download_2D_segs():
+    """download maxproject/seg data."""
+    download_quilt_data(
+        package="2d_segmented_fields_fish_1",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="2d_segmented_fields_fish_2",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="2d_segmented_fields_fish_3",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="2d_segmented_fields_fish_4",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data",
+        ignore_warnings=True,
+    )
 
 
-def download_2D_features(test=False):
-    """download maxporject/seg data. if test=True, only download two randomly dampled images."""
-    if test:
-        download_quilt_data(
-            package="tanyasg/2d_autocontrasted_single_cell_features_test",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_features_test",
-            ignore_warnings=True,
-        )
-    else:
-        download_quilt_data(
-            package="tanyasg/2d_autocontrasted_single_cell_features",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_features",
-            ignore_warnings=True,
-        )
+def download_2D_contrasted():
+    """download maxproject/seg data."""
+    download_quilt_data(
+        package="2d_autocontrasted_fields_and_single_cells_fish_1",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_contrasted",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="2d_autocontrasted_fields_and_single_cells_fish_2",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_contrasted",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="2d_autocontrasted_fields_and_single_cells_fish_3",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_contrasted",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="2d_autocontrasted_fields_and_single_cells_fish_4",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_contrasted",
+        ignore_warnings=True,
+    )
 
 
-def download_2D_nuclear_masks(test=False):
-    """download 2D nuclear mask images. if test=True, only download two randomly sampled images"""
-    if test:
-        download_quilt_data(
-            package="calystay/2d_nuclear_masks_test",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_2d_nuclear_masks_test",
-            ignore_warnings=True,
-        )
-    else:
-        download_quilt_data(
-            package="calystay/2d_nuclear_masks",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_2d_nuclear_masks",
-            ignore_warnings=True,
-        )
+def download_2D_features():
+    """download maxproject/seg data."""
+    download_quilt_data(
+        package="2d_autocontrasted_single_cell_features_fish_1",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_features",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="2d_autocontrasted_single_cell_features_fish_2",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_features",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="2d_autocontrasted_single_cell_features_fish_3",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_features",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="2d_autocontrasted_single_cell_features_fish_4",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_features",
+        ignore_warnings=True,
+    )
 
 
-def download_scrnaseq(test=False):
-    """download scrnaseq data. if test=True, only download counts for ten random cells."""
-    if test:
-        download_quilt_data(
-            package="tanyasg/scrnaseq_data_test",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_scrnaseq_test",
-            ignore_warnings=True,
-        )
-    else:
-        download_quilt_data(
-            package="tanyasg/scrnaseq_data",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_scrnaseq",
-            ignore_warnings=True,
-        )
+def download_2D_nuclear_masks():
+    """download 2D nuclear mask images."""
+    download_quilt_data(
+        package="2d_nuclear_masks",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_2d_nuclear_masks",
+        ignore_warnings=True,
+    )
+
+
+def download_scrnaseq():
+    """download scrnaseq data."""
+    download_quilt_data(
+        package="scrnaseq_data",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_scrnaseq",
+        ignore_warnings=True,
+    )
 
 
 def download_scrnaseq_raw():
     """download scrnaseq raw fastq"""
     download_quilt_data(
-        package="tanyasg/scrnaseq_data_raw",
-        bucket="s3://allencell-internal-quilt",
-        data_save_loc="quilt_data_scrnaseq_raw",
+        package="scrnaseq_data_raw",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_scrnaseq_raw",
         ignore_warnings=True,
     )
 
 
-def download_ML_struct_scores(test=False):
+def download_ML_struct_scores():
     """download automated structure channel scoring."""
-    if test:
-        download_quilt_data(
-            package="matheus/assay_dev_fish_analysis_test",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_matheus_assay_dev_fish_analysis_test",
-            ignore_warnings=True,
-        )
-    else:
-        download_quilt_data(
-            package="matheus/assay_dev_fish_analysis",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_matheus_assay_dev_fish_analysis",
-            ignore_warnings=True,
+    download_quilt_data(
+        package="automated_local_and_global_structure_fish_1",
+        bucket="s3://allencell",
+        data_save_loc="./fish_analysis",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="automated_local_and_global_structure_fish_2",
+        bucket="s3://allencell",
+        data_save_loc="./fish_analysis",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="automated_local_and_global_structure_fish_3",
+        bucket="s3://allencell",
+        data_save_loc="./fish_analysis",
+        ignore_warnings=True,
+    )
+    download_quilt_data(
+        package="automated_local_and_global_structure_fish_4",
+        bucket="s3://allencell",
+        data_save_loc="./fish_analysis",
+        ignore_warnings=True,
+    )
+
+
+def download_nonstructure_2D_segs():
+    """download non-structure maxporject/seg data."""
+    download_quilt_data(
+        package="2d_nonstructure_fields",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_nonstructure",
+        ignore_warnings=True,
+    )
+
+
+def download_2D_nonstructure_features():
+    """download non-structure features."""
+    download_quilt_data(
+        package="2d_nonstructure_single_cell_features",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_nonstructure_features",
+        ignore_warnings=True,
+    )
+
+
+def download_actn2_3d_seg():
+    """download actn2 structure segmentation."""
+    download_quilt_data(
+        package="3d_actn2_segmentation",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_actn2_3d_seg",
+        ignore_warnings=True,
         )
 
 
-def download_nonstructure_2D_segs(test=False):
-    """download non-structure maxporject/seg data. if test=True, only download two randomly sampled images."""
-    if test:
-        download_quilt_data(
-            package="tanyasg/2d_nonstructure_fields_test",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_nonstructure_test",
-            ignore_warnings=True,
-        )
-    else:
-        download_quilt_data(
-            package="tanyasg/2d_nonstructure_fields",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_nonstructure",
-            ignore_warnings=True,
-        )
+def download_probe_struc_classifier_features():
+    """download features relating probes and structure classifier."""
+    download_quilt_data(
+        package="probe_structure_classifier",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_probe_struc_classifier_features",
+        ignore_warnings=True,
+    )
 
 
-def download_2D_nonstructure_features(test=False):
-    """download non-structure features. if test=True, only download features for two randomly sampled images."""
-    if test:
-        download_quilt_data(
-            package="tanyasg/2d_nonstructure_single_cell_features_test",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_nonstructure_features_test",
-            ignore_warnings=True,
-        )
-    else:
-        download_quilt_data(
-            package="tanyasg/2d_nonstructure_single_cell_features",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_nonstructure_features",
-            ignore_warnings=True,
-        )
-
-
-def download_actn2_3d_seg(test=False):
-    """download actn2 structure segmentation. if test=True, only download two randomly sampled images."""
-    if test:
-        download_quilt_data(
-            package="calystay/3d_actn2_segmentation_test",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_actn2_3d_seg_test",
-            ignore_warnings=True,
-        )
-    else:
-        download_quilt_data(
-            package="calystay/3d_actn2_segmentation",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_actn2_3d_seg",
-            ignore_warnings=True,
-        )
-
-
-def download_probe_struc_classifier_features(test=False):
-    """download features relating probes and structure classifier. if test=True, only download features for two randomly sampled images."""
-    if test:
-        download_quilt_data(
-            package="calystay/probe_structure_classifier_test",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_probe_struc_classifier_features_test",
-            ignore_warnings=True,
-        )
-    else:
-        download_quilt_data(
-            package="calystay/probe_structure_classifier",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_probe_struc_classifier_features",
-            ignore_warnings=True,
-        )
-
-
-def download_probe_localization_features(test=False):
-    """download probe localization features. if test=True, only download two randomly sampled images."""
-    if test:
-        download_quilt_data(
-            package="calystay/probe_localization_test",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_probe_localization_features_test",
-            ignore_warnings=True,
-        )
-    else:
-        download_quilt_data(
-            package="calystay/probe_localization",
-            bucket="s3://allencell-internal-quilt",
-            data_save_loc="quilt_data_probe_localization_features",
-            ignore_warnings=True,
-        )
+def download_probe_localization_features():
+    """download probe localization features."""
+    download_quilt_data(
+        package="probe_localization",
+        bucket="s3://allencell",
+        data_save_loc="./quilt_data_probe_localization_features",
+        ignore_warnings=True,
+    )
 
 
 def main_segs():
